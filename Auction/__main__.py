@@ -1004,3 +1004,3122 @@ def extract_tm_details(message_text):
         return match.group(0)  # Return just 'TM13'
     return None  # Return None if no TM code is found
 
+@bot.callback_query_handler(func=lambda call: call.data.startswith(("approve_", "reject_")))
+def handle_admin_actions(call):
+    user_id = call.from_user.id
+    
+    data_parts = call.data.split("_")
+    call_data = data_parts[0]
+    userd = int(data_parts[1])
+    
+    if user_id in xmods:
+        bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id, reply_markup=None)
+        
+        if call_data == 'approve':
+            # Forward the message
+            original_message = bot.forward_message(post_channel, log_channel, call.message.message_id)
+            bot.forward_message(approve_channel, log_channel, call.message.message_id)
+
+            # Ensure the message has text or caption content
+            if original_message.text:
+                message_text = original_message.text # Extract the text content of the message
+                
+            elif original_message.caption:
+                message_text = original_message.caption # Extract the caption if text is None
+
+                # Process based on message content
+            if '#Shiny' in message_text:
+                chat_id.append(f"https://t.me/aho_hexa_auction/{original_message.message_id}")
+                if "Pokemon Name:" in message_text:  # Check for the key in the text
+                    pokemon_name = extract_pokemon_name(message_text)  # Extract Pokémon name
+                    shineiess.append(pokemon_name)
+                    bot.send_message(userd, f"🎉𝘠𝘰𝘶𝘳 **{pokemon_name}** 𝘚𝘶𝘣𝘮𝘪𝘴𝘴𝘪𝘰𝘯 𝘏𝘢𝘴 𝘉𝘦𝘦𝘯 𝘈𝘱𝘱𝘳𝘰𝘷𝘦𝘥!\n\n🥂𝘊𝘩𝘦𝘤𝘬 𝘉𝘦𝘭𝘰𝘸 𝘍𝘰𝘳 𝘈𝘶𝘤𝘵𝘪𝘰𝘯 𝘎𝘳𝘰𝘶𝘱 𝘓𝘪𝘯k✨",parse_mode='markdown',reply_markup=types.InlineKeyboardMarkup().add(types.InlineKeyboardButton('AUCTION GROUP', url=AUCTION_GROUP_LINK)))
+                    try:
+                        save_data()
+                        users_nich.setdefault(str(userd), {}).setdefault("shiny", []).append({
+                            "name": pokemon_name,
+                            "link": f"https://t.me/aho_hexa_auction/{original_message.message_id}"
+                        })
+                        save_users_data()
+                    except Exception as e:
+                        print(f"[ERROR] Approve item process failed: {e}")
+
+            elif '#Legendary' in message_text:
+                crat_id.append(f"https://t.me/aho_hexa_auction/{original_message.message_id}")
+                if "Pokemon Name:" in message_text:
+                    pokemon_name = extract_pokemon_name(message_text)
+                    legpoke_name.append(pokemon_name)
+                    bot.send_message(userd, f"🎉𝘠𝘰𝘶𝘳 **{pokemon_name}** 𝘚𝘶𝘣𝘮𝘪𝘴𝘴𝘪𝘰𝘯 𝘏𝘢𝘴 𝘉𝘦𝘦𝘯 𝘈𝘱𝘱𝘳𝘰𝘷𝘦𝘥!\n\n🥂𝘊𝘩𝘦𝘤𝘬 𝘉𝘦𝘭𝘰𝘸 𝘍𝘰𝘳 𝘈𝘶𝘤𝘵𝘪𝘰𝘯 𝘎𝘳𝘰𝘶𝘱 𝘓𝘪𝘯k✨",parse_mode='markdown',reply_markup=types.InlineKeyboardMarkup().add(types.InlineKeyboardButton('AUCTION GROUP', url=AUCTION_GROUP_LINK)))
+                    try:    
+                        save_data()
+                        users_nich.setdefault(str(userd), {}).setdefault("legendary", []).append({
+                            "name": pokemon_name,
+                            "link": f"https://t.me/aho_hexa_auction/{original_message.message_id}"
+                        })
+                        save_users_data()
+                    except Exception as e:
+                        print(f"[ERROR] Approve item process failed: {e}")
+
+            elif '#Non_legendary' in message_text:
+                brat_id.append(f"https://t.me/aho_hexa_auction/{original_message.message_id}")
+                if "Pokemon Name:" in message_text:
+                    pokemon_name = extract_pokemon_name(message_text)
+                    nonleg_name.append(pokemon_name)
+                    bot.send_message(userd, f"🎉𝘠𝘰𝘶𝘳 **{pokemon_name}** 𝘚𝘶𝘣𝘮𝘪𝘴𝘴𝘪𝘰𝘯 𝘏𝘢𝘴 𝘉𝘦𝘦𝘯 𝘈𝘱𝘱𝘳𝘰𝘷𝘦𝘥!\n\n🥂𝘊𝘩𝘦𝘤𝘬 𝘉𝘦𝘭𝘰𝘸 𝘍𝘰𝘳 𝘈𝘶𝘤𝘵𝘪𝘰𝘯 𝘎𝘳𝘰𝘶𝘱 𝘓𝘪𝘯k✨",parse_mode='markdown',reply_markup=types.InlineKeyboardMarkup().add(types.InlineKeyboardButton('AUCTION GROUP', url=AUCTION_GROUP_LINK)))
+                    try:
+                        save_data()
+                        users_nich.setdefault(str(userd), {}).setdefault("nonleg", []).append({
+                            "name": pokemon_name,
+                            "link": f"https://t.me/aho_hexa_auction/{original_message.message_id}"
+                        })
+                        save_users_data()
+                        print("[DEBUG] Save completed.")
+                    except Exception as e:
+                        print(f"[ERROR] Approve item process failed: {e}")
+
+            elif 'About TM:' in message_text:
+                craft_id.append(f"https://t.me/aho_hexa_auction/{original_message.message_id}")
+                tm_name = extract_tm_details(message_text)  # Extract TM code
+                if tm_name:
+                    tmen.append(tm_name)
+                    bot.send_message(userd, f"🎉𝘠𝘰𝘶𝘳 **{tm_name}** 𝘚𝘶𝘣𝘮𝘪𝘴𝘴𝘪𝘰𝘯 𝘏𝘢𝘴 𝘉𝘦𝘦𝘯 𝘈𝘱𝘱𝘳𝘰𝘷𝘦𝘥!\n\n🥂𝘊𝘩𝘦𝘤𝘬 𝘉𝘦𝘭𝘰𝘸 𝘍𝘰𝘳 𝘈𝘶𝘤𝘵𝘪𝘰𝘯 𝘎𝘳𝘰𝘶𝘱 𝘓𝘪𝘯k✨",parse_mode='markdown',reply_markup=types.InlineKeyboardMarkup().add(types.InlineKeyboardButton('AUCTION GROUP', url=AUCTION_GROUP_LINK)))
+                    try:
+                        save_data()
+                        users_nich.setdefault(str(userd), {}).setdefault("tmn", []).append({
+                            "name": tm_name,
+                            "link": f"https://t.me/aho_hexa_auction/{original_message.message_id}"
+                        })
+                        save_users_data()
+                        print("[DEBUG] Save completed.")
+                    except Exception as e:
+                        print(f"[ERROR] Approve item process failed: {e}")
+
+            elif '#Teams' in message_text:
+                trat_id.append(f"https://t.me/aho_hexa_auction/{original_message.message_id}")
+                team_name = extract_team_details(message_text)  # Extract TM code
+                if team_name:
+                    teams.append(team_name)
+                    bot.send_message(userd, f"🎉𝘠𝘰𝘶𝘳 **{team_name}** 𝘚𝘶𝘣𝘮𝘪𝘴𝘴𝘪𝘰𝘯 𝘏𝘢𝘴 𝘉𝘦𝘦𝘯 𝘈𝘱𝘱𝘳𝘰𝘷𝘦𝘥!\n\n🥂𝘊𝘩𝘦𝘤𝘬 𝘉𝘦𝘭𝘰𝘸 𝘍𝘰𝘳 𝘈𝘶𝘤𝘵𝘪𝘰𝘯 𝘎𝘳𝘰𝘶𝘱 𝘓𝘪??k✨",parse_mode='markdown',reply_markup=types.InlineKeyboardMarkup().add(types.InlineKeyboardButton('AUCTION GROUP', url=AUCTION_GROUP_LINK)))
+                    try:
+                        save_data()
+                        users_nich.setdefault(str(userd), {}).setdefault("team", []).append({
+                            "name": team_name,
+                            "link": f"https://t.me/aho_hexa_auction/{original_message.message_id}"
+                        })
+                        save_users_data()
+                    except Exception as e:
+                        print(f"[ERROR] Approve item process failed: {e}")
+
+                            
+                # Notify approval
+            
+            bot.send_message(approve_channel, f"Accepted by @{call.from_user.username}")
+            
+        else:
+            
+            
+            original_message = bot.forward_message(reject_channel, log_channel, call.message.message_id)
+            bot.delete_message(log_channel, call.message.message_id)
+            
+            # Ensure the message has text or caption content
+            if original_message.text:
+                message_text = original_message.text # Extract the text content of the message
+                
+            elif original_message.caption:
+                message_text = original_message.caption # Extract the caption if text is None
+
+                # Process based on message content
+            if '#Shiny' in message_text:
+                if "Pokemon Name:" in message_text:  # Check for the key in the text
+                    pokemon_name = extract_pokemon_name(message_text)  # Extract Pokémon name
+                    item_name = pokemon_name
+                    markup = InlineKeyboardMarkup()
+                    markup.add(InlineKeyboardButton('Nature is bad',callback_data=f'rejn_{userd}_{item_name}'))
+                    markup.add(InlineKeyboardButton('ivs is ded ',callback_data=f'rejii_{userd}_{item_name}'))
+                    markup.add(InlineKeyboardButton('main move is missing',callback_data=f'rejm_{userd}_{item_name}'))
+                    markup.add(InlineKeyboardButton('pokemon is ded',callback_data=f'rejdd_{userd}_{item_name}'))
+                    markup.add(InlineKeyboardButton('reject base price is high',callback_data=f'rejb_{userd}_{item_name}'))
+                    markup.add(InlineKeyboardButton('other reason',callback_data=f'rejo_{userd}_{item_name}'))
+                    
+            elif '#Legendary' in message_text:
+                if "Pokemon Name:" in message_text:
+                    pokemon_name = extract_pokemon_name(message_text)
+                    item_name = pokemon_name
+                    markup = InlineKeyboardMarkup()
+                    markup.add(InlineKeyboardButton('Nature is bad',callback_data=f'rejn_{userd}_{item_name}'))
+                    markup.add(InlineKeyboardButton('ivs is ded ',callback_data=f'rejii_{userd}_{item_name}'))
+                    markup.add(InlineKeyboardButton('main move is missing',callback_data=f'rejm_{userd}_{item_name}'))
+                    markup.add(InlineKeyboardButton('pokemon is ded',callback_data=f'rejdd_{userd}_{item_name}'))
+                    markup.add(InlineKeyboardButton('reject base price is high',callback_data=f'rejb_{userd}_{item_name}'))
+                    markup.add(InlineKeyboardButton('other reason',callback_data=f'rejo_{userd}_{item_name}'))
+                    
+            elif '#Non_legendary' in message_text:
+                if "Pokemon Name:" in message_text:
+                    pokemon_name = extract_pokemon_name(message_text)
+                    item_name = pokemon_name
+                    markup = InlineKeyboardMarkup()
+                    markup.add(InlineKeyboardButton('Nature is bad',callback_data=f'rejn_{userd}_{item_name}'))
+                    markup.add(InlineKeyboardButton('ivs is ded ',callback_data=f'rejii_{userd}_{item_name}'))
+                    markup.add(InlineKeyboardButton('main move is missing',callback_data=f'rejm_{userd}_{item_name}'))
+                    markup.add(InlineKeyboardButton('pokemon is ded',callback_data=f'rejdd_{userd}_{item_name}'))
+                    markup.add(InlineKeyboardButton('reject base price is high',callback_data=f'rejb_{userd}_{item_name}'))
+                    markup.add(InlineKeyboardButton('other reason',callback_data=f'rejo_{userd}_{item_name}'))
+                    
+            elif 'About TM:' in message_text:
+                tm_name = extract_tm_details(message_text)  # Extract TM code
+                item_name = tm_name  
+                markup = InlineKeyboardMarkup() 
+                markup.add(InlineKeyboardButton('reject waste tm',callback_data=f'rejt_{userd}_{item_name}'))
+                markup.add(InlineKeyboardButton('reject base price is high',callback_data=f'rejb_{userd}_{item_name}'))
+                markup.add(InlineKeyboardButton('other reason',callback_data=f'rejo_{userd}_{item_name}'))
+                
+            elif '#Teams' in message_text:
+                team_name = extract_team_details(message_text)  # Extract TM code
+                item_name = team_name
+                markup = InlineKeyboardMarkup()
+                markup.add(InlineKeyboardButton('reject due to high level',callback_data=f'rejh_{userd}_{item_name}'))
+                markup.add(InlineKeyboardButton('reject base price is high',callback_data=f'rejb_{userd}_{item_name}'))
+                markup.add(InlineKeyboardButton('other reason',callback_data=f'rejo_{userd}_{item_name}'))
+                
+            bot.send_message(
+                reject_channel,
+                "Select the reason for rejection",
+                reply_markup=markup
+            )
+                
+    else:
+        bot.send_sticker(call.message.chat.id, ANGRY_STICKER_ID)
+        bot.answer_callback_query(call.id, 'You are not the auctioneer', show_alert=True)
+
+@bot.callback_query_handler(func=lambda call: call.data.startswith(("rejii_", "rejn_","rejb_","rejo_","rejt_","rejdd_","rejm_","rejh_")))
+def callbacksjiji(call):
+    bot.delete_message(call.message.chat.id, call.message.message_id)
+    
+    user_id = call.from_user.id
+    dp = call.data.split('_')
+    action = dp[0]
+    used = int(dp[1])
+    itenn = dp[2]
+    
+    if user_id not in xmods:
+        bot.send_sticker(call.message.chat.id, ANGRY_STICKER_ID)
+        bot.answer_callback_query(call.id, 'You are not the auctioneer', show_alert=True)
+        return
+    
+    if action == 'rejii':
+        text = '<blockquote><b>𝘗𝘰𝘬𝘦𝘮𝘰𝘯 𝘐𝘝 𝘐𝘴 𝘙𝘪𝘱.</b></blockquote>'
+    elif action == 'rejn':
+        text = '<blockquote><b>𝘗𝘰𝘬𝘦𝘮𝘰𝘯 𝘕𝘢𝘵𝘶𝘳𝘦 𝘐𝘴 𝘙𝘪𝘱.</b></blockquote>'
+    elif action == 'rejb':
+        text = '<blockquote><b>𝘉𝘢𝘴𝘦 𝘗𝘳𝘪𝘤𝘦 𝘐𝘴 𝘏𝘪𝘨𝘩.</b></blockquote>'
+    elif action == 'rejo':
+        text = '<blockquote><b>𝘕𝘰 𝘙𝘦𝘢𝘴𝘰𝘯. | 𝘙𝘦𝘢𝘴𝘰𝘯 𝘐𝘴 𝘉𝘭𝘢𝘯𝘬.</b></blockquote>'
+    elif action == 'rejt':
+        text = '<blockquote><b>𝘜𝘴𝘦𝘭𝘦𝘴𝘴 𝘛𝘮𝘴.</b></blockquote>'
+    elif action == 'rejdd':
+        text = '<blockquote><b>𝘗𝘰𝘬𝘦𝘮𝘰𝘯 𝘐𝘴 𝘜𝘴𝘦𝘭𝘦𝘴𝘴.</b></blockquote>'
+    elif action == 'rejm':
+        text = '<blockquote><b>𝘗𝘰𝘬𝘦𝘮𝘰𝘯`𝘴 𝘔𝘢𝘪𝘯 𝘔𝘰𝘷𝘦 𝘐𝘴 𝘔𝘪𝘴𝘴𝘪𝘯𝘨.</b></blockquote>'
+    elif action == 'rejh':
+        text = '<blockquote><b>𝘛𝘦𝘢𝘮𝘴 𝘓𝘦𝘷𝘦𝘭 𝘐𝘴 𝘏𝘪𝘨𝘩.</b></blockquote>'
+        
+    bat = (
+        "🔴 Rejected \n"
+        f"<b>📣 Item Name: {itenn}\n</b>"
+        f"<b>💬 Reason:\n\n</b>"
+    )
+    bot.send_message(
+        reject_channel,
+        bat+text,
+        parse_mode='html'
+    )
+    
+    bot.send_message(
+        used,
+        bat+text,
+        parse_mode='html'
+    )
+
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
+
+@bot.message_handler(commands=['myitem'])
+def myitem(message):
+    user_id = str(message.from_user.id)
+    if user_id not in users_nich:
+        bot.reply_to(message, "No items found for your ID.")
+        return
+
+    markup = InlineKeyboardMarkup(row_width=2)
+    markup.add(
+        InlineKeyboardButton("✨ Shiny", callback_data=f"myitem_shiny_{user_id}"),
+        InlineKeyboardButton("🌟 Legendary", callback_data=f"myitem_legendary_{user_id}"),
+        InlineKeyboardButton("🔹 Non-Legendary", callback_data=f"myitem_nonleg_{user_id}"),
+        InlineKeyboardButton("📘 TMs", callback_data=f"myitem_tmn_{user_id}"),
+        InlineKeyboardButton("👥 Teams", callback_data=f"myitem_team_{user_id}")
+    )
+    markup.add(InlineKeyboardButton("❌ Close", callback_data=f"close_{user_id}"))
+
+    bot.reply_to(message, "📦 Select a category to view your approved items:", reply_markup=markup)
+
+
+@bot.callback_query_handler(func=lambda call: call.data.startswith("myitem_"))
+def show_myitem_category(call):
+    _, category, user_id = call.data.split("_", 2)
+
+    if call.from_user.id != int(user_id):
+        bot.answer_callback_query(call.id, "This menu isn't for you.")
+        return
+
+    if user_id not in users_nich:
+        bot.edit_message_text("No items found for your ID.", call.message.chat.id, call.message.message_id)
+        return
+
+    user_items = users_nich[user_id]
+    items = user_items.get(category, [])
+
+    if not items:
+        markup = InlineKeyboardMarkup()
+        markup.add(
+            InlineKeyboardButton("🔙 Back to Menu", callback_data=f"myite_menu_{user_id}"),
+            InlineKeyboardButton("❌ Close", callback_data=f"close_{user_id}")
+        )
+        bot.edit_message_text(f"No {category.title()} items found.", call.message.chat.id, call.message.message_id,reply_markup=markup)
+        return
+
+    title_map = {
+        "shiny": "✨ Shiny Pokémon",
+        "legendary": "🌟 Legendary Pokémon",
+        "nonleg": "🔹 Non-Legendary Pokémon",
+        "tmn": "📘 TMs",
+        "team": "👥 Teams"
+    }
+
+    text = f"{title_map.get(category, category.title())}:\n\n"
+    for item in items:
+        name = item.get("name", "Unnamed")
+        link = item.get("link", "#")
+        text += f"  ◾ [{name}]({link})\n"
+
+    markup = InlineKeyboardMarkup()
+    markup.add(
+        InlineKeyboardButton("🔙 Back to Menu", callback_data=f"myite_menu_{user_id}"),
+        InlineKeyboardButton("❌ Close", callback_data=f"close_{user_id}")
+    )
+
+    bot.edit_message_text(text, call.message.chat.id, call.message.message_id,
+                          parse_mode="Markdown", disable_web_page_preview=True, reply_markup=markup)
+
+
+@bot.callback_query_handler(func=lambda call: call.data.startswith("myite_menu_"))
+def back_to_menu(call):
+    user_id = call.data.split("_")[-1]
+
+    if call.from_user.id != int(user_id):
+        bot.answer_callback_query(call.id, "This menu isn't for you.")
+        return
+
+    markup = InlineKeyboardMarkup(row_width=2)
+    markup.add(
+        InlineKeyboardButton("✨ Shiny", callback_data=f"myitem_shiny_{user_id}"),
+        InlineKeyboardButton("🌟 Legendary", callback_data=f"myitem_legendary_{user_id}"),
+        InlineKeyboardButton("🔹 Non-Legendary", callback_data=f"myitem_nonleg_{user_id}"),
+        InlineKeyboardButton("📘 TMs", callback_data=f"myitem_tmn_{user_id}"),
+        InlineKeyboardButton("👥 Teams", callback_data=f"myitem_team_{user_id}")
+    )
+    markup.add(InlineKeyboardButton("❌ Close", callback_data=f"close_{user_id}"))
+
+    bot.edit_message_text("📦 Select a category to view your approved items:",
+                          call.message.chat.id, call.message.message_id, reply_markup=markup)
+
+
+@bot.callback_query_handler(func=lambda call: call.data.startswith("close_"))
+def close_menu(call):
+    user_id = call.data.split("_")[1]
+    if call.from_user.id != int(user_id):
+        bot.answer_callback_query(call.id, "This menu isn't for you.")
+        return
+    bot.delete_message(call.message.chat.id, call.message.message_id)
+
+def elements_items_list(chat_id, msg_id):
+    photo = 'https://i.postimg.cc/CLcgF4WM/IMG-20241226-182420-618.jpg'
+    text = "welcome to items page \n click any button to check in your desire:"
+    markup = types.InlineKeyboardMarkup(row_width=3)
+    markup.add(
+            types.InlineKeyboardButton('6ls', callback_data='lls'),
+            types.InlineKeyboardButton('0ls', callback_data='pls'),
+            types.InlineKeyboardButton('shiny', callback_data='shini'),
+            types.InlineKeyboardButton('TMs', callback_data='tme'),
+            types.InlineKeyboardButton('Teams', callback_data='team'),
+            types.InlineKeyboardButton('Back', callback_data='back')
+        )
+
+    sendoff = bot.send_photo(
+            chat_id,
+            photo=photo,
+            caption=text,
+            reply_markup=markup,
+            reply_to_message_id=msg_id
+        )
+    return sendoff.message_id
+
+@bot.message_handler(commands=['elements'])
+def send_detuils(message):
+    user_id = message.from_user.id
+    if not has_started_bot(user_id):
+        markup=InlineKeyboardMarkup()
+        markup.add(InlineKeyboardButton('start',url='https://t.me/Auct_he_bot?start=start'))
+        bot.reply_to(message, '<blockquote><b>start the bot first.</b></blockquote>', parse_mode='html',reply_markup=markup,disable_web_page_preview=True)
+        return
+    
+    if not is_user_updated(user_id):
+        markup=InlineKeyboardMarkup()
+        markup.add(InlineKeyboardButton('update',url='https://t.me/Auct_he_bot?start=update'))
+        bot.reply_to(message, '<blockquote><b>update the bot first.</b></blockquote>', parse_mode='html',reply_markup=markup,disable_web_page_preview=True)
+        return
+    
+    message_id = elements_items_list(message.chat.id, message.message_id)   
+
+def create_hyperlink(name, link):
+    template = Template("<a href='{{ link }}'>{{ name }}</a>")
+    html = template.render(name = name, link= link) 
+    return html
+
+vari = []
+bari = []
+nari = []
+lari = []
+gari = []
+    
+def legendary_ele(call):
+    if len(legpoke_name) == 0:
+        text = "No legendary Pokémon are added yet."
+        markup = types.InlineKeyboardMarkup(row_width=3)
+        markup.add(
+            types.InlineKeyboardButton('Back', callback_data='back'),
+            types.InlineKeyboardButton('0ls', callback_data='pls'),
+            types.InlineKeyboardButton('Shiny', callback_data='shini'),
+            types.InlineKeyboardButton('TMs', callback_data='tme'),
+            types.InlineKeyboardButton('teams', callback_data='team')
+        )
+        bot.edit_message_caption(
+            chat_id=call.message.chat.id,
+            message_id=call.message.message_id,
+            caption=text,
+            reply_markup=markup
+        )
+    else:
+        text = "🔥 Welcome to the Legendary Page!\n\nThe legendary Pokémon of the auction are:"
+        
+        # Ensure crat_id is iterable
+        crat = [f"{j}" for j in crat_id]
+        
+        # Use zip to pair each Pokémon name with a corresponding crat_id link
+        combined_links = zip(legpoke_name, crat)
+        
+        # Create unique hyperlinks and store them in vari
+        vari.extend(
+            create_hyperlink(name, link)
+            for name, link in combined_links
+            if create_hyperlink(name, link) not in vari
+        )
+        
+        # Append each unique hyperlink to the text
+        for k in vari:
+            text += f'\n⚜️ {k}'
+
+        markup = types.InlineKeyboardMarkup(row_width=3)
+        markup.add(
+            types.InlineKeyboardButton('Back', callback_data='back'),
+            types.InlineKeyboardButton('0ls', callback_data='pls'),
+            types.InlineKeyboardButton('Shiny', callback_data='shini'),
+            types.InlineKeyboardButton('TMs', callback_data='tme'),
+            types.InlineKeyboardButton('teams', callback_data='team')
+        )
+        bot.edit_message_caption(
+            chat_id=call.message.chat.id,
+            message_id=call.message.message_id,
+            caption=text,
+            reply_markup=markup,
+            parse_mode='HTML'  # Use HTML for hyperlink formatting
+        )
+
+    
+def nonleg_ele(call):
+    if len(nonleg_name) == 0:
+        text = "no non_legendary pokemons are added yet"
+        markup = types.InlineKeyboardMarkup(row_width=3)
+        markup.add(
+            types.InlineKeyboardButton('6ls', callback_data='lls'),
+            types.InlineKeyboardButton('back', callback_data='back'),
+            types.InlineKeyboardButton('shiny', callback_data='shini'),
+            types.InlineKeyboardButton('TMs', callback_data='tme'),
+            types.InlineKeyboardButton('teams', callback_data='team')
+        )
+        bot.edit_message_caption(
+            chat_id=call.message.chat.id,
+            message_id=call.message.message_id,
+            caption= text,
+            reply_markup=markup
+              # Use strict MarkdownV2 mode
+            )
+    
+    else:    
+        text = "🔥 Welcome to the Non-Legendary Page!\n\nthe Non-Legendary pokemons of the auction:-"
+        crat = [f"{j}" for j in brat_id]
+        
+        combined_links = zip(nonleg_name, crat)
+        bari.extend(
+            create_hyperlink(name, link)
+            for name, link in combined_links
+            if create_hyperlink(name, link) not in bari
+        )
+
+        for k in bari:
+            text += f'\n💠 {k}'
+        
+        markup = types.InlineKeyboardMarkup(row_width=3)
+        markup.add(
+            types.InlineKeyboardButton('6ls', callback_data='lls'),
+            types.InlineKeyboardButton('Back', callback_data='back'),
+            types.InlineKeyboardButton('shiny', callback_data='shini'),
+            types.InlineKeyboardButton('TMs', callback_data='tme'),
+            types.InlineKeyboardButton('teams', callback_data='team')
+        )
+        bot.edit_message_caption(
+                chat_id=call.message.chat.id,
+                message_id=call.message.message_id,
+                caption=text,
+                reply_markup=markup,
+                parse_mode='HTML'
+                # Use strict MarkdownV2 mode
+            )
+
+def shiny_ele(call):
+    if len(shineiess) == 0:
+        text = "no shinies are added yet"
+        markup = types.InlineKeyboardMarkup(row_width=3)
+        markup.add(
+            types.InlineKeyboardButton('6ls', callback_data='lls'),
+            types.InlineKeyboardButton('0ls', callback_data='pls'),
+            types.InlineKeyboardButton('back', callback_data='back'),
+            types.InlineKeyboardButton('TMs', callback_data='tme'),
+            types.InlineKeyboardButton('teams', callback_data='team')
+        )
+        bot.edit_message_caption(
+            chat_id=call.message.chat.id,
+            message_id=call.message.message_id,
+            caption= text,
+            reply_markup=markup
+             # Use strict MarkdownV2 mode
+            )
+     
+    else:    
+        text = "🔥 Welcome to the shiny Page!\n\nthe shiny pokemons of the auction:-"
+        crat = [f"{j}" for j in chat_id]
+
+        combined_links = zip(shineiess, crat)
+        nari.extend(
+            create_hyperlink(name, link)
+            for name, link in combined_links
+            if create_hyperlink(name, link) not in nari
+        )
+
+        for k in nari:
+            text += f'\n✨ {k}'
+            
+        markup = types.InlineKeyboardMarkup(row_width=3)
+        markup.add(
+            types.InlineKeyboardButton('6ls', callback_data='lls'),
+            types.InlineKeyboardButton('0ls', callback_data='pls'),
+            types.InlineKeyboardButton('back', callback_data='back'),
+            types.InlineKeyboardButton('TMs', callback_data='tme'),
+            types.InlineKeyboardButton('teams', callback_data='team')
+        )
+        bot.edit_message_caption(
+                chat_id=call.message.chat.id,
+                message_id=call.message.message_id,
+                caption=text,
+                reply_markup=markup,
+                parse_mode='HTML'# Use strict MarkdownV2 mode
+            )
+    
+def tm_ele(call):
+    if len(tmen) == 0:
+        text = "No TMs are added yet."
+        markup = types.InlineKeyboardMarkup(row_width=3)
+        markup.add(
+            types.InlineKeyboardButton('6ls', callback_data='lls'),
+            types.InlineKeyboardButton('0ls', callback_data='pls'),
+            types.InlineKeyboardButton('shiny', callback_data='shini'),
+            types.InlineKeyboardButton('back', callback_data='back'),
+            types.InlineKeyboardButton('teams', callback_data='team')
+        )
+        bot.edit_message_caption(
+            chat_id=call.message.chat.id,
+            message_id=call.message.message_id,
+            caption=text,
+            reply_markup=markup
+        )
+    else:
+        text = "🔥 Welcome to the TMs Page!\n\nThe TMs Pokémons of the auction are:"
+        crat = [f"{j}" for j in craft_id]
+
+        combined_links = zip(tmen, crat)
+        lari.extend(
+            create_hyperlink(name, link)
+            for name, link in combined_links
+            if create_hyperlink(name, link) not in lari
+        )
+
+        for k in lari:
+            text += f'\n🔹 {k}'
+
+        markup = types.InlineKeyboardMarkup(row_width=3)
+        markup.add(
+            types.InlineKeyboardButton('6ls', callback_data='lls'),
+            types.InlineKeyboardButton('0ls', callback_data='pls'),
+            types.InlineKeyboardButton('shiny', callback_data='shini'),
+            types.InlineKeyboardButton('back', callback_data='back'),
+            types.InlineKeyboardButton('teams', callback_data='team')
+        )
+        bot.edit_message_caption(
+            chat_id=call.message.chat.id,
+            message_id=call.message.message_id,
+            caption=text,
+            reply_markup=markup,
+            parse_mode='HTML'  # Use HTML for hyperlink formatting
+        )
+        
+def team_ele(call):
+    if len(teams) == 0:
+        text = "No Teams are added yet."
+        markup = types.InlineKeyboardMarkup(row_width=3)
+        markup.add(
+            types.InlineKeyboardButton('6ls', callback_data='lls'),
+            types.InlineKeyboardButton('0ls', callback_data='pls'),
+            types.InlineKeyboardButton('shiny', callback_data='shini'),
+            types.InlineKeyboardButton('TMs', callback_data='tme'),
+            types.InlineKeyboardButton('back', callback_data='back')
+        )
+        bot.edit_message_caption(
+            chat_id=call.message.chat.id,
+            message_id=call.message.message_id,
+            caption=text,
+            reply_markup=markup
+        )
+    else:
+        text = "🔥 Welcome to the TMs Page!\n\nThe TMs Pokémons of the auction are:"
+        crat = [f"{j}" for j in trat_id]
+
+        combined_links = zip(teams, crat)
+        gari.extend(
+            create_hyperlink(name, link)
+            for name, link in combined_links
+            if create_hyperlink(name, link) not in gari
+        )
+
+        for k in gari:
+            text += f'\n🔹 {k}'
+
+        markup = types.InlineKeyboardMarkup(row_width=3)
+        markup.add(
+            types.InlineKeyboardButton('6ls', callback_data='lls'),
+            types.InlineKeyboardButton('0ls', callback_data='pls'),
+            types.InlineKeyboardButton('shiny', callback_data='shini'),
+            types.InlineKeyboardButton('TMs', callback_data='tme'),
+            types.InlineKeyboardButton('back', callback_data='back')
+        )
+        bot.edit_message_caption(
+            chat_id=call.message.chat.id,
+            message_id=call.message.message_id,
+            caption=text,
+            reply_markup=markup,
+            parse_mode='HTML'  # Use HTML for hyperlink formatting
+        )
+
+@bot.message_handler(commands=['reseti'])
+def reset_all_lists(message):
+    """Clears all stored lists (Admin-Only)."""
+    if message.from_user.id not in xmods:
+        bot.reply_to(message, "❌ You do not have permission to use this command.")
+        return
+
+    global lari, vari, nari, bari, gari
+    global legpoke_name, nonleg_name, shineiess, tmen, teams
+    global brat_id, crat_id, chat_id, craft_id, trat_id
+    global msg_leg, msg_nonleg, msg_shiny, msg_tm, msg_team
+
+    # Reset all lists
+    nari.clear()
+    bari.clear()
+    lari.clear()
+    vari.clear()
+    gari.clear()
+
+    legpoke_name.clear()
+    nonleg_name.clear()
+    shineiess.clear()
+    tmen.clear()
+    teams.clear()
+
+    brat_id.clear()
+    crat_id.clear()
+    chat_id.clear()
+    craft_id.clear()
+    trat_id.clear()
+    
+    msg_leg.clear()
+    msg_nonleg.clear()
+    msg_shiny.clear()
+    msg_tm.clear()
+    msg_team.clear()
+    
+    save_data()
+    
+    users_nich.clear()
+    save_users_data()
+
+    bot.reply_to(message, "✅ All Pokémon lists, names, and IDs have been **cleared** successfully!",parse_mode='markdown')
+
+@bot.message_handler(commands=['limpokes'])
+def list_pokemon_counts(message):
+    
+    if message.from_user.id not in xmods:
+        bot.reply_to(message, "❌ You do not have permission to use this command.")
+        return
+    
+    """Displays the count of Pokémon & TMs in the auction with progress bars."""
+    
+    total_limit = 100
+    category_limits = {"legendary": 20, "non-legendary": 50, "shiny": 10, "tms": 15, "teams": 5}
+
+    # Current counts
+    current_counts = {
+        "legendary": len(legpoke_name),
+        "non-legendary": len(nonleg_name),
+        "shiny": len(shineiess),
+        "tms": len(tmen),
+        "teams": len(teams)
+    }
+
+    # Function to create progress bars
+    def progress_bar(count, limit, bar_length=10):
+        filled = round((count / limit) * bar_length)
+        return "▰" * filled + "▱" * (bar_length - filled)
+
+    # Format message
+    message_text = (
+        "<b>📜 CURRENT AUCTION STATUS 📜</b>\n"
+        "<i>Here's the count of Pokémon & TMs currently in the auction:</i>\n\n"
+        "🟡 <b>Legendary Pokémon:</b> {}/20\n"
+        "   [{}]\n"
+        "🔵 <b>Non-Legendary Pokémon:</b> {}/50\n"
+        "   [{}]\n"
+        "✨ <b>Shiny Pokémon:</b> {}/10\n"
+        "   [{}]\n"
+        "📜 <b>TMs:</b> {}/15\n"
+        "   [{}]\n"
+        "🏹 <b>Teams:</b> {}/5\n"
+        "   [{}]\n"
+        "━━━━━━━━━━━━━━━━━━━━━━\n"
+        "📊 <b>Total Pokémon & TMs:</b> {}/100\n"
+        "   [{}]\n"
+        "━━━━━━━━━━━━━━━━━━━━━━"
+    ).format(
+        current_counts["legendary"], progress_bar(current_counts["legendary"], category_limits["legendary"]),
+        current_counts["non-legendary"], progress_bar(current_counts["non-legendary"], category_limits["non-legendary"]),
+        current_counts["shiny"], progress_bar(current_counts["shiny"], category_limits["shiny"]),
+        current_counts["tms"], progress_bar(current_counts["tms"], category_limits["tms"]),
+        current_counts["teams"], progress_bar(current_counts["teams"], category_limits["teams"]),
+        sum(current_counts.values()), progress_bar(sum(current_counts.values()), total_limit)
+    )
+
+    bot.reply_to(message, message_text, parse_mode="HTML")
+
+import re
+from difflib import get_close_matches
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
+
+# Combine all into one list
+def get_all_pokemon_links():
+    return vari + bari + nari + lari + gari
+
+# Extract name and link from HTML anchor tag
+def parse_html_link(html_string):
+    match = re.search(r"<a href=['\"](.*?)['\"]>(.*?)</a>", html_string)
+    if match:
+        return match.group(2), match.group(1)  # name, link
+    return None, None
+
+@bot.message_handler(commands=['info'])
+def info_command(message):
+    args = message.text.split(maxsplit=1)
+    if len(args) < 2:
+        bot.reply_to(message, "⚠️ Please provide a Pokémon name.\nUsage: `/info charizard`", parse_mode="Markdown")
+        return
+
+    query = args[1].strip().lower()
+    all_links = get_all_pokemon_links()
+
+    # Parse all into (name, link) tuples
+    parsed_data = [parse_html_link(x) for x in all_links if parse_html_link(x)[0]]
+
+    # Find all exact matches (case-insensitive)
+    matches = [(name, link) for name, link in parsed_data if name.lower() == query]
+
+    if matches:
+        mes = bot.reply_to(message, "⏳ Please wait, checking...")
+        time.sleep(2)
+        return send_multiple_info(mes.chat.id, mes.message_id, query, matches)
+
+    # If no exact match, suggest similar ones
+    names = [name for name, _ in parsed_data]
+    close_matches = get_close_matches(query, names, n=5, cutoff=0.5)
+
+    if close_matches:
+        markup = InlineKeyboardMarkup()
+        for name in close_matches:
+            markup.add(InlineKeyboardButton(text=name, callback_data=f"info:{name.lower()}"))
+        bot.reply_to(message, f"❌ No exact match found for *{query}*.\n\nDid you mean one of these?", parse_mode="Markdown", reply_markup=markup)
+    else:
+        bot.reply_to(message, f"❌ No match or suggestion found for *{query}*.", parse_mode="Markdown")
+
+# Send multiple results if same name found more than once
+def send_multiple_info(chat_id, message_id, name, matches):
+    text = f"🔍 Info for <b>{name.title()}</b>:\n"
+    markup = InlineKeyboardMarkup()
+    for i, (n, link) in enumerate(matches, start=1):
+        text += f"{i}. <a href='{link}'>{n}</a>\n"
+        markup.add(InlineKeyboardButton(f"📨 View Message {i}", url=link))
+
+    bot.edit_message_text(
+        text,
+        chat_id,
+        message_id,
+        reply_markup=markup,
+        parse_mode="HTML",
+        disable_web_page_preview=True
+    )
+
+# Callback from close match buttons
+@bot.callback_query_handler(func=lambda call: call.data.startswith("info:"))
+def handle_info_callback(call):
+    name_query = call.data.split("info:", 1)[1].lower()
+    parsed_data = [parse_html_link(x) for x in get_all_pokemon_links() if parse_html_link(x)[0]]
+    matches = [(name, link) for name, link in parsed_data if name.lower() == name_query]
+
+    if matches:
+        send_multiple_info(call.message.chat.id, call.message.message_id, name_query, matches)
+    else:
+        bot.answer_callback_query(call.id, "❌ Pokémon not found.")
+
+@bot.message_handler(commands=['msg'])
+def handle_msg(message):
+    # Check if the user is banned
+    if str(message.from_user.id) in banned_users:
+        bot.reply_to(message, "You are banned by an administrator.")
+        return
+
+    # Check if the user is an authorized admin
+    if message.from_user.id not in admin_id:
+        bot.reply_to(message, "You are not authorized to use this command.")
+        return
+
+    # Parse the command arguments
+    try:
+        _, user_id, user_message = message.text.split(maxsplit=2)
+        user_id = int(user_id)  # Convert user_id to an integer
+    except ValueError:
+        bot.reply_to(message, "Invalid syntax. Use: /msg <user_id> <message>")
+        return
+
+    # Attempt to send the message to the specified user
+    try:
+        bot.send_message(user_id, user_message)
+        bot.reply_to(message, f"Message successfully sent to user {user_id}.")
+    except Exception as e:
+        bot.reply_to(message, f"Failed to send message to user {user_id}. Error: {e}")
+        
+@bot.message_handler(commands=['rules'])
+def rule_page(message):
+    user_id = message.from_user.id
+    if not has_started_bot(user_id):
+        markup=InlineKeyboardMarkup()
+        markup.add(InlineKeyboardButton('start',url='https://t.me/Auct_he_bot?start=start'))
+        bot.reply_to(message, '<blockquote><b>start the bot first.</b></blockquote>', parse_mode='html',reply_markup=markup,disable_web_page_preview=True)
+        return
+    
+    if not is_user_updated(user_id):
+        markup=InlineKeyboardMarkup()
+        markup.add(InlineKeyboardButton('update',url='https://t.me/Auct_he_bot?start=update'))
+        bot.reply_to(message, '<blockquote><b>update the bot first.</b></blockquote>', parse_mode='html',reply_markup=markup,disable_web_page_preview=True)
+        return
+    
+    image = 'https://i.imghippo.com/files/WDS1997ELI.jpg'
+    text = (
+        "<b> 📌 RULES </b>\n"
+        "〄╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍\n\n"
+        "➥ 𝘞𝘩𝘪𝘤𝘩 𝘙𝘶𝘭𝘦𝘴 𝘠𝘰𝘶 𝘸𝘢𝘯𝘵 𝘛𝘰 𝘊𝘩𝘦𝘤𝘬?"
+        )
+    
+    markup = types.InlineKeyboardMarkup(row_width=2)
+    markup.add(
+            types.InlineKeyboardButton('AUCTION', callback_data='auced'),
+            types.InlineKeyboardButton('COMMUNITY', callback_data='comed'),
+            types.InlineKeyboardButton('🔗 MAIN GROUP LINK', url='https://t.me/AllinoneHexa'))
+    
+    bot.send_photo(
+        message.chat.id,
+        photo=image,
+        caption=text,
+        reply_to_message_id=message.message_id,
+        reply_markup=markup,
+        parse_mode='html'
+    )
+
+@bot.callback_query_handler(func=lambda call: call.data == "comed")
+def comed(call):
+    tex = (
+        """<blockquote>╭═══════════════════════
+✮ COMMUNITY RULES ✨
+╰━━━━━━━━━━━━━━━━━━━━━━━
+➥ ғᴏʀ ᴀɴʏ ᴋɪɴᴅ ᴏғ ᴘʀᴏᴍᴏs ᴄᴏɴᴛᴀᴄᴛ ᴀᴅᴍɪɴs. 
+➥ ᴅᴏɴ'ᴛ ᴀʙᴜsᴇ ᴀɴʏᴏɴᴇ. 
+➥ ʙᴇ ғʀɪᴇɴᴅʟʏ ᴡɪᴛʜ ᴇᴠᴇʀʏᴏɴᴇ. 
+➥ ᴅᴏɴ'ᴛ sᴘᴀᴍ ɪɴ ᴏᴜʀ ɢʀᴏᴜᴘs. 
+➥ 𝟷𝟾+ ᴄᴏɴᴛᴇɴᴛs ᴀʀᴇ ɴᴏᴛ ᴀʟʟᴏᴡᴇᴅ ɪɴ ᴏᴜʀ ɢʀᴏᴜᴘ. 
+━━━━━━━━━━━━━━━━━━━━━━━━
+➥ ɪғ ʏᴏᴜ ɢᴏᴛ ᴀɴʏ sᴄᴀᴍ. 
+➥ ɪғ ᴀɴʏᴏɴᴇ ᴀʙᴜsᴇ ʏᴏᴜ. 
+➥ ᴀɴʏ ᴏᴛʜᴇʀ ɪssᴜᴇs?⚡️ ᴜsᴇ /𝗛𝗲𝗹𝗽.
+  -- 𝘖𝘯𝘭𝘺 𝘞𝘪𝘵𝘩 𝘗𝘳𝘰𝘰𝘧 𝘈𝘤𝘤𝘦𝘱𝘵𝘦𝘥 --</blockquote>"""
+    )
+    
+    markup = types.InlineKeyboardMarkup(row_width=2)
+    markup.add(
+            types.InlineKeyboardButton('AUCTION', callback_data='auced'),
+            types.InlineKeyboardButton('🔗 LINK', url='https://t.me/AIO_COMMUNITY'))
+    
+    bot.edit_message_caption(
+        chat_id=call.message.chat.id,
+        message_id=call.message.message_id,
+        caption = tex,
+        parse_mode='html',
+        reply_markup=markup
+    )
+    
+@bot.callback_query_handler(func=lambda call: call.data == "auced")
+def auced(call):
+    tex = (
+        """<blockquote>╭═══════════════════════
+☀️AUCTION RULES ✨
+╰━━━━━━━━━━━━━━━━━━━━━━━
+▫️ɪғ ᴜ ᴀᴅᴅ ᴀɴʏ ᴘᴏᴋᴇ/ᴛᴍ ɪɴ ᴀᴜᴄᴛɪᴏɴ ᴀɴᴅ ʟᴀᴛᴇʀ ᴜ ᴡᴀɴᴛ ᴛᴏ ʀᴇᴍᴏᴠᴇ ᴛʜᴀᴛ ᴘᴏᴋᴇ/ᴛᴍ ʙᴇғᴏʀᴇ ᴀᴜᴄᴛɪᴏɴ ᴜ ɢɪᴠᴇ ғɪɴᴇ 𝟒𝐊 ᴘᴅ ᴛᴏ ʀᴇᴍᴏᴠᴇ ᴛʜᴀᴛ ᴘᴏᴋᴇ/ᴛᴍ.
+
+▫️ɪғ ᴜ ʙɪᴅ ɪɴ ᴀᴜᴄᴛɪᴏɴ ᴀɴᴅ ʟᴀᴛᴇʀ ʏᴏᴜ ᴅᴏɴ'ᴛ ᴛᴀᴋᴇ ᴛʜᴀᴛ ɪᴛᴇᴍ ᴜ ɢᴏᴛ ᴡᴀʀɴ ᴏʀ ʙᴀɴ ᴀɴᴅ ᴏᴛʜᴇʀ ᴏᴘᴛɪᴏɴ ɪs ɢɪᴠᴇ ғɪɴᴇ ᴀᴄᴄᴏʀᴅɪɴɢ ᴛᴏ ʏᴏᴜʀ ʙɪᴅ 𝟒𝟎% ғɪɴᴇ ᴘᴀɪᴅ ᴛᴏ ᴛʜᴇ ᴀᴅᴍɪɴ. 
+
+▫️ᴀғᴛᴇʀ ᴀᴜᴄᴛɪᴏɴ ɪғ sᴇʟʟᴇʀ ᴅᴏɴ'ᴛ ɢɪᴠᴇ ᴀɴʏ ɪᴛᴇᴍs ᴛᴏ ᴛʜᴇ ʙᴜʏᴇʀ ʜᴇ ɢᴏᴛ ʙᴀɴ ᴏʀ ᴡᴀʀɴɪɴɢ ᴀɴᴅ ᴏᴛʜᴇʀ ᴏᴘᴛɪᴏɴ ɪs ɢɪᴠᴇ 𝟒𝟎% ғɪɴᴇ ᴏғ ᴛʜᴀᴛ ɪᴛᴇᴍs sᴏʟᴅ ɪɴ ᴀᴜᴄᴛɪᴏɴ. 
+
+▫️ɪғ ᴀɴʏ ᴘʟᴀʏᴇʀ ᴡᴀɴᴛs ᴛᴏ ʀᴇʙɪᴅ ᴏғ ᴛʜᴇɪʀ ɪᴛᴇᴍs ᴛᴇʟʟ ᴀᴅᴍɪɴ ɪɴ ᴛʀᴀᴅᴇ ɢᴄ ᴡʜᴇɴ ᴀᴜᴄᴛɪᴏɴ ɪs ʀᴜɴɴɪɴɢ ᴛʜᴀᴛ ᴛɪᴍᴇ ᴀғᴛᴇʀ ᴀᴜᴄᴛɪᴏɴ ᴜ ʜᴀᴠᴇ ᴀʟsᴏ 𝟷𝟻 ᴍɪɴᴜᴛᴇs  ᴛᴏ ʀᴇʙɪᴅ ᴛʜᴀᴛ ɪᴛᴇᴍs ᴀғᴛᴇʀ ᴛʜᴀᴛ ᴛɪᴍᴇ ᴅᴏɴ'ᴛ ᴅᴏ ʀʀ ᴡɪᴛʜ ᴀᴅᴍɪɴ. 
+
+▫️ɪғ ᴀɴʏ sᴇʟʟᴇʀ ᴅᴏ ʀᴇʙɪᴅ ᴏғ ᴛʜᴇɪʀ ɪᴛᴇᴍs ʟᴀᴛᴇʀ ᴏʟᴅ ʙᴜʏᴇʀ ᴅᴏɴ'ᴛ ᴅᴏ ʀʀ ᴡɪᴛʜ ᴀᴅᴍɪɴ ᴀʙᴏᴜᴛ ᴛʜᴀᴛ ɪᴛᴇᴍs.
+
+➥ ᴀɴʏᴏɴᴇ ᴅᴏɴ'ᴛ ғᴏʟʟᴏᴡ ᴀʙᴏᴠᴇ ʀᴜʟᴇs ʜᴇ ɢᴏᴛ 𝟸 ᴡᴀʀɴs ᴛʜᴇɴ ᴅɪʀᴇᴄᴛ ʙᴀɴ.
+
+➥ ɪғ ᴀɴʏᴏɴᴇ ᴅɪᴅ sᴄᴀᴍ ᴛᴀɢ ᴀᴅᴍɪɴ ᴡɪᴛʜ ᴘʀᴏᴏғ.
+━━━━━━━━━━━━━━━━━━━━━━━━
+✮ ɪɴᴄʀᴇᴀsᴇ ʏᴏᴜʀ ʙɪᴅ ᴡɪᴛʜ ᴍɪɴɪᴍᴜᴍ 𝟓𝟎𝟎 𝐏𝐝. (ᴇxᴄᴇᴘᴛ 𝐓𝐦𝐬)</blockquote>"""
+    )
+    
+    markup = types.InlineKeyboardMarkup(row_width=2)
+    markup.add(
+            types.InlineKeyboardButton('🔗 LINK', url='https://t.me/allinoneAuction'),
+            types.InlineKeyboardButton('COMMUNITY', callback_data='comed'))
+    
+    bot.edit_message_caption(
+        chat_id=call.message.chat.id,
+        message_id=call.message.message_id,
+        caption = tex,
+        parse_mode='html',
+        reply_markup=markup
+    )
+
+message_store = {}
+stored_messages = {}
+current_index = 0
+sold_items = []
+confirmed_messages = set()
+
+@bot.message_handler(commands=['renext'])
+def renext(message):
+    global c
+    if str(message.from_user.id) in banned_users:
+        bot.reply_to(message, "You Are Banned By an Administrator")
+    else:
+        if is_admin(message.from_user.id):
+            bot.reply_to(message, "<blockquote>Done reseted next</blockquote>",parse_mode="html")
+            c=0
+            return
+        
+@bot.message_handler(commands=['store'])
+def store_message_prompt(message):
+    if str(message.from_user.id) in banned_users:
+        bot.reply_to(message, "You Are Banned By an Administrator")
+    else:
+        if is_admin(message.from_user.id):
+            bot.reply_to(message, "<blockquote>Type the message you want to store:</blockquote>",parse_mode="html")
+            bot.register_next_step_handler(message, store_message)
+        else:
+            bot.send_sticker(message.chat.id,ANGRY_STICKER_ID)
+            bot.reply_to(message, "<blockquote>Only admins can perform this action.</blockquote>",parse_mode="html")
+
+def store_message(message):
+    stored_messages[message.message_id] = {"message": message.text, "chat_id": message.chat.id}
+    bot.reply_to(message, "<blockquote>Message stored successfully.</blockquote>",parse_mode="html")
+
+import time
+import telebot
+from telebot import types
+
+banned_users=[]
+auce_active = False  # Track auction status
+current_category = None  # Track current auction category
+
+expic = 'https://files.catbox.moe/t9s3sa.jpg'
+def extract_seller_details(forwarded_message):
+    """
+    Extracts the seller's ID and username from the forwarded auction message.
+    """
+    text = forwarded_message.text if forwarded_message.text else ""
+    caption = forwarded_message.caption if forwarded_message.caption else ""
+
+    # Extract User ID
+    user_id_match = re.search(r"(?:User ID|User id)[:\s-]+(\d+)", caption + text, re.IGNORECASE)
+    seller_id = user_id_match.group(1) if user_id_match else "Unknown ID"
+
+    # Extract Username
+    username_match = re.search(r"(?:Username|username)[:\s@]+([\w\d_]+)", caption + text, re.IGNORECASE)
+    seller_username = f"@{username_match.group(1)}" if username_match else "Unknown Username"
+
+    return seller_id, seller_username
+
+# ---- START AUCTION COMMAND ----
+@bot.message_handler(commands=['aucon'])
+def aucon(message):
+    chat_id = message.chat.id
+    if str(message.from_user.id) in banned_users:
+        bot.reply_to(message, "You Are Banned By an Administrator")
+        return
+
+    if str(message.from_user.id) in admin_ids:
+        global auce_active
+        if not auce_active:
+            auce_active = True
+            msg = bot.send_photo(chat_id,photo='https://i.imghippo.com/files/P6359OgI.jpg', caption="Auction is starting....",reply_to_message_id=message.message_id)
+            time.sleep(3.5)
+            bot.edit_message_caption('🫧 Processing....', chat_id, msg.message_id)
+            time.sleep(2.5)
+            bot.edit_message_caption('Auction started 💫⚡️', chat_id, msg.message_id)
+            time.sleep(1.5)
+            markup = types.InlineKeyboardMarkup(row_width=2)
+            markup.add(
+                types.InlineKeyboardButton("🟡 Legendary Pokémon", callback_data="auc_leg"),
+                types.InlineKeyboardButton("🔵 Non-Legendary Pokémon", callback_data="auc_nonleg"),
+                types.InlineKeyboardButton("✨ Shiny Pokémon", callback_data="auc_shiny"),
+                types.InlineKeyboardButton("📜 TMs", callback_data="auc_tm"),
+                types.InlineKeyboardButton("🏹 Teams", callback_data="auc_team"),
+                types.InlineKeyboardButton("🔙 Back", callback_data="auc_bye")  # No callback for back button
+            )
+            bot.edit_message_caption('Admins can now select a category to start the auction.', chat_id, msg.message_id, reply_markup = markup)
+
+            
+
+            # Send category selection buttons
+        else:
+            bot.reply_to(message, "<blockquote>Auction is already active.</blockquote>", parse_mode="HTML")
+    else:
+        bot.reply_to(message, "<blockquote>Only admins can perform this action.</blockquote>", parse_mode="HTML")
+
+# ---- STOP AUCTION COMMAND ----
+@bot.message_handler(commands=['aucoff'])
+def aucoff(message):
+    chat_id = message.chat.id
+    if str(message.from_user.id) in banned_users:
+        bot.reply_to(message, "You Are Banned By an Administrator")
+        return
+
+    if str(message.from_user.id) in admin_ids:
+        global auce_active, current_category
+        if auce_active:
+            auce_active = False
+            msg = bot.send_photo(chat_id,photo='https://i.imghippo.com/files/tJ3639N.jpg', caption="Auction is stopping....",reply_to_message_id=message.message_id)
+            time.sleep(3)
+            markup = types.InlineKeyboardMarkup(row_width=2)
+            markup.add(
+                types.InlineKeyboardButton("TRADE GROUP", url='https://t.me/allinonehexa'))
+            text = "Thanks everyone for participating! Trade Group to see the buyers list."
+            bot.edit_message_caption(caption=text, chat_id=chat_id, message_id=msg.message_id, parse_mode="html",reply_markup=markup)
+            current_category = None  # Reset category
+        else:
+            bot.reply_to(message, "<blockquote>Auction is already off.</blockquote>", parse_mode="HTML")
+    else:
+        bot.reply_to(message, "<blockquote>Only admins can perform this action.</blockquote>", parse_mode="HTML")
+
+# ---- HANDLE CATEGORY SELECTION ----
+@bot.callback_query_handler(func=lambda call: call.data.startswith("auc_"))
+def handle_auction_category(call):
+    
+    if call.from_user.id not in xmods:
+        bot.answer_callback_query(call.id, text="🖕")
+        return
+    
+    global current_category,c
+    c=0
+
+    category = call.data
+    if category == "auc_leg":
+        current_category = msg_leg
+        title = "🟡 Legendary Pokémon"
+            
+    elif category == "auc_nonleg":
+        current_category = msg_nonleg
+        title = "🔵 Non-Legendary Pokémon"
+            
+    elif category == "auc_shiny":
+        current_category = msg_shiny
+        title = "✨ Shiny Pokémon"
+            
+    elif category == "auc_tm":
+        current_category = msg_tm
+        title = "📜 TMs"
+        
+    elif category == "auc_team":
+        current_category = msg_team
+        title = "🏹 Teams"
+        
+    elif category == "auc_bye":
+        bot.edit_message_caption(f"Auction ended! ", call.message.chat.id, call.message.message_id)
+
+    bot.answer_callback_query(call.id, "selected!")
+    bot.edit_message_caption(f"{title} auction has started!", call.message.chat.id, call.message.message_id)
+    next_message(call.message)
+    print(f"Category changed to: {title}")  # Debugging log
+    
+poke_pros = False
+brond = True
+
+def next_message(message):
+    global current_category
+    global c
+    global poke_pros
+    global brond 
+
+    a = bot.send_message(message.chat.id, "Item loading....")
+    time.sleep(2)
+    for i in ['3','2','1']:
+        bot.edit_message_text(chat_id=a.chat.id,message_id=a.message_id,text=f'sending Item in {i}')
+        time.sleep(1)
+
+    bot.delete_message(a.chat.id,a.message_id)
+
+    if current_category:
+        try:
+            print("here")
+            for i in current_category:
+                if brond == True:
+                    print("here")
+                    forwarded_msg = bot.forward_message(message.chat.id, approve_channel, current_category[c])
+                    print("sent")
+                    brond = False
+                    poke_pros = True
+                    chat_id = message.chat.id
+                        
+                        # Send Pokémon/TM name separately
+                    c += 1
+                    auction_details = extract_pokemon_details(forwarded_msg)
+                    print(auction_details)
+                    item_name = (
+                    auction_details.get("tm_name") or
+                    auction_details.get("pokemon_name") or
+                    auction_details.get("team_name") or
+                    "Unknown Item"
+                    )
+                    print(item_name)
+
+                    # Send Pokémon/TM name separately
+                    bot.send_message(chat_id, f"Next Pokémon/TM: {item_name}", parse_mode='Markdown')
+                        
+                    message_stor[chat_id] = {
+                        "auction_message" : forwarded_msg
+                    }
+                        # Ensure category is correctly extracted
+                    category = auction_details.get("category", "Unknown Category")
+
+                        # ✅ Store auction details with full details
+
+                        # Store the forwarded auction details for use in dot (.) process
+                    message_store[chat_id] = {
+                    "item_name": (
+                        auction_details.get("tm_name") or
+                        auction_details.get("pokemon_name") or
+                        auction_details.get("team_name") or
+                        "Unknown Item"
+                    ),
+                    "category": auction_details.get("category", "Unknown"),
+                    }
+                    print(message_store[chat_id])
+
+        except IndexError:
+            markup = InlineKeyboardMarkup(row_width=2)
+            markup.add(
+                InlineKeyboardButton("🟡 Legendary Pokémon", callback_data="auc_leg"),
+                InlineKeyboardButton("🔵 Non-Legendary Pokémon", callback_data="auc_nonleg"),
+                InlineKeyboardButton("✨ Shiny Pokémon", callback_data="auc_shiny"),
+                InlineKeyboardButton("📜 TMs", callback_data="auc_tm"),
+                InlineKeyboardButton("🏹 Teams", callback_data="auc_team"),
+                InlineKeyboardButton("🔙 Back", callback_data="auc_bye")  # No callback for back button
+            )
+            bot.send_photo(message.chat.id,photo=expic,caption= "<blockquote>No more Pokémon in this category.\n choose next category from below options</blockquote>", parse_mode="html",reply_markup=markup)
+    else:
+        markup = InlineKeyboardMarkup(row_width=2)
+        markup.add(
+                InlineKeyboardButton("🟡 Legendary Pokémon", callback_data="auc_leg"),
+                InlineKeyboardButton("🔵 Non-Legendary Pokémon", callback_data="auc_nonleg"),
+                InlineKeyboardButton("✨ Shiny Pokémon", callback_data="auc_shiny"),
+                InlineKeyboardButton("📜 TMs", callback_data="auc_tm"),
+                InlineKeyboardButton("🏹 Teams", callback_data="auc_team"),
+                InlineKeyboardButton("🔙 Back", callback_data="auc_bye")  # No callback for back button
+            )
+        bot.send_photo(message.chat.id,photo=expic,caption= "<blockquote>select the category again.</blockquote>", parse_mode="html",reply_markup=markup)
+        
+import re
+
+def extract_pokemon_details(forwarded_message):
+    """
+    Extracts Pokémon, TM, and Team details from a forwarded auction message.
+    - Pokémon details are in the caption.
+    - TM and Team details are in the text.
+    """
+    
+    if forwarded_message.text:
+        message_text = forwarded_message.text
+    elif forwarded_message.caption:
+        message_text = forwarded_message.caption
+    else:
+        return None  # No text or caption, return None
+
+    # ✅ Check for TMs
+    if "#TMS" in message_text:
+        category = "TMS"
+
+        # Extract TM Name
+        tm_match = re.search(r"(TM\d+\s+💿)", message_text)
+        tm_name = tm_match.group(1).strip() if tm_match else "Unknown TM"
+
+        # Extract Move Name and Type
+        move_match = re.search(r"([\w\s]+)\s*\[(.*?)\]", message_text)
+        move_name = move_match.group(1).strip() if move_match else "Unknown Move"
+        move_type = move_match.group(2).strip() if move_match else "Unknown Type"
+
+        # Extract Power and Accuracy
+        power_match = re.search(r"Power:\s*(\d+)", message_text)
+        accuracy_match = re.search(r"Accuracy:\s*(\d+)", message_text)
+        power = power_match.group(1) if power_match else "N/A"
+        accuracy = accuracy_match.group(1) if accuracy_match else "N/A"
+
+        return {
+            "category": category,
+            "tm_name": tm_name,
+            "move_name": move_name,
+            "move_type": move_type,
+            "power": power,
+            "accuracy": accuracy,
+        }
+
+
+    # ✅ Check for Teams
+    elif "#Teams" in message_text:
+        category = "Teams"
+
+        # Extract Team Name
+        team_match = re.search(r"Team name:\s*(.+)", message_text)
+        team_name = team_match.group(1).strip() if team_match else "Unknown Team"
+
+        # Extract Pokémon in Team (Only First Line)
+        team_pokemon_match = re.search(r"About Team:\s*(.*)", message_text)
+        team_pokemon = team_pokemon_match.group(1).split("\n")[0].strip() if team_pokemon_match else "Unknown Pokémon"
+
+
+        return {
+            "category": category,
+            "team_name": team_name,
+            "team_pokemon": team_pokemon,
+        }
+
+    # ✅ Check for Pokémon
+    else:
+        # Extract Category (Legendary, Non-Legendary, etc.)
+        category_match = re.search(r"#(Legendary|Non_legendary|Shiny)", message_text, re.IGNORECASE)
+        category = category_match.group(1).capitalize() if category_match else "Unknown Category"
+
+        # Extract Pokémon Name
+        pokemon_match = re.search(r"Pokemon Name:\s*(.+)", message_text)
+        pokemon_name = pokemon_match.group(1).strip() if pokemon_match else "Unknown Pokémon"
+
+        # Extract Level
+        level_match = re.search(r"Lv\.\s*(\d+)", message_text)
+        level = level_match.group(1) if level_match else "N/A"
+
+        # Extract Nature
+        nature_match = re.search(r"Nature:\s*([\w\s]+)", message_text)
+        nature = nature_match.group(1).strip() if nature_match else "Unknown Nature"
+
+        # Extract Types
+        types_match = re.search(r"Types:\s*\[(.+?)\]", message_text)
+        types = types_match.group(1) if types_match else "Unknown Types"
+
+        return {
+            "category": category,
+            "pokemon_name": pokemon_name,
+            "level": level,
+            "nature": nature,
+            "types": types,
+        }
+
+    return None  # If nothing matched
+
+@bot.message_handler(commands=['nexts'])
+def nexts_message(message):
+    if str(message.from_user.id) in banned_users:
+        bot.reply_to(message, "You Are Banned By an Administrator")
+    else:
+        if is_admin(message.from_user.id):
+            if stored_messages:
+                next_message_id = next(iter(stored_messages))
+                next_message_data = stored_messages.pop(next_message_id)
+                bot.forward_message(message.chat.id, next_message_data["chat_id"], next_message_id)
+            else:
+                bot.send_sticker(message.chat.id,OK_STICKER_ID)
+                bot.reply_to(message, "<blockquote>No more Posts To Forward</blockquote>",parse_mode="html")
+        else:
+            bot.send_sticker(message.chat.id,ANGRY_STICKER_ID)
+            bot.reply_to(message, "<blockquote>Only admins can perform this action.</blockquote>",parse_mode="html")
+
+
+
+previous_dot_message = {}
+
+confirmed_messages = set()  # Track confirmed sales
+message_store = {}  # Store auction details
+message_stor = {}
+
+# ---- HANDLE DOT PROCESS ----
+import re
+import time
+from telebot import types
+
+@bot.message_handler(func=lambda message: message.text == "." and message.from_user.id in xmods)
+def handle_dot(message):
+    chat_id = message.chat.id
+    global auce_active, poke_pros
+    if auce_active == False:
+        return 
+    
+    if poke_pros == False:
+        return
+    
+    # Delete previous dot message if exists
+    if chat_id in previous_dot_message:
+        prev_msg_id = previous_dot_message[chat_id]
+        if prev_msg_id not in confirmed_messages:
+            try:
+                bot.delete_message(chat_id, prev_msg_id)
+            except Exception as e:
+                print(f"Failed to delete message: {e}")
+
+    # Animated Dots Process
+    msg = bot.reply_to(message, "•")
+    previous_dot_message[chat_id] = msg.message_id
+
+    time.sleep(1.5)
+    bot.edit_message_text("• •", chat_id, msg.message_id)
+    time.sleep(1.5)
+    bot.edit_message_text("• • •", chat_id, msg.message_id)
+    time.sleep(1.5)
+
+    # Ensure the message is a reply to a bid
+    if not message.reply_to_message:
+        bot.reply_to(message, "❌ Error: Please reply to a bid message.")
+        return
+
+    bid_message = message.reply_to_message.text
+
+    # Extract bid amount
+    price_match = re.search(r"(\d+(?:\.\d+)?(?:k|pd)?)", bid_message, re.IGNORECASE)
+    price = price_match.group(1) if price_match else "Unknown Price"
+
+    # Extract buyer details
+    buyer_id = message.reply_to_message.from_user.id
+    fn = message.reply_to_message.from_user.full_name
+    buyer_username = f"@{message.reply_to_message.from_user.username}" if message.reply_to_message.from_user.username else f'<a href="tg://user?id={buyer_id}">{fn}</a>'
+
+    # Retrieve auction item details
+    if chat_id not in message_store:
+        bot.reply_to(message, "❌ No auction item found. Use `/next` first.",parse_mode='Markdown')
+        return
+
+    auction_details = message_store[chat_id]
+    category = auction_details["category"]
+    
+    item_name = (
+                auction_details.get("tm_name") or
+                auction_details.get("pokemon_name") or
+                auction_details.get("team_name") or
+                "Unknown Item"
+                )
+    # Confirmation Message
+    confirmation_text = f"🔹 Confirm Sale\n Item: {item_name} ({category})?"
+
+    # Inline Button for Confirmation
+    keyboard = types.InlineKeyboardMarkup()
+    confirm_button = types.InlineKeyboardButton(text="✅ Confirm", callback_data=f"s_{chat_id}_{msg.message_id}_{buyer_id}_{price}_{category}")
+    keyboard.add(confirm_button)
+
+    message_store[f"{chat_id}_{msg.message_id}"] = {
+        "auction_details": auction_details,
+        "buyer_id": buyer_id,
+        "buyer_username": buyer_username,
+        "price": price
+    }
+    print(message_store[f"{chat_id}_{msg.message_id}"])
+    bot.edit_message_text(confirmation_text, chat_id, msg.message_id, reply_markup=keyboard)
+
+# ---- HANDLE CONFIRMATION CALLBACK ----
+@bot.callback_query_handler(func=lambda call: call.data.startswith("s_"))
+def handle_sell_pokemon(call):
+    global poke_pros,brond
+    if call.from_user.id not in xmods:
+        bot.answer_callback_query(call.id, text="🖕")
+        return
+
+    data = call.data.split("_")
+    chat_id = int(data[1])
+    message_id = int(data[2])
+    buyer_id = data[3]
+    price = data[4]
+    category = data[5]
+    confirmed_messages.add(message_id)
+
+    sale_details = message_store.get(f"{chat_id}_{message_id}")
+    if not sale_details:
+        bot.answer_callback_query(call.id, "❌ Error: Sale details not found.")
+        return
+    
+    if chat_id not in message_stor or "auction_message" not in message_stor[chat_id]:
+        bot.answer_callback_query(call.id, "❌ Error: No auction item found. Use `/next` first.")
+        return
+    
+    poke_pros = False
+
+    forwarded_msg = message_stor[chat_id]["auction_message"]
+
+    # Extract seller details from the forwarded message
+    seller_id, seller_username = extract_seller_details(forwarded_msg)
+    # Extract Pokémon/TM details using the extract_pokemon_details function
+    auction_details = extract_pokemon_details(forwarded_msg)# Ensure category is correctly extracted
+    category = auction_details.get("category", "Unknown Category")
+
+    # Extract item name (Pokémon, TM, or Team)
+    item_name = (
+        auction_details.get("tm_name") or
+        auction_details.get("pokemon_name") or
+        auction_details.get("team_name") or
+        "Unknown Item"
+    )
+
+# 📜 Generate full details dynamically based on category
+    if category == "TMS":
+        move_name = auction_details.get("move_name", "Unknown Move")
+        move_type = auction_details.get("move_type", "Unknown Type")
+        power = auction_details.get("power", "Unknown Power")
+        accuracy = auction_details.get("accuracy", "Unknown Accuracy")
+
+        full_details = (
+            f"<blockquote>📀 TM Name: {item_name}\n"
+            f"🌀 Move: {move_name} [{move_type}]\n"
+            f"💥 Power: {power}|🎯 Accuracy: {accuracy}</blockquote>"
+        )
+
+    elif category in ['Legendary','Non_legendary','Shiny']:
+        level = auction_details.get("level", "Unknown Level")
+        nature = auction_details.get("nature", "Unknown Nature")
+        types = auction_details.get("types", "Unknown Types")
+
+        full_details = (
+            f"<blockquote>🔹 Pokémon Name: {item_name}\n"
+            f" Lv. {level}| Nature: {nature}\n"
+            f" Types: {types}</blockquote>"
+        )
+
+    elif category == "Teams":
+        team_details = auction_details.get("team_pokemon", "No team details available.")
+
+        full_details = (
+            f"<blockquote>⚔️ Team Name: {item_name}\n"
+            f"📋 Team Members:\n {team_details}</blockquote>"
+        )
+
+    else:
+        full_details = f"📦 **Item:** {item_name} (Category: {category})"
+ 
+    if not auction_details:
+        bot.answer_callback_query(call.id, "❌ Error: Could not extract details.")
+        return
+
+    item_name = (
+            auction_details.get("tm_name") or
+            auction_details.get("pokemon_name") or
+            auction_details.get("team_name") or
+            "Unknown Item"
+        )  
+
+    keyboard = InlineKeyboardMarkup()
+    trade_button = InlineKeyboardButton(text="🔗 Trade Group", url='https://t.me/allinonehexa')
+    keyboard.add(trade_button)
+
+    # 🛒 Notify Buyer
+    buyer_notification = (
+        f"🎉 𝘠𝘖𝘜 𝘏𝘈𝘝𝘌 𝘚𝘜𝘊𝘊𝘌𝘚𝘚𝘍𝘜𝘓𝘓𝘠 𝘉𝘖𝘜𝘎𝘏𝘛!\n\n"
+        f"➥ 𝗖𝗔𝗧𝗘𝗚𝗢𝗥𝗬 - {category}\n"
+        f"➥ 𝗦𝗘𝗟𝗟𝗘𝗥 - {seller_username} (ID: <code>{seller_id}</code>)\n"
+        f"➥ 𝗣𝗥𝗜𝗖𝗘 - {price}\n\n"
+        f"✮ 𝙳𝙴𝚃𝙰𝙸𝙻𝚂 :\n{full_details}\n\n"
+        "⚡️𝘑𝘖𝘐𝘕 𝘛𝘏𝘌 𝘛𝘙𝘈𝘋𝘌 𝘎𝘙𝘖𝘜𝘗 𝘍𝘖𝘙 𝘔𝘖𝘙𝘌 𝘋𝘌𝘈𝘓𝘚...!"
+    )
+    bot.send_message(buyer_id, buyer_notification, reply_markup=keyboard, parse_mode='html')
+
+    # 🏷 Notify Seller
+    seller_notification = (
+        f"💰 Your {item_name} has been sold!\n\n"
+        f"🎯 Buyer: {sale_details['buyer_username']} (ID: {buyer_id})\n"
+        f"💰 Final Price: {price}\n\n"
+        f"📜 Details:\n{full_details}\n\n"
+        "✅ Please contact the buyer to finalize the trade."
+    )
+    bot.send_message(seller_id, seller_notification,  reply_markup=keyboard, parse_mode='html')
+
+    # 🏆 Format Sale Message Based on Category
+    category_messages = {
+        "Legendary": f"🔥 A Legendary Pokémon has been sold!\n\n",
+        "Non_legendary": f"⚡ A Pokémon has been sold!\n\n",
+        "Shiny": f"✨ A Shiny Pokémon has been sold!\n\n",
+        "TMS": f"📀 A TM Move has been sold!\n\n",
+        "Teams": f"⚔️ A Team has been sold!\n\n"
+    }
+    category_message = category_messages.get(category, "💎 An item has been sold!\n\n")
+
+    # Final Sale Announcement
+    sell_message = (
+        f"{category_message}"
+        f"🎯 Sold To: {sale_details['buyer_username']} (ID: {buyer_id})\n"
+        f"💰 Sold For: {price}\n\n"
+        f"📜 Details:\n{full_details}\n\n"
+        "📌 Join the trade group to get the seller's username after the auction."
+    )
+    
+    # Edit Message to Show Sale Confirmation
+    bot.edit_message_text(sell_message, call.message.chat.id, call.message.message_id,
+                           disable_web_page_preview=True, reply_markup=keyboard, parse_mode='html')
+
+    bot.pin_chat_message(call.message.chat.id, call.message.message_id)
+
+    # ✅ Store the purchase details
+    store_purchase(buyer_id, sale_details["buyer_username"], seller_id, seller_username, price, full_details)
+
+    # ✅ Log Sale
+    print(f"✅ {item_name} sold to {sale_details['buyer_username']} (ID: {buyer_id}) for {price}.")
+    brond = True
+    next_message(call.message)
+
+buyersthings = []
+
+import json
+
+# File to store auction transaction data
+FILE_NAME = "auctop.json"
+
+# Dictionary to store purchase history {buyer_id: [(seller_username, seller_id, item_name, price), ...]}
+purchase_history = {}
+
+# Dictionary to store sales history {seller_id: [(buyer_username, buyer_id, item_name, price), ...]}
+sales_history = {}
+
+# Function to load data from JSON
+def loa_data():
+    global purchase_history, sales_history
+    try:
+        with open(FILE_NAME, "r") as file:
+            data = json.load(file)
+            purchase_history = data.get("purchase_history", {})
+            sales_history = data.get("sales_history", {})
+    except (FileNotFoundError, json.JSONDecodeError):
+        sav_data()  # Save an empty file if not found or corrupted
+
+# Function to save data to JSON
+def sav_data():
+    with open(FILE_NAME, "w") as file:
+        json.dump({"purchase_history": purchase_history, "sales_history": sales_history}, file, indent=4)
+
+# Load existing data when script starts
+loa_data()
+
+@bot.message_handler(commands=['resetall'])
+def reset_all(message):
+    """Clears all purchase and sales history (Admin-Only)."""
+    if message.from_user.id not in xmods:
+        bot.reply_to(message, "❌ You do not have permission to use this command.")
+        return
+
+    global purchase_history, sales_history  # Ensure we're modifying the global dictionaries
+    purchase_history.clear()
+    sales_history.clear()
+
+    sav_data()
+    bot.reply_to(message, "✅ All purchase and sales history has been **cleared** successfully!", parse_mode='markdown')
+
+def store_purchase(buyer_id, buyer_username, seller_id, seller_username, price, details):
+    """Stores purchase details for a user."""
+    buyer_id = str(buyer_id)
+    seller_id = str(seller_id)
+
+    # Store for buyer
+    if buyer_id not in purchase_history:
+        purchase_history[buyer_id] = []
+    purchase_history[buyer_id].append((seller_username, seller_id, price, details))
+
+    # Store for seller
+    if seller_id not in sales_history:
+        sales_history[seller_id] = []
+    sales_history[seller_id].append((buyer_username, buyer_id, price, details))
+    
+    buyersthings.append((buyer_id, buyer_username, seller_id, seller_username, price, details))
+    sav_data()
+    print(f"✅ Purchase stored: Buyer {buyer_id} from Seller {seller_id} for {price}")
+
+@bot.message_handler(commands=['myaio'])
+def myaio(message):
+    """Shows the user's purchase history."""
+    user_id = message.from_user.id
+
+    if not has_started_bot(user_id):
+        markup=InlineKeyboardMarkup()
+        markup.add(InlineKeyboardButton('start',url='https://t.me/Auct_he_bot?start=start'))
+        bot.reply_to(message, '<blockquote><b>start the bot first.</b></blockquote>', parse_mode='html',reply_markup=markup,disable_web_page_preview=True)
+        return
+    
+    if not is_user_updated(user_id):
+        markup=InlineKeyboardMarkup()
+        markup.add(InlineKeyboardButton('update',url='https://t.me/Auct_he_bot?start=update'))
+        bot.reply_to(message, '<blockquote><b>update the bot first.</b></blockquote>', parse_mode='html',reply_markup=markup,disable_web_page_preview=True)
+        return
+    
+    markup = InlineKeyboardMarkup()
+    markup.add(
+        InlineKeyboardButton("🛒 Bought Items", callback_data=f"myaio_bought_{user_id}"),
+        InlineKeyboardButton("💰 Sold Items", callback_data=f"myaio_sold_{user_id}"),
+    )
+    
+    photo = 'https://i.postimg.cc/ncKSPcZr/AIO-AUCTION.png'
+    bot.send_photo(message.chat.id, photo=photo,caption= "📜 **Select your transaction type:**", parse_mode="Markdown", reply_markup=markup, reply_to_message_id=message.message_id)
+
+
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, InputMediaPhoto
+
+@bot.callback_query_handler(func=lambda call: call.data.startswith("myaio_"))
+def handle_myaio_selection(call):
+    """Handles inline button clicks for Bought & Sold history with pagination and proper image handling."""
+    user_id = int(call.from_user.id)
+    data_parts = call.data.split("_")
+    
+    # Ensure correct data format
+    if len(data_parts) < 3:
+        bot.answer_callback_query(call.id, "❌ Invalid data format.", show_alert=True)
+        return
+
+    action = data_parts[1]
+    original_user_id = int(data_parts[2]) if data_parts[2].isdigit() else None
+    page = int(data_parts[3]) if len(data_parts) > 3 and data_parts[3].isdigit() else 1  # Default to page 1
+
+    # Debugging: Print extracted values
+    print(f"User ID: {user_id}, Extracted Original User ID: {original_user_id}, Data Parts: {data_parts}")
+
+    # Ensure only the user who started `/myaio` can interact
+    if user_id != original_user_id:
+        bot.answer_callback_query(call.id, "❌ You cannot use this button.", show_alert=True)
+        return
+
+    if action == "bought":
+        history_data = purchase_history.get(str(user_id), [])
+        image_url = 'https://files.catbox.moe/xmyod5.jpg'  # Bought Items Image
+        title = "🛒 <b>Your Bought Items:</b>\n\n"
+        switch_section_button = InlineKeyboardButton("💰 Sold Items", callback_data=f"myaio_sold_{original_user_id}_1")
+
+    elif action == "sold":
+        history_data = sales_history.get(str(user_id), [])
+        image_url = 'https://i.postimg.cc/BQTqBjGf/1-a.jpg'  # Sold Items Image
+        title = "💰 <b>Your Sold Items:</b>\n\n"
+        switch_section_button = InlineKeyboardButton("🛒 Bought Items", callback_data=f"myaio_bought_{original_user_id}_1")
+
+    else:
+        bot.answer_callback_query(call.id, "❌ Invalid action.", show_alert=True)
+        return
+
+    # Check if history is empty
+    if not history_data:
+        bot.answer_callback_query(call.id, f"❌ You haven't {action} anything yet.")
+        return
+
+    # Pagination logic
+    items_per_page = 6
+    total_items = len(history_data)
+    total_pages = (total_items + items_per_page - 1) // items_per_page  # Round up
+
+    # Ensure page is within limits
+    page = max(1, min(page, total_pages))
+
+    # Get items for the current page
+    start_index = (page - 1) * items_per_page
+    end_index = start_index + items_per_page
+    history_page = history_data[start_index:end_index]
+
+    # Format history text
+    history_text = f"{title} (Page {page}/{total_pages})\n\n"
+    for i, (username, userid, price, details) in enumerate(history_page, start=start_index + 1):
+        history_text += (
+            f"🔹 {i}. \n"
+            f"   🎯 User: {username} (ID: <code>{userid}</code>)\n"
+            f"   💰 Price: {price}\n\n"
+            f"<blockquote>   🏛 Details:\n{details}\n\n</blockquote>"
+        )
+
+    # Inline keyboard with pagination buttons
+    markup = InlineKeyboardMarkup()
+    if page > 1:
+        markup.add(InlineKeyboardButton("⬅ Previous", callback_data=f"myaio_{action}_{user_id}_{page-1}"))
+    if page < total_pages:
+        markup.add(InlineKeyboardButton("Next ➡", callback_data=f"myaio_{action}_{user_id}_{page+1}"))
+    
+    # Add switch section button
+    markup.add(switch_section_button)
+    
+    sav_data()
+    
+    # Change image when switching sections, otherwise update text only
+    if f"myaio_{action}" in call.data:
+        bot.edit_message_media(
+            media=InputMediaPhoto(image_url, caption=history_text, parse_mode="html"),
+            chat_id=call.message.chat.id,
+            message_id=call.message.message_id,
+            reply_markup=markup
+        )
+    else:
+        bot.edit_message_text(history_text, call.message.chat.id, call.message.message_id, parse_mode="html", reply_markup=markup)
+    
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, InputMediaPhoto
+
+# Sample Images for Buyers & Sellers
+BUYERS_IMAGE = "https://i.imghippo.com/files/Rbl9165tHM.jpg"
+SELLERS_IMAGE = "https://i.postimg.cc/W3n82pQ0/1-a.jpg"
+
+@bot.message_handler(commands=["auctop"])
+def auctop(message):
+    """Handles the /auctop command to show top buyers & sellers."""
+    user_id = message.from_user.id
+    if user_id not in xmods:
+        bot.reply_to(message,"you are not authorized to use this")
+        return
+
+    # Get top buyers and sellers data
+    top_buyers = get_top_buyers()
+    top_sellers = get_top_sellers()
+
+    # Generate buyer list text
+    buyers_text = "🏆 <b>Top 5 Buyers</b> 🛒\n\n"
+    for i, (buyer_id, username, full_name, count) in enumerate(top_buyers, start=1):
+        buyers_text += (
+            f"🔹 <b>{i}. {full_name}</b>\n"
+            f"   🆔 <code>{buyer_id}</code>\n"
+            f"   🏷 @{username if username else f'<a href="tg://user?id={user_id}">{full_name}</a>'}\n"
+            f"   📦 <b>{count}</b> items bought\n\n"
+        )
+
+    # Generate seller list text
+    sellers_text = "🏆 <b>Top 5 Sellers</b> 💰\n\n"
+    for i, (seller_id, username, full_name, count) in enumerate(top_sellers, start=1):
+        sellers_text += (
+            f"🔹 <b>{i}. {full_name}</b>\n"
+            f"   🆔 <code>{seller_id}</code>\n"
+            f"   🏷 @{username if username else f'<a href="tg://user?id={user_id}">{full_name}</a>'}\n"
+            f"   💰 <b>{count}</b> items sold\n\n"
+        )
+
+    # Inline Keyboard
+    markup = InlineKeyboardMarkup()
+    markup.add(InlineKeyboardButton("📜 Top Sellers", callback_data=f"top_sellers_{user_id}"))
+
+    # Send initial message with top buyers
+    bot.send_photo(
+        chat_id=message.chat.id,
+        photo=BUYERS_IMAGE,
+        caption=buyers_text,
+        parse_mode="html",
+        reply_markup=markup,
+        reply_to_message_id=message.message_id
+    )
+
+@bot.callback_query_handler(func=lambda call: call.data.startswith("top_"))
+def handle_top_list(call):
+    """Handles inline button clicks for switching between Top Buyers & Top Sellers."""
+    user_id = int(call.from_user.id)
+    data_parts = call.data.split("_")
+    action = data_parts[1]
+    original_user_id = int(data_parts[2])  # Extract user ID from callback data
+
+    # Ensure only the user who started the command can interact
+    if user_id != original_user_id:
+        bot.answer_callback_query(call.id, "❌ You cannot use this button.", show_alert=True)
+        return
+
+    if action == "buyers":
+        top_buyers = get_top_buyers()
+        text = "🏆 <b>Top 5 Buyers</b> 🛒\n\n"
+        for i, (buyer_id, username, full_name, count) in enumerate(top_buyers, start=1):
+            text += (
+                f"🔹 <b>{i}. {full_name}</b>\n"
+                f"   🆔 <code>{buyer_id}</code>\n"
+                f"   🏷 @{username if username else 'No Username'}\n"
+                f"   📦 <b>{count}</b> items bought\n\n"
+            )
+
+        markup = InlineKeyboardMarkup()
+        markup.add(InlineKeyboardButton("📜 Top Sellers", callback_data=f"top_sellers_{user_id}"))
+
+        bot.edit_message_media(
+            media=InputMediaPhoto(BUYERS_IMAGE, caption=text, parse_mode="HTML"),
+            chat_id=call.message.chat.id,
+            message_id=call.message.message_id,
+            reply_markup=markup
+        )
+
+    elif action == "sellers":
+        top_sellers = get_top_sellers()
+        text = "🏆 <b>Top 5 Sellers</b> 💰\n\n"
+        for i, (seller_id, username, full_name, count) in enumerate(top_sellers, start=1):
+            text += (
+                f"🔹 <b>{i}. {full_name}</b>\n"
+                f"   🆔 <code>{seller_id}</code>\n"
+                f"   🏷 @{username if username else 'No Username'}\n"
+                f"   💰 <b>{count}</b> items sold\n\n"
+            )
+
+        markup = InlineKeyboardMarkup()
+        markup.add(InlineKeyboardButton("🛒 Top Buyers", callback_data=f"top_buyers_{user_id}"))
+
+        bot.edit_message_media(
+            media=InputMediaPhoto(SELLERS_IMAGE, caption=text, parse_mode="HTML"),
+            chat_id=call.message.chat.id,
+            message_id=call.message.message_id,
+            reply_markup=markup
+        )
+
+def get_top_buyers():
+    """Fetches the top 5 buyers from the purchase history."""
+    buyer_counts = {}
+    for buyer_id, purchases in purchase_history.items():
+        buyer_counts[buyer_id] = len(purchases)
+
+    sorted_buyers = sorted(buyer_counts.items(), key=lambda x: x[1], reverse=True)[:5]
+
+    # Retrieve username and full name
+    return [(buyer_id, get_username(buyer_id), get_full_name(buyer_id), count) for buyer_id, count in sorted_buyers]
+
+
+def get_top_sellers():
+    """Fetches the top 5 sellers from the sales history."""
+    seller_counts = {}
+    for seller_id, sales in sales_history.items():
+        seller_counts[seller_id] = len(sales)
+
+    sorted_sellers = sorted(seller_counts.items(), key=lambda x: x[1], reverse=True)[:5]
+
+    # Retrieve username and full name
+    return [(seller_id, get_username(seller_id), get_full_name(seller_id), count) for seller_id, count in sorted_sellers]
+
+
+def get_username(user_id):
+    """Retrieves the username of a user based on their ID."""
+    try:
+        user = bot.get_chat(user_id)
+        return user.username if user.username else "No Username"
+    except:
+        return "Unknown"
+
+
+def get_full_name(user_id):
+    """Retrieves the full name (First & Last) of a user based on their ID."""
+    try:
+        user = bot.get_chat(user_id)
+        return f"{user.first_name} {user.last_name}" if user.last_name else user.first_name
+    except:
+        return "Unknown"
+
+@bot.message_handler(commands=["remo"])
+def remove_item(message):
+    if message.from_user.id not in xmods:
+        bot.reply_to(message, "❌ Only admins can remove items from the auction.")
+        return
+
+    args = message.text.split()
+    if len(args) < 3:
+        bot.reply_to(message, "⚠️ Usage: <code>/remo &lt;category&gt; &lt;index&gt;</code>\n"
+                              "Example: <code>/remo leg 2</code>",
+                     parse_mode="HTML")
+        return
+
+    category = args[1].lower()
+    try:
+        index = int(args[2]) - 1
+    except ValueError:
+        bot.reply_to(message, "⚠️ Invalid index. Please enter a number.")
+        return
+
+    category_map = {
+        "leg": (legpoke_name, crat_id, vari, "legendary"),
+        "nonleg": (nonleg_name, brat_id, bari, "nonleg"),
+        "shiny": (shineiess, chat_id, nari, "shiny"),
+        "tm": (tmen, craft_id, lari, "tmn"),
+        "team": (teams, trat_id, gari, "team")
+    }
+
+    if category not in category_map:
+        bot.reply_to(message, "⚠️ Invalid category! Choose from: <code>leg, nonleg, shiny, tm, team</code>", parse_mode="HTML")
+        return
+
+    name_list, link_list, hyperlink_list, user_category = category_map[category]
+
+    if index < 0 or index >= len(name_list):
+        bot.reply_to(message, "⚠️ Invalid index! No item found at that position.")
+        return
+
+    # Get item data before removal
+    removed_name = name_list.pop(index)
+    removed_link = link_list.pop(index)
+    removed_hyperlink = hyperlink_list.pop(index)
+
+    # Remove from users_nich by matching name + link
+    for user_id, user_data in users_nich.items():
+        if user_category in user_data:
+            items = user_data[user_category]
+            users_nich[user_id][user_category] = [
+                item for item in items
+                if not (item["name"] == removed_name and item["link"] == removed_link)
+            ]
+
+    save_data()
+    save_users_data()
+
+    bot.reply_to(message, f"✅ Successfully removed **{removed_name}** from auction.", parse_mode="Markdown")
+
+    # Try deleting the original message if available
+    try:
+        msg_id = int(removed_link.split("/")[-1])
+        bot.delete_message(log_channel, msg_id)
+    except Exception as e:
+        print(f"Error deleting message: {e}")
+
+# AUTOMATIC AUCTION CODE :-
+        
+@bot.message_handler(commands=['sold'])
+def handle_sold(message):
+    if message.from_user.id in banned_users:
+        bot.reply_to(message, "You Are Banned By an Administrator")
+    else:
+        if message.from_user.id in admin_id:
+            try:
+                # Split command and arguments
+                command, *args = message.text.split(' ', 1)
+                if len(args) != 1:
+                    raise ValueError
+
+                # Extract Pokémon name and nature
+                details = args[0].split(',')
+                if len(details) != 2:
+                    raise ValueError
+
+                pokemon_name = details[0].strip()
+                pokemon_nature = details[1].strip()
+
+                # Extract the username and amount from the replied message
+                username = message.reply_to_message.from_user.username
+                amount = message.reply_to_message.text
+
+                # New formatted message with the provided design
+                reply_message = (
+                    "🔊 𝐏𝐎𝐊𝐄𝐌𝐎𝐍 𝐒𝐎𝐋𝐃 🚀\n\n"
+                    f"<blockquote>𝗣𝗼𝗸𝗲𝗺𝗼𝗻 𝗡𝗮𝗺𝗲  - \n {pokemon_name}\n\n"
+                    f"𝗣𝗼𝗸𝗲𝗺𝗼𝗻 𝗡𝗮𝘁𝘂𝗿𝗲 -\n {pokemon_nature}\n\n"
+                    f"🔸𝗦𝗢𝗟𝗗 𝗧𝗢 - @{username}\n"
+                    f"🔸𝗦𝗢𝗟𝗗 𝗙𝗢𝗥 - {amount}</blockquote>\n\n"
+                    "❗Join <a href='https://t.me/AllinoneHexa'>Trade Group</a> To Get Seller Username After Auction"
+                )
+
+                # Send the formatted reply message
+                sent_message = bot.reply_to(
+                    message, reply_message, parse_mode="HTML", disable_web_page_preview=True
+                )
+                bot.send_sticker(message.chat.id, SOLD_STICKER_ID)
+                bot.pin_chat_message(message.chat.id, sent_message.id)
+
+                # Log the sold Pokémon details
+                sold_items.append((pokemon_name, pokemon_nature, username, amount))
+
+            except ValueError:
+                bot.send_sticker(message.chat.id, DOUBT_STICKER_ID)
+                bot.reply_to(
+                    message,
+                    "ᴘʟᴇᴀsᴇ ᴘʀᴏᴠɪᴅᴇ ᴛʜᴇ ᴄᴏᴍᴍᴀɴᴅ ɪɴ ᴛʜᴇ ғᴏʀᴍᴀᴛ : /sold ( ᴘᴏᴋᴇᴍᴏɴ ɴᴀᴍᴇ, ᴘᴏᴋᴇᴍᴏɴ ɴᴀᴛᴜʀᴇ )",
+                    parse_mode="html",
+                )
+        else:
+            bot.send_sticker(message.chat.id, ANGRY_STICKER_ID)
+            bot.reply_to(
+                message,
+                "𝚈𝚘𝚞 𝚊𝚛𝚎 𝚗𝚘𝚝 𝚊𝚞𝚝𝚑𝚘𝚛𝚒𝚣𝚎𝚍 𝚝𝚘 𝚞𝚜𝚎 𝚝𝚑𝚒𝚜 𝚌𝚘𝚖𝚖𝚊𝚗𝚍.",
+                parse_mode="html",
+            )
+
+# Global list to keep track of unsold Pokémon
+unsold_list = []
+
+@bot.message_handler(commands=['unsold'])
+def handle_unsold(message):
+    if not auce_active:
+        bot.reply_to(message, "<blockquote>𝗔𝘂𝗰𝘁𝗶𝗼𝗻 𝗜𝘀 𝗖𝘂𝗿𝗿𝗲𝗻𝘁𝗹𝘆 𝗢𝗳𝗳.</blockquote>",parse_mode='html')
+        return
+    
+    if str(message.from_user.id) in banned_users:
+        bot.reply_to(message, "You Are Banned By an Administrator")
+        return
+
+    if not is_admin(message.from_user.id):
+        bot.send_sticker(message.chat.id, ANGRY_STICKER_ID)
+        bot.reply_to(message, "<blockquote>𝚈𝚘𝚞 𝚊𝚛𝚎 𝚗𝚘𝚝 𝚊𝚞𝚝𝚑𝚘𝚛𝚒𝚣𝚎𝚍 𝚝𝚘 𝚞𝚜𝚎 𝚝𝚑𝚒𝚜 𝚌𝚘𝚖𝚖𝚊𝚗𝚍.</blockquote>", parse_mode="html")
+        return
+
+    chat_id = message.chat.id
+    if chat_id not in message_store:
+        bot.send_sticker(message.chat.id, DOUBT_STICKER_ID)
+        bot.reply_to(message, "<blockquote>𝙽𝚘 𝚛𝚎𝚌𝚎𝚗𝚝 𝚊𝚞𝚌𝚝𝚒𝚘𝚗 𝚏𝚘𝚞𝚗𝚍 𝚝𝚘 𝚖𝚊𝚛𝚔 𝚊𝚜 𝚞𝚗𝚜𝚘𝚕𝚍.</blockquote>", parse_mode="html")
+        return
+
+    forwarded_msg = message_stor[chat_id]["auction_message"]
+    # Extract auction details
+    auction_details = extract_pokemon_details(forwarded_msg)
+    category = auction_details.get("category", "Unknown Category")
+    item_name = auction_details.get("tm_name") or auction_details.get("pokemon_name") or auction_details.get("team_name") or "Unknown Item"
+    # 📜 Generate full details dynamically based on category
+    if category == "TMS":
+        move_name = auction_details.get("move_name", "Unknown Move")
+        move_type = auction_details.get("move_type", "Unknown Type")
+        power = auction_details.get("power", "Unknown Power")
+        accuracy = auction_details.get("accuracy", "Unknown Accuracy")
+
+        full_details = (
+            f"<blockquote>📀 TM Name: {item_name}\n"
+            f"🌀 Move: {move_name} [{move_type}]\n"
+            f"💥 Power: {power}|🎯 Accuracy: {accuracy}</blockquote>"
+        )
+
+    elif category in ['Legendary','Non_legendary','Shiny']:
+        level = auction_details.get("level", "Unknown Level")
+        nature = auction_details.get("nature", "Unknown Nature")
+        types = auction_details.get("types", "Unknown Types")
+
+        full_details = (
+            f"<blockquote>🔹 Pokémon Name: {item_name}\n"
+            f"⭐ Lv. {level}|🌿 Nature: {nature}\n"
+            f"⚡ Types: {types}</blockquote>"
+        )
+
+    elif category == "Teams":
+        team_details = auction_details.get("team_pokemon", "No team details available.")
+
+        full_details = (
+            f"<blockquote>⚔️ Team Name: {item_name}\n"
+            f"📋 Team Members:\n {team_details}</blockquote>"
+        )
+
+    else:
+        full_details = f"📦 **Item:** {item_name} (Category: {category})"
+ 
+
+    # Extract seller details
+    seller_id, seller_username = extract_seller_details(message_stor[chat_id]["auction_message"])
+
+    # Send the unsold message in the auction chat
+    reply_message = (
+        f"<blockquote>❌ {item_name} Has Been Marked as Unsold</blockquote>\n\n"
+        f"📜 <b>Details:</b>\n{full_details}"
+    )
+    sent_message = bot.reply_to(message, reply_message, parse_mode="html")
+
+    # Send sticker and pin message
+    bot.send_sticker(message.chat.id, SAD_STICKER_ID)
+    bot.pin_chat_message(message.chat.id, sent_message.id)
+
+    keyboard = InlineKeyboardMarkup()
+    trade_button = InlineKeyboardButton(text="🔗 Trade Group", url='https://t.me/allinonehexa')
+    keyboard.add(trade_button)
+    
+    # 🏷 Notify Seller
+    seller_notification = (
+        f"⚠️ <b>Your item was not sold!</b>\n\n"
+        f"📦 <b>Item:</b> {item_name}\n"
+        f"📜 <b>Category:</b> {category}\n"
+        f"💔 <b>It has been marked as unsold.</b>\n\n"
+        f"📋 <b>Details:</b>\n{full_details}\n\n"
+        "✅ You can try auctioning it again!"
+    )
+    bot.send_sticker(seller_id, SAD_STICKER_ID)
+    bot.send_message(seller_id, seller_notification, parse_mode="html", reply_markup=keyboard)
+
+    print(f"🚨 {item_name} was marked as UNSOLD. Seller: {seller_username} (ID: {seller_id})")
+
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, InputMediaPhoto
+
+ADMIN_GROUP_ID = -1002173824142  # Replace with your admin group ID
+user_cache = {}  # Stores user reports temporarily
+
+@bot.message_handler(commands=['help'])
+def help_command(message):
+    
+    user_id = message.from_user.id
+    if not has_started_bot(user_id):
+        markup=InlineKeyboardMarkup()
+        markup.add(InlineKeyboardButton('start',url='https://t.me/Auct_he_bot?start=start'))
+        bot.reply_to(message, '<blockquote><b>start the bot first.</b></blockquote>', parse_mode='html',reply_markup=markup,disable_web_page_preview=True)
+        return
+    
+    if not is_user_updated(user_id):
+        markup=InlineKeyboardMarkup()
+        markup.add(InlineKeyboardButton('update',url='https://t.me/Auct_he_bot?start=update'))
+        bot.reply_to(message, '<blockquote><b>update the bot first.</b></blockquote>', parse_mode='html',reply_markup=markup,disable_web_page_preview=True)
+        return
+    
+    """Handles the /help command and sends inline buttons."""
+    if message.chat.type != "private":  # Ensure it only works in DM
+        markup = InlineKeyboardMarkup()
+        markup.add(InlineKeyboardButton('help',url='https://t.me/Auct_he_bot?start=help'))
+        bot.reply_to(message, "❌ This command only works in my DM.",reply_markup=markup, disable_web_page_preview=True)
+        return
+
+    markup = InlineKeyboardMarkup(row_width=2)
+    markup.add(
+        InlineKeyboardButton("📸 Report an Error", callback_data="help_error"),
+        InlineKeyboardButton("🚫 Request a Ban", callback_data="help_ban"),
+        InlineKeyboardButton("🛑 Report Bad Words", callback_data="help_badwords"),
+        InlineKeyboardButton("❓ Other Issues", callback_data="help_other"),
+        InlineKeyboardButton("💻 Commands", callback_data="help_command")
+    )
+
+    bot.send_message(message.chat.id, "<b>🤖 𝘏𝘰𝘸 𝘊𝘢𝘯 𝘐 𝘏𝘦𝘭𝘱 𝘠𝘰𝘶?</b>\n\n𝘚𝘦𝘭𝘦𝘤𝘵 𝘈𝘯 𝘖𝘱𝘵𝘪𝘰𝘯 𝘉𝘦𝘭𝘰𝘸 :", reply_markup=markup, parse_mode="Markdown")
+
+@bot.callback_query_handler(func=lambda call: call.data == "help_command")
+def handle_help_back(call):
+    text = (
+        "<blockquote><b>Here is the commands that users can use.\n </b>"
+            "<code>/start</code> -  to start the bot\n"
+            "<code>/help</code> - to help in the things of bot or group.\n"
+            "<code>/add</code> - To add any items in our auction.\n"
+            "<code>/profile</code> - To view your status in our auction.\n"
+            "<code>/rules</code> - to check the rules\n"
+            "<code>/apin</code> - to pin hexa bot messages.\n"
+            "<code>/elements</code> -  to check the items in the current auction.\n"
+            "<code>/myaio</code> -  to check what all you bought or sold in our auction.\n"
+            "<code>/natures</code> - To check the natures list\n"
+            "<code>/tm00</code> - To get tms list and particular tm too.</blockquote>"
+            )
+    bot.edit_message_text(
+        chat_id=call.message.chat.id,
+        message_id=call.message.message_id,
+        text=text,
+        parse_mode='html'
+    )
+
+@bot.callback_query_handler(func=lambda call: call.data == "help_error")
+def ask_error_photo(call):
+    bot.edit_message_text(
+        chat_id=call.message.chat.id,
+        message_id=call.message.message_id,
+        text="<b>OK</b>",
+        parse_mode='html'
+    )
+    bot.send_message(call.message.chat.id, "📸 **Send a screenshot of the error.**",parse_mode='markdown')
+    bot.register_next_step_handler(call.message, receive_error_photo)
+
+def receive_error_photo(message):
+    """Receives an error photo and asks for error type."""
+    if not message.photo:
+        bot.send_message(message.chat.id, "❌ Please send a photo of the error.")
+        return
+
+    user_cache[message.chat.id] = {"error_photo": message.photo[-1].file_id}
+
+    markup = InlineKeyboardMarkup()
+    markup.add(
+        InlineKeyboardButton("⚙️ Bot Issue", callback_data="error_bot"),
+        InlineKeyboardButton("🌐 Network Issue", callback_data="error_network"),
+        InlineKeyboardButton("📄 Other", callback_data="error_other")
+    )
+
+    bot.send_message(message.chat.id, "📌 **Select the type of error:**", reply_markup=markup, parse_mode="Markdown")
+
+@bot.callback_query_handler(func=lambda call: call.data.startswith("error_"))
+def forward_error_report(call):
+    """Forwards error details to the admin group."""
+    bot.edit_message_text(
+        chat_id=call.message.chat.id,
+        message_id=call.message.message_id,
+        text="<b>OK</b>",
+        parse_mode='html'
+    )
+    error_type = call.data.split("_")[1]
+    user_id = call.message.chat.id
+    user_info = f"🆔 User ID: `{user_id}`\n👤 Username: @{call.from_user.username or 'No Username'}"
+
+    error_photo = user_cache.get(user_id, {}).get("error_photo")
+
+    caption = f"🚨 Error Reported! 🚨\n\n🔹 Type: {error_type.capitalize()}\n{user_info} \n@benzenez\n@smit_2446\n@Orochimaruu5828"
+
+    bot.send_photo(ADMIN_GROUP_ID, error_photo, caption=caption)
+    bot.send_message(user_id, "✅ **Your error report has been forwarded to the admins!**",parse_mode='markdown')
+
+@bot.callback_query_handler(func=lambda call: call.data == "help_ban")
+def ask_ban_photos(call):
+    bot.edit_message_text(
+        chat_id=call.message.chat.id,
+        message_id=call.message.message_id,
+        text="<b>OK</b>",
+        parse_mode='html'
+    )
+    bot.send_message(call.message.chat.id, "📸 **Send proof (photos/videos) of the scammer.** You can send multiple.",parse_mode='markdown')
+    bot.register_next_step_handler(call.message, receive_ban_photos)
+
+def receive_ban_photos(message):
+    """Receives scam proof and asks for scammer's details."""
+    if not message.photo:
+        bot.send_message(message.chat.id, "❌ Please send at least one photo/video as proof.")
+        return
+
+    user_cache[message.chat.id] = {"ban_photos": [message.photo[-1].file_id]}
+
+    bot.send_message(message.chat.id, "🔹 **Enter the scammer's username and ID (if available).**",parse_mode='markdown')
+    bot.register_next_step_handler(message, forward_ban_request)
+
+def forward_ban_request(message):
+    """Forwards ban request to the admin group."""
+    scammer_info = message.text
+    user_id = message.chat.id
+    user_info = f"🆔 User ID: `{user_id}`\n👤 Username: @{message.from_user.username or 'No Username'}"
+
+    caption = f"🚨 **Ban Request!** 🚨\n\n🔹 **Scammer Info:** {scammer_info}\n{user_info} \n@benzenez\n@smit_2446\n@Orochimaruu5828"
+
+    ban_photos = user_cache.get(user_id, {}).get("ban_photos", [])
+    media = [InputMediaPhoto(photo) for photo in ban_photos]
+
+    if media:
+        bot.send_media_group(ADMIN_GROUP_ID, media)
+
+    bot.send_message(ADMIN_GROUP_ID, caption)
+    bot.send_message(user_id, "✅ **Your ban request has been sent to the admins!**",parse_mode='markdown')
+
+@bot.callback_query_handler(func=lambda call: call.data == "help_badwords")
+def ask_badword_details(call):
+    bot.edit_message_text(
+        chat_id=call.message.chat.id,
+        message_id=call.message.message_id,
+        text="<b>OK</b>",
+        parse_mode='html'
+    )
+    bot.send_message(call.message.chat.id, "🚨 **Who used the bad words?**\nEnter their username and ID.",parse_mode='markdown')
+    bot.register_next_step_handler(call.message, receive_badword_details)
+
+def receive_badword_details(message):
+    user_cache[message.chat.id] = {"badword_user": message.text}
+
+    bot.send_message(message.chat.id, "📌 **Forward the message containing bad words.**",parse_mode='markdown')
+    bot.register_next_step_handler(message, forward_badword_report)
+
+def forward_badword_report(message):
+    """Forwards bad words report to the admin group."""
+    if not message.forward_date:
+        bot.send_message(message.chat.id, "❌ You must forward the message containing bad words.")
+        return
+
+    badword_user = user_cache.get(message.chat.id, {}).get("badword_user", "Unknown")
+    user_info = f"🆔 User ID: `{message.chat.id}`\n👤 Username: @{message.from_user.username or 'No Username'}"
+
+    caption = f"🚨 Bad Words Report! 🚨\n\n🔹 Reported User: {badword_user}\n{user_info} \n@benzenez\n@smit_2446\n@Orochimaruu5828"
+
+    bot.forward_message(ADMIN_GROUP_ID, message.chat.id, message.message_id)
+    bot.send_message(ADMIN_GROUP_ID, caption)
+    bot.send_message(message.chat.id, "✅ **Your report has been sent to the admins!**",parse_mode='markdown')
+
+@bot.callback_query_handler(func=lambda call: call.data == "help_other")
+def ask_other_issue(call):
+    bot.edit_message_text(
+        chat_id=call.message.chat.id,
+        message_id=call.message.message_id,
+        text="<b>OK</b>",
+        parse_mode='html'
+    )
+    bot.send_message(call.message.chat.id, "💬 **Describe your issue briefly.**",parse_mode='markdown')
+    bot.register_next_step_handler(call.message, forward_other_issue)
+
+def forward_other_issue(message):
+    user_info = f"🆔 User ID: `{message.chat.id}`\n👤 Username: @{message.from_user.username or 'No Username'}"
+    issue_text = message.text
+
+    caption = f"🚨 **User Needs Help!** 🚨\n\n🔹 **Issue:** {issue_text}\n{user_info} \n@benzenez\n@smit_2446\n@Orochimaruu5828"
+
+    bot.send_message(ADMIN_GROUP_ID, caption, parse_mode="markdown")
+    bot.send_message(message.chat.id, "✅ **Your request has been forwarded to the admins!**")
+
+
+@bot.message_handler(commands=['list_unsold'])
+def list_unsold(message):
+    if is_admin(message.from_user.id):
+        if unsold_list:
+            # Create a formatted list of unsold Pokémon
+            unsold_message = "\n".join([f"• {pokemon}" for pokemon in unsold_list])
+            reply_message = f"<b>📋 Unsold Pokémon List:</b>\n{unsold_message}"
+        else:
+            # Handle empty list
+            reply_message = "<b>No Pokémon are currently marked as unsold.</b>"
+        bot.reply_to(message, reply_message, parse_mode="html")
+    else:
+        # Handle unauthorized users
+        bot.send_sticker(message.chat.id, ANGRY_STICKER_ID)
+        bot.reply_to(message, "<blockquote>𝚈𝚘𝚞 𝚊𝚛𝚎 𝚗𝚘𝚝 𝚊𝚞𝚝𝚑𝚘𝚛𝚒𝚣𝚎𝚍 𝚝𝚘 𝚞𝚜𝚎 𝚝𝚑𝚒𝚜 𝚌𝚘𝚖𝚖𝚊𝚗𝚍.</blockquote>", parse_mode="html")
+
+
+
+@bot.message_handler(commands=['remove_unsold'])
+def remove_unsold(message):
+    if is_admin(message.from_user.id):
+        try:
+            # Extract Pokémon name from the message
+            pokemon_name = message.text.split(' ', 1)[1].strip()
+
+            # Check if the Pokémon exists in the unsold list
+            if pokemon_name in unsold_list:
+                unsold_list.remove(pokemon_name)  # Remove the Pokémon
+                reply_message = f"<blockquote>✅ {pokemon_name} Has Been Removed From the Unsold List</blockquote>"
+                bot.reply_to(message, reply_message, parse_mode="html")
+            else:
+                # Handle Pokémon not found in the list
+                bot.send_sticker(message.chat.id, DOUBT_STICKER_ID)
+                bot.reply_to(
+                    message,
+                    f"<blockquote>❌ {pokemon_name} Is Not in the Unsold List</blockquote>",
+                    parse_mode="html",
+                )
+        except IndexError:
+            # Handle missing Pokémon name
+            bot.send_sticker(message.chat.id, DOUBT_STICKER_ID)
+            bot.reply_to(
+                message,
+                "<blockquote>𝙿𝚕𝚎𝚊𝚜𝚎 𝚙𝚛𝚘𝚟𝚒𝚍𝚎 𝚝𝚑𝚎 𝚗𝚊𝚖𝚎 𝚘𝚏 𝚝𝚑𝚎 𝙿𝚘𝚔é𝚖𝚘𝚗 𝚝𝚘 𝚛𝚎𝚖𝚘𝚟𝚎 𝚏𝚛𝚘𝚖 𝚝𝚑𝚎 𝚞𝚗𝚜𝚘𝚕𝚍 𝚕𝚒𝚜𝚝.</blockquote>",
+                parse_mode="html",
+            )
+    else:
+        # Handle unauthorized users
+        bot.send_sticker(message.chat.id, ANGRY_STICKER_ID)
+        bot.reply_to(
+            message,
+            "<blockquote>𝚈𝚘𝚞 𝚊𝚛𝚎 𝚗𝚘𝚝 𝚊𝚞𝚝𝚑𝚘𝚛𝚒𝚣𝚎𝚍 𝚝𝚘 𝚞𝚜𝚎 𝚝𝚑𝚒𝚜 𝚌𝚘𝚖𝚖𝚊𝚗𝚍.</blockquote>",
+            parse_mode="html",
+        )
+
+@bot.message_handler(commands=['lock'])
+def lock_all_users(message):
+    chat_id = message.chat.id
+
+    # Check if the sender is an admin
+    if not is_admin(message.from_user.id):
+        bot.reply_to(message, "❌ You must be an admin to use this command.")
+        return
+
+    try:
+        # Restrict all non-admin users
+        bot.set_chat_permissions(
+            chat_id,
+            permissions=types.ChatPermissions(
+                can_send_messages=False,
+                can_send_media_messages=False,
+                can_send_polls=False,
+                can_send_other_messages=False,
+                can_add_web_page_previews=False,
+                can_change_info=False,
+                can_invite_users=False,
+                can_pin_messages=False
+            )
+        )
+
+        bot.reply_to(message, "🔒 **All users have been locked!** They can no longer send messages or media.", parse_mode='markdown')
+
+    except Exception as e:
+        bot.reply_to(message, f"⚠️ Error: {str(e)}")
+        
+@bot.message_handler(commands=['unlock'])
+def lock_all_users(message):
+    chat_id = message.chat.id
+
+    # Check if the sender is an admin
+    if not is_admin(message.from_user.id):
+        bot.reply_to(message, "❌ You must be an admin to use this command.")
+        return
+
+    try:
+        # Restrict all non-admin users
+        bot.set_chat_permissions(
+            chat_id,
+            permissions=types.ChatPermissions(
+                can_send_messages=True,
+                can_send_media_messages=False,
+                can_send_polls=False,
+                can_send_other_messages=False,
+                can_add_web_page_previews=False,
+                can_change_info=False,
+                can_invite_users=False,
+                can_pin_messages=False
+            )
+        )
+        
+        bot.reply_to(message, "🔒 **All users have been unlocked!** They can send messages only", parse_mode='markdown')
+
+    except Exception as e:
+        bot.reply_to(message, f"⚠️ Error: {str(e)}")
+
+@bot.message_handler(commands=['reset_unsold'])
+def reset_unsold(message):
+    if is_admin(message.from_user.id):
+        if unsold_list:
+            # Clear the unsold list
+            unsold_list.clear()
+            reply_message = "<blockquote>✅ The Unsold List Has Been Successfully Reset</blockquote>"
+            bot.reply_to(message, reply_message, parse_mode="html")
+        else:
+            # Handle already empty list
+            bot.send_sticker(message.chat.id, DOUBT_STICKER_ID)
+            bot.reply_to(
+                message,
+                "<blockquote>⚠️ The Unsold List Is Already Empty</blockquote>",
+                parse_mode="html",
+            )
+    else:
+        # Handle unauthorized users
+        bot.send_sticker(message.chat.id, ANGRY_STICKER_ID)
+        bot.reply_to(
+            message,
+            "<blockquote>𝚈𝚘𝚞 𝚊𝚛𝚎 𝚗𝚘𝚝 𝚊𝚞𝚝𝚑𝚘𝚛𝚒𝚣𝚎𝚍 𝚝𝚘 𝚞𝚜𝚎 𝚝𝚑𝚒𝚜 𝚌𝚘𝚖𝚖𝚊𝚗𝚍.</blockquote>",
+            parse_mode="html",
+        )
+
+# Dictionary to keep track of users waiting for input
+waiting_for_pokemon_name = {}
+
+@bot.message_handler(commands=['add_unsold'])
+def add_unsold_command(message):
+    if is_admin(message.from_user.id):
+        # Prompt the user to enter the Pokémon name
+        bot.reply_to(
+            message,
+            "<blockquote>ℹ️ Please enter the Pokémon name to add to the Unsold List:</blockquote>",
+            parse_mode="html",
+        )
+        # Mark the user as waiting for a Pokémon name
+        waiting_for_pokemon_name[message.from_user.id] = True
+    else:
+        # Handle unauthorized users
+        bot.send_sticker(message.chat.id, ANGRY_STICKER_ID)
+        bot.reply_to(
+            message,
+            "<blockquote>𝚈𝚘𝚞 𝚊𝚛𝚎 𝚗𝚘𝚝 𝚊𝚞𝚝𝚑𝚘𝚛𝚒𝚣𝚎𝚍 𝚝𝚘 𝚞𝚜𝚎 𝚝𝚑𝚒𝚜 𝚌𝚘𝚖𝚖𝚊𝚗𝚍.</blockquote>",
+            parse_mode="html",
+        )
+
+@bot.message_handler(func=lambda message: message.from_user.id in waiting_for_pokemon_name)
+def handle_pokemon_name_input(message):
+    # Remove the user from the waiting list
+    del waiting_for_pokemon_name[message.from_user.id]
+
+    pokemon_name = message.text.strip()
+
+    if pokemon_name:
+        # Add the Pokémon to the unsold list
+        unsold_list.append(pokemon_name)
+        reply_message = f"<blockquote>✅ {pokemon_name} Has Been Added to the Unsold List</blockquote>"
+        bot.reply_to(message, reply_message, parse_mode="html")
+    else:
+        # Handle empty input
+        bot.send_sticker(message.chat.id, DOUBT_STICKER_ID)
+        bot.reply_to(
+            message,
+            "<blockquote>❌ Invalid Pokémon name. Please try again with a valid name.</blockquote>",
+            parse_mode="html",
+        )
+
+# Replace this with the username of the bot whose messages should be pinned (without the '@')
+TARGET_BOT_USERNAME = ["hexamonbot" , "auct_he_bot"]  # Replace with the actual bot username (e.g., "MyTargetBot")
+
+# Handle /apin command to show timing buttons for pinning a replied message
+@bot.message_handler(commands=["apin"])
+def handle_apin_command(message):
+    """
+    Displays inline timing buttons for pinning the replied message if it is from the specified bot.
+    """
+    user_id = message.from_user.id
+    
+    if not has_started_bot(user_id):
+        markup=InlineKeyboardMarkup()
+        markup.add(InlineKeyboardButton('start',url='https://t.me/Auct_he_bot?start=start'))
+        bot.reply_to(message, '<blockquote><b>start the bot first.</b></blockquote>', parse_mode='html',reply_markup=markup,disable_web_page_preview=True)
+        return
+    
+    if not is_user_updated(user_id):
+        markup=InlineKeyboardMarkup()
+        markup.add(InlineKeyboardButton('update',url='https://t.me/Auct_he_bot?start=update'))
+        bot.reply_to(message, '<blockquote><b>update the bot first.</b></blockquote>', parse_mode='html',reply_markup=markup,disable_web_page_preview=True)
+        return
+    try:
+        chat_id = message.chat.id
+
+        # Check if the message is a reply
+        if message.reply_to_message:
+            replied_from_user = message.reply_to_message.from_user
+            if replied_from_user:
+                print(f"Replied message is from: {replied_from_user.username}, is_bot: {replied_from_user.is_bot}")  # Debugging log
+
+                # Check if the replied message is from the target bot
+                if (
+                    replied_from_user.is_bot and 
+                    replied_from_user.username and 
+                    replied_from_user.username.lower() in TARGET_BOT_USERNAME
+                ):
+                    reply_message_id = message.reply_to_message.message_id
+                    
+                    markup = InlineKeyboardMarkup(row_width=2)  # 2 buttons per row
+
+                    buttons = []
+                    for minutes in [1, 3, 5, 10, 12, 15, 17, 20]:
+                        buttons.append(InlineKeyboardButton(f"{minutes}m", callback_data=f"pin_{reply_message_id}_{minutes}"))
+
+                    # Add buttons to markup in rows of 2
+                    for i in range(0, len(buttons), 4):
+                        markup.row(*buttons[i:i+4])  # Add two buttons per row
+
+                    bot.send_message(chat_id, "⏱ Select the time for how long the message should be pinned:", reply_markup=markup)
+
+                else:
+                    bot.reply_to(
+                        message,
+                        f"This message is not from the target bot @{TARGET_BOT_USERNAME}."
+                    )
+            else:
+                bot.reply_to(message, "Could not determine the sender of the replied message.")
+        else:
+            bot.reply_to(message, "Please reply to a message to use /apin.")
+
+    except Exception as e:
+        print(f"Error in /apin command: {e}")
+        bot.reply_to(message, "An error occurred while processing your /apin command.")
+
+# Handle button clicks for pinning and setting unpin timers
+@bot.callback_query_handler(func=lambda call: call.data.startswith("pin_"))
+def handle_pin_with_timer(call):
+    """
+    Pins a message after the user selects a timing and sets a timer for unpinning.
+    """
+    try:
+        data = call.data.split("_")  # Extract details from callback data
+        message_id = int(data[1])  # Replied message ID
+        pin_time = int(data[2])  # Selected time in minutes
+        chat_id = call.message.chat.id
+
+        # Pin the message
+        bot.pin_chat_message(chat_id, message_id)
+
+        # Edit the original inline buttons message to confirm the action
+        bot.edit_message_text(
+            f"📌 The message has been pinned for {pin_time} minutes.",
+            chat_id=chat_id,
+            message_id=call.message.message_id
+        )
+
+        # Notify the user with a short confirmation
+        bot.answer_callback_query(call.id, f"📌 Message pinned for {pin_time} minutes.")
+
+        # Start a timer thread for unpinning
+        threading.Thread(target=unpin_message_after_delay, args=(chat_id, message_id, pin_time)).start()
+
+    except Exception as e:
+        print(f"Error in handle_pin_with_timer: {e}")
+        bot.answer_callback_query(call.id, "An error occurred while processing your request.")
+
+def unpin_message_after_delay(chat_id, message_id, delay_minutes):
+    """
+    Waits for the specified time and then unpins the message.
+    """
+    try:
+        time.sleep(delay_minutes * 60)  # Convert minutes to seconds
+        bot.unpin_chat_message(chat_id, message_id)
+        bot.send_message(chat_id, f"🚫 The pinned message has been unpinned after {delay_minutes} minutes.")
+    except Exception as e:
+        print(f"Error in unpin_message_after_delay: {e}")
+
+
+# Assuming sold_items is defined as a global list
+sold_items = []
+
+@bot.message_handler(commands=['buyers'])
+def handle_buyers(message):
+    if str(message.from_user.id) in banned_users:
+        bot.reply_to(message, "You Are Banned By an Administrator")
+    else:
+        if message.from_user.id not in admin_id:
+            bot.reply_to(message, "You are not authorized to use this command.")
+            return
+
+        if not sold_items:
+            bot.reply_to(message, "No items have been sold yet.")
+            return
+
+        buyers_list = "📋 List of Buyers:\n\n"
+        for pokemon_name, pokemon_nature, buyer_username, amount  in sold_items:
+            buyers_list += f"🔹{pokemon_name} ({pokemon_nature}) sold to @{buyer_username} for {amount}\n"
+
+        bot.reply_to(message, buyers_list)
+
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
+
+# ✅ Number of items per page
+ITEMS_PER_PAGE = 6
+
+# ✅ Pagination cache to store the page index per user
+user_page_cache = {}
+
+@bot.message_handler(commands=['details'])
+def handle_buyers(message):
+    user_id = message.from_user.id
+    if str(user_id) in banned_users:
+        bot.reply_to(message, "❌ You are banned by an administrator.")
+        return
+    
+    if user_id not in admin_id:
+        bot.reply_to(message, "❌ You are not authorized to use this command.")
+        return
+    
+    if not buyersthings:
+        bot.reply_to(message, "ℹ️ No items have been sold yet.")
+        return
+
+    # ✅ Initialize user page to 0 if not set
+    user_page_cache[user_id] = 0
+    send_buyer_list(message, page=0)
+
+def send_buyer_list(message, page=0):
+    user_id = message.from_user.id
+    start_index = page * ITEMS_PER_PAGE
+    end_index = start_index + ITEMS_PER_PAGE
+
+    buyers_list = "📋 <b>List of Buyers:</b>\n\n"
+    paged_items = buyersthings[start_index:end_index]
+
+    if not paged_items:
+        buyers_list = "❌ No items found on this page."
+    else:
+        for buyer_id, buyer_username, seller_id, seller_username, price, details in paged_items:
+            buyers_list += (
+                f"🔹 <b>Buyer ID:</b> <code>{buyer_id}</code>\n"
+                f"👤 <b>Username:</b> @{buyer_username}\n"
+                f"🛍️ <b>Seller ID:</b> <code>{seller_id}</code>\n"
+                f"👤 <b>Username:</b> @{seller_username}\n"
+                f"💰 <b>Bought Price:</b> {price}\n"
+                f"📄 <b>Details:</b> {details}\n\n"
+            )
+    
+    # ✅ Create inline keyboard for pagination
+    markup = InlineKeyboardMarkup()
+    buttons = []
+
+    if page > 0:
+        buttons.append(InlineKeyboardButton("⬅️ Back", callback_data=f"buyers_prev_{page-1}"))
+
+    if end_index < len(buyersthings):
+        buttons.append(InlineKeyboardButton("➡️ Next", callback_data=f"buyers_next_{page+1}"))
+
+    markup.row(*buttons)
+
+    # ✅ Send the message with pagination
+    if message.chat.type == "private":
+        bot.send_message(
+            user_id, buyers_list, parse_mode='html', reply_markup=markup, disable_web_page_preview=True
+        )
+    else:
+        bot.reply_to(
+            message, buyers_list, parse_mode='html', reply_markup=markup, disable_web_page_preview=True
+        )
+
+# ✅ Callback handler for pagination
+@bot.callback_query_handler(func=lambda call: call.data.startswith('buyers_'))
+def handle_buyer_pagination(call):
+    user_id = call.from_user.id
+    if user_id not in admin_id:
+        bot.answer_callback_query(call.id, "❌ You are not authorized to navigate this list.")
+        return
+    
+    # ✅ Parse the callback data
+    action, direction, page_str = call.data.split('_')
+    page = int(page_str)
+    
+    # ✅ Update the current page for the user
+    user_page_cache[user_id] = page
+
+    # ✅ Edit the original message with the new page content
+    try:
+        send_buyer_list(call.message, page=page)
+        bot.answer_callback_query(call.id)
+    except Exception as e:
+        print(f"Error handling pagination: {e}")
+
+@bot.message_handler(commands=['reset_buyers'])
+def reset_buyers(message):
+    if str(message.from_user.id) in banned_users:
+        bot.reply_to(message, "You Are Banned By an Administrator")
+    else:
+        if message.from_user.id not in admin_id:
+            bot.reply_to(message, "You are not authorized to use this command.")
+            return
+
+        global sold_items
+        sold_items.clear()  # Clear the buyers list
+        bot.reply_to(message, "The buyers list has been reset.")
+
+# Command to remove a buyer from the list
+@bot.message_handler(commands=['remove_buyer'])
+def remove_buyer(message):
+    if str(message.from_user.id) in banned_users:
+        bot.reply_to(message, "You Are Banned By an Administrator")
+        return
+
+    if message.from_user.id not in admin_id:
+        bot.reply_to(message, "You are not authorized to use this command.")
+        return
+
+    # Check if the command contains a username to remove
+    command_parts = message.text.split()
+    if len(command_parts) < 2:
+        bot.reply_to(message, "Please specify the username of the buyer to remove. Example: /remove_buyer username")
+        return
+
+    buyer_username = command_parts[1]  # Extract the username
+    global sold_items
+    updated_sold_items = [item for item in sold_items if item[2] != buyer_username]  # Remove buyer by username
+
+    if len(sold_items) == len(updated_sold_items):
+        bot.reply_to(message, f"No buyer found with username @{buyer_username}.")
+    else:
+        sold_items = updated_sold_items
+        bot.reply_to(message, f"Buyer @{buyer_username} has been removed from the list.")
+
+
+# Command to add a buyer to the list
+@bot.message_handler(commands=['add_buyer'])
+def add_buyer(message):
+    if str(message.from_user.id) in banned_users:
+        bot.reply_to(message, "You Are Banned By an Administrator")
+        return
+
+    if message.from_user.id not in admin_id:
+        bot.reply_to(message, "You are not authorized to use this command.")
+        return
+
+    # Check if the command contains all required details
+    command_parts = message.text.split(maxsplit=4)
+    if len(command_parts) < 5:
+        bot.reply_to(
+            message,
+            "Please provide all the required details in the format:\n"
+            "/add_buyer Pokémon_Name Pokémon_Nature Buyer_Username Amount\n"
+            "Example: /add_buyer Pikachu Jolly john_doe 500"
+        )
+        return
+
+    # Extract details from the command
+    pokemon_name = command_parts[1]
+    pokemon_nature = command_parts[2]
+    buyer_username = command_parts[3].strip('@')  # Remove "@" if provided
+    amount = command_parts[4]
+
+    # Add the buyer to the list
+    global sold_items
+    sold_items.append((pokemon_name, pokemon_nature, buyer_username, amount))
+    bot.reply_to(
+        message,
+        f"Buyer @{buyer_username} has been added to the list:\n"
+        f"🔹 {pokemon_name} ({pokemon_nature}) sold for {amount}."
+    )
+    
+# Define broadcast lists
+broad_users = []  # List of private chat user IDs
+broad_groups = []  # List of group chat IDs
+
+# Define admin list
+admin_ids_broad = ["1952192480", "1897434080", "6210317431", "5750189157",]  # Replace with actual admin user IDs
+banned_users = []  # List of banned user IDs
+
+from telebot.types import Message
+import html
+
+@bot.message_handler(commands=["abroad"])
+def broadcast(message: Message):
+    if message.from_user.id not in xmods:
+        bot.reply_to(message, "❌ You are not authorized to use this command.")
+        return
+
+    sent_count = 0
+    failed_count = 0
+    recipient_list = []
+
+    def format_user_link(user_id, name):
+        """Properly format and escape user links to avoid errors."""
+        safe_name = html.escape(name)   
+        return f" <a href='tg://user?id={user_id}'>{safe_name}</a>"
+    
+    # If the command is replying to a message, forward it
+    if message.reply_to_message:
+        for user_id, user_data in users.items():
+            try:
+                bot.forward_message(user_id, message.chat.id, message.reply_to_message.message_id)
+                name = user_data.get('name','unknown')
+                sent_count += 1
+                recipient_list.append(f"👤 {format_user_link(user_id,name)} ({user_data.get('username', 'NoUsername')}) - <code>{user_id}</code>")
+            except Exception as e:
+                failed_count += 1
+                print(f"Could not send to {user_id}: {e}")
+
+        bot.reply_to(message, f"✅ Broadcast forwarded to **{sent_count}** users. ({failed_count} failed)",parse_mode='Markdown')
+
+    # If the command is used with text, send that text
+    elif len(message.text.split()) > 1:
+        text = message.text.replace("/abroad ", "")
+        for user_id, user_data in users.items():
+            try:
+                bot.send_message(user_id, f"📢 <b>Broadcast Message:</b>\n\n{text}", parse_mode="html")
+                name = user_data.get('name','unknown')
+                sent_count += 1
+                recipient_list.append(f"👤 {format_user_link(user_id,name)} ({user_data.get('username', 'NoUsername')}) - <code>{user_id}</code>")
+            except Exception as e:
+                failed_count += 1
+                print(f"Could not send to {user_id}: {e}")
+
+        bot.reply_to(message, f"✅ Broadcast sent to <b>{sent_count}</b> users. ({failed_count} failed)",parse_mode='html')
+
+    else:
+        bot.reply_to(message, "❌ Please reply to a message or type a message to send.")
+        return
+
+    # Send recipient list in the group
+    if recipient_list:
+        recipient_text = "📋 <b>Broadcast Recipients:</b>\n\n" + "\n".join(recipient_list)
+        bot.send_message(-1002173824142, recipient_text, parse_mode="HTML")
+
+# Dynamic list management for users and groups
+@bot.message_handler(commands=['add_user', 'remove_user', 'add_group', 'remove_group'])
+def manage_broadcast_list(message):
+    user_id = message.chat.id
+    if str(user_id) in admin_ids_broad:
+        try:
+            command, target_id = message.text.split(maxsplit=1)
+
+            if command == '/add_user':
+                if target_id not in broad_users:
+                    broad_users.append(target_id)
+                    bot.reply_to(message, f"<blockquote>User {target_id} added to the broadcast list.</blockquote>", parse_mode="html")
+                else:
+                    bot.reply_to(message, f"<blockquote>User {target_id} is already in the list.</blockquote>", parse_mode="html")
+
+            elif command == '/remove_user':
+                if target_id in broad_users:
+                    broad_users.remove(target_id)
+                    bot.reply_to(message, f"<blockquote>User {target_id} removed from the broadcast list.</blockquote>", parse_mode="html")
+                else:
+                    bot.reply_to(message, f"<blockquote>User {target_id} is not in the list.</blockquote>", parse_mode="html")
+
+            elif command == '/add_group':
+                if target_id not in broad_groups:
+                    broad_groups.append(target_id)
+                    bot.reply_to(message, f"<blockquote>Group {target_id} added to the broadcast list.</blockquote>", parse_mode="html")
+                else:
+                    bot.reply_to(message, f"<blockquote>Group {target_id} is already in the list.</blockquote>", parse_mode="html")
+
+            elif command == '/remove_group':
+                if target_id in broad_groups:
+                    broad_groups.remove(target_id)
+                    bot.reply_to(message, f"<blockquote>Group {target_id} removed from the broadcast list.</blockquote>", parse_mode="html")
+                else:
+                    bot.reply_to(message, f"<blockquote>Group {target_id} is not in the list.</blockquote>", parse_mode="html")
+
+        except ValueError:
+            bot.reply_to(message, "<blockquote>Please provide a valid target ID.</blockquote>", parse_mode="html")
+    else:
+        bot.reply_to(message, "<blockquote>You are not authorized to manage the broadcast list.</blockquote>", parse_mode="html")
+
+group_id = -1002022693265
+
+@bot.message_handler(commands=['forward'])
+def send_message_prompt(message):
+    if str(message.from_user.id) in banned_users:
+        bot.reply_to(message, "You Are Banned By an Administrator")
+    else:
+        if is_admin(message.from_user.id):
+            bot.reply_to(message, "<blockquote>Type the message to send in the group</blockquote>",parse_mode="html")
+            bot.register_next_step_handler(message, send_message)
+        else:
+            bot.send_sticker(message.chat.id,ANGRY_STICKER_ID)
+            bot.reply_to(message, "<blockquote>𝚈𝚘𝚞 𝚊𝚛𝚎 𝚗𝚘𝚝 𝚊𝚞𝚝𝚑𝚘𝚛𝚒𝚣𝚎𝚍 𝚝𝚘 𝚞𝚜𝚎 𝚝𝚑𝚒𝚜 𝚌𝚘𝚖𝚖𝚊𝚗𝚍.</blockquote>",parse_mode="html")
+
+def send_message(message):
+    if str(message.from_user.id) in banned_users:
+        bot.reply_to(message, "You Are Banned By an Administrator")
+    else:
+        if message.forward_from or message.forward_from_chat:
+            forwarded_message = message
+        else:
+            forwarded_message = message.text
+        try:
+            bot.forward_message(group_id, message.chat.id, message.id)
+            bot.send_message(message.chat.id, "<blockquote>Message sent successfully.</blockquote>",parse_mode="html")
+        except Exception as e:
+            bot.send_message(message.chat.id, f"Failed to send message: {e}")
+
+@bot.message_handler(commands=['users'])
+def handle_users(message):
+    if str(message.from_user.id) in banned_users:
+        bot.reply_to(message, "You Are Banned By an Administrator")
+    else:
+        user_id = message.from_user.id
+        if str(user_id) in str(admin_id):
+            num_users = len(started_users)
+            bot.send_message(message.chat.id, f"Total users : {num_users}")
+        else:
+            bot.send_sticker(message.chat.id,ANGRY_STICKER_ID)
+            bot.send_message(message.chat.id, "<blockquote>𝚈𝚘𝚞 𝚊𝚛𝚎 𝚗𝚘𝚝 𝚊𝚞𝚝𝚑𝚘𝚛𝚒𝚣𝚎𝚍 𝚝𝚘 𝚞𝚜𝚎 𝚝𝚑𝚒𝚜 𝚌𝚘𝚖𝚖𝚊𝚗𝚍.</blockquote>",parse_mode="html")
+
+admin_ids = ['1897434080', '5750189157', '1896198661', '6969086416', '1952192480']  # Updated admin list
+
+
+# Function to get username or user ID for display
+def get_username_or_id(user_id):
+    try:
+        user = bot.get_chat(user_id)
+        if user.username:
+            return f'@{user.username}'
+        else:
+            return f'{user.id}'  # Fallback to user ID if no username
+    except telebot.apihelper.ApiTelegramException:
+        return f'{user_id} (unable to fetch details)'
+
+# Command to validate username format
+def is_valid_username(username):
+    # Regex to ensure valid Telegram username: starts with letter/number, and only letters, numbers, and underscores
+    return re.match(r'^[a-zA-Z0-9_]{5,32}$', username) is not None
+
+# Escape Markdown special characters
+def escape_markdown(text):
+    # List of special characters in Markdown
+    special_characters = ['\\', '*', '_', '{', '}', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '.', '!']
+
+    # Escape special characters
+    for char in special_characters:
+        text = text.replace(char, f'\\{char}')
+
+    return text
+
+# Admin command to promote a user to admin using username or ID
+@bot.message_handler(commands=['admin'])
+def add_admin(message):
+    # Check if the user sending the command is an admin
+    if str(message.from_user.id) not in admin_ids:
+        bot.send_sticker(message.chat.id, ANGRY_STICKER_ID)
+        bot.send_message(
+            message.chat.id,
+            "<blockquote>Only current admins can use this command.</blockquote>",
+            parse_mode="html"
+        )
+        return
+
+    try:
+        # Split the message to get the identifier (username or user_id)
+        args = message.text.split(maxsplit=1)
+        if len(args) != 2:
+            bot.send_message(
+                message.chat.id,
+                "<blockquote>Usage: /admin <@username or user_id></blockquote>",
+                parse_mode="html"
+            )
+            return
+
+        identifier = args[1].strip()  # Capture the username or user ID
+
+        # Handle username or user ID
+        if identifier.startswith('@'):  # If a username is provided
+            username = identifier[1:]  # Remove the '@'
+            if not is_valid_username(username):
+                bot.send_message(message.chat.id, "Invalid username format.")
+                return
+            try:
+                user = bot.get_chat(username)  # Fetch user globally
+                user_id = user.id
+            except telebot.apihelper.ApiTelegramException:
+                bot.send_message(message.chat.id, f"User @{username} not found.")
+                return
+        else:  # If an ID is provided
+            try:
+                user_id = int(identifier)
+            except ValueError:
+                bot.send_message(message.chat.id, "Invalid user ID.")
+                return
+
+        # Add the user to the admin list if not already an admin
+        if str(user_id) not in admin_ids:
+            admin_ids.append(str(user_id))  # Store as string
+            bot.send_message(
+                message.chat.id,
+                f"User {get_username_or_id(user_id)} has been added to the admin list."
+            )
+        else:
+            bot.send_message(
+                message.chat.id,
+                f"User {get_username_or_id(user_id)} is already an admin."
+            )
+
+    except Exception as e:
+        bot.send_message(
+            message.chat.id,
+            f"An error occurred while processing the request: {str(e)}"
+        )
+
+
+# Command to list all admins
+@bot.message_handler(commands=['admins'])
+def handle_admins(message):
+    if str(message.from_user.id) in banned_users:
+        bot.reply_to(message, "You Are Banned By an Administrator")
+        return
+
+    response = "Bot Administrators:\n\n"
+    for admin_id in admin_ids:
+        username = get_username_or_id(admin_id)
+        response += f"• {escape_markdown(username)} ✨\n"  # Escape Markdown characters in usernames
+
+    bot.reply_to(message, response, parse_mode='Markdown')
+
+# Command to handle banned users
+@bot.message_handler(commands=['ban'])
+def ban_user(message):
+    if str(message.from_user.id) not in admin_ids:
+        bot.send_sticker(message.chat.id, ANGRY_STICKER_ID)
+        bot.send_message(
+            message.chat.id,
+            "<blockquote>Only current admins can use this command.</blockquote>",
+            parse_mode="html"
+        )
+        return
+
+    try:
+        # Split the message to get the identifier (username or user_id)
+        args = message.text.split(maxsplit=1)
+        if len(args) != 2:
+            bot.send_message(
+                message.chat.id,
+                "<blockquote>Usage: /ban <@username or user_id></blockquote>",
+                parse_mode="html"
+            )
+            return
+
+        identifier = args[1].strip()  # Capture the username or user ID
+
+        # Handle username or user ID
+        if identifier.startswith('@'):  # If a username is provided
+            username = identifier[1:]  # Remove the '@'
+            if not is_valid_username(username):
+                bot.send_message(message.chat.id, "Invalid username format.")
+                return
+            try:
+                user = bot.get_chat(username)  # Fetch user globally
+                user_id = user.id
+            except telebot.apihelper.ApiTelegramException:
+                bot.send_message(message.chat.id, f"User @{username} not found.")
+                return
+        else:  # If an ID is provided
+            try:
+                user_id = int(identifier)
+            except ValueError:
+                bot.send_message(message.chat.id, "Invalid user ID.")
+                return
+
+        # Add user to banned list
+        if str(user_id) not in banned_users:
+            banned_users.append(str(user_id))
+            bot.send_message(
+                message.chat.id,
+                f"User {get_username_or_id(user_id)} has been banned."
+            )
+        else:
+            bot.send_message(
+                message.chat.id,
+                f"User {get_username_or_id(user_id)} is already banned."
+            )
+
+    except Exception as e:
+        bot.send_message(
+            message.chat.id,
+            f"An error occurred while processing the request: {str(e)}"
+        )
+
+def escape_markdown(text):
+    """
+    Escape special characters for Telegram MarkdownV2.
+    """
+    if not text:
+        return ""
+    escape_chars = r'_*[]()~`>#+-=|{}.!'
+    return re.sub(f'([{re.escape(escape_chars)}])', r'\\\1', str(text))
+
+
+
+
+import telebot
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
+from PIL import Image, ImageDraw, ImageOps
+import requests
+from io import BytesIO
+
+
+
+
+
+
+
