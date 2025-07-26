@@ -561,3 +561,446 @@ def process_nature_pic(message, item_type, pokemon_name):
                     f"━━━━━━━━━━━━━━━━━━━━━━━━━━",
                     parse_mode="HTML"
                 )
+
+bot.register_next_step_handler(message, process_evs_pic, item_type, pokemon_name, message.caption)
+        else:
+            bot.send_message(message.chat.id, "❌ This doesn't seem like a valid nature page.\nPlease forward the Pokémon's nature screenshot.")
+    else:
+        bot.send_message(message.chat.id, "❌ An error occurred.\nPlease restart the process and ensure you forward the correct nature page.")
+
+import re
+
+def is_valid_evs_page(caption):
+    """Checks if the caption contains a valid Pokémon IVs/EVs table."""
+    ivs_evs_pattern = (
+        r"Points\s+IV\s+\|\s+EV\n"
+        r"[-–—]+\n"
+        r"(?:.*?\d+\s+\|\s+\d+\n){6}"  # Matches 6 lines of IVs and EVs
+        r"[-–—]+\n"
+        r"Total\s+\d+\s+\|\s+\d+"
+    )
+    return bool(re.search(ivs_evs_pattern, caption, re.DOTALL))
+
+def process_evs_pic(message, item_type, pokemon_name, nature):
+    """Processes the forwarded EVs picture and validates its content."""
+    
+    if not sub_process:
+        return
+    
+    # ✅ Ensure the message is forwarded
+    if not hasattr(message, "forward_date") or not message.forward_date:
+        bot.send_message(message.chat.id, "❌ Please forward the IVs/EVs page, do not upload a new image.")
+        return
+    
+    if not is_valid_forwarded_message(message):
+        bot.reply_to(message, "❌ This message is not from the required bot.\nREQUIRED BOT :- @hexamonbot")
+        return
+
+    # ✅ Ensure the message contains a photo
+    if not hasattr(message, "photo") or not message.photo:
+        bot.send_message(message.chat.id, "❌ No image detected. Please forward the Pokémon's IVs/EVs screenshot.")
+        return
+
+    # ✅ Ensure the message contains a caption
+    if not message.caption:
+        bot.send_message(message.chat.id, "❌ Caption missing. Please forward the Pokémon's IVs/EVs screenshot with the correct format.")
+        return
+
+    # ✅ Validate the IVs/EVs format
+    if not is_valid_evs_page(message.caption):
+        bot.send_message(message.chat.id, "❌ This doesn't seem like a valid IVs/EVs page.\nPlease forward the correct IVs/EVs screenshot.")
+        return
+
+    # ✅ Ensure it's the SAME image as the nature page
+    if user_cache.get(message.chat.id, {}).get('nature_pic') != message.photo[-1].file_id:
+        bot.send_message(message.chat.id, "❌ This image does not match the nature page. Please forward the correct IVs/EVs page.")
+        return
+
+    # ✅ Store the IVs/EVs image
+    user_cache[message.chat.id]['evs_pic'] = message.photo[-1].file_id
+
+    bot.send_message(
+            message.chat.id,
+            f"══════════════════════════\n"
+            f"🏆 Submission Progress\n"
+            f"══════════════════════════\n\n"
+            f"✮ 𝘗𝘰𝘬𝘦𝘮𝘰𝘯/𝘛𝘮 : <b>{pokemon_name}</b>\n"
+            f"➥ 𝘚𝘵𝘦𝘱 3: 𝘍𝘰𝘳𝘸𝘢𝘳𝘥 𝘛𝘩𝘦 𝘔𝘰𝘷𝘦𝘴𝘦𝘵 𝘗𝘢𝘨𝘦\n\n"
+            f"▬▬▬▬▬▭▭▭▭▭ (40%) 🟡\n"
+            f"━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+            f"<blockquote>🔄 𝘔𝘶𝘴𝘵 𝘉𝘦 𝘛𝘩𝘦 𝘚𝘢𝘮𝘦 𝘐𝘮𝘢𝘨𝘦 𝘈𝘴 𝘛𝘩𝘦 𝘕𝘢𝘵𝘶𝘳𝘦 𝘗𝘢𝘨𝘦.\n⚠️ 𝘖𝘯𝘭𝘺 𝘍𝘰𝘳𝘸𝘢𝘳𝘥𝘦𝘥 𝘔𝘦𝘴𝘴𝘢𝘨𝘦 𝘍𝘳𝘰𝘮 @hexamonbot 𝘈𝘳𝘦 𝘈𝘤𝘤𝘦𝘱𝘵𝘦𝘥.\n</blockquote>"
+            f"━━━━━━━━━━━━━━━━━━━━━━━━━━",
+            parse_mode="HTML"
+        )
+
+
+    bot.register_next_step_handler(message, process_moveset_pic, item_type, pokemon_name, nature, message.caption)
+
+import re
+
+def is_valid_moveset_page(caption):
+    """Checks if the caption contains a valid Pokémon moveset format."""
+    moveset_pattern = r"Power:\s*\d+,\s*Accuracy:\s*\d+\s*\(.+?\)"  # Matches "Power: 55, Accuracy: 100 (Physical)")
+    return bool(re.search(moveset_pattern, caption, re.DOTALL))
+
+def process_moveset_pic(message, item_type, pokemon_name, nature, evs):
+    """Processes the forwarded Moveset picture and validates its content."""
+    
+    if not sub_process:
+        return
+    
+    # ✅ Ensure the message is forwarded
+    if not hasattr(message, "forward_date") or not message.forward_date:
+        bot.send_message(message.chat.id, "❌ Please forward the Moveset page, do not upload a new image.")
+        return
+    
+    if not is_valid_forwarded_message(message):
+        bot.reply_to(message, "❌ This message is not from the required bot.\nREQUIRED BOT :- @hexamonbot")
+        return
+
+    # ✅ Ensure the message contains a photo
+    if not hasattr(message, "photo") or not message.photo:
+        bot.send_message(message.chat.id, "❌ No image detected. Please forward the Pokémon's Moveset screenshot.")
+        return
+
+    # ✅ Ensure the message contains a caption
+    if not message.caption:
+        bot.send_message(message.chat.id, "❌ Caption missing. Please forward the Pokémon's Moveset screenshot with the correct format.")
+        return
+
+    # ✅ Validate the Moveset format
+    if not is_valid_moveset_page(message.caption):
+        bot.send_message(message.chat.id, "❌ This doesn't seem like a valid Moveset page.\nPlease forward the correct Moveset screenshot.")
+        return
+
+    # ✅ Ensure it's the SAME image as the nature page
+    if user_cache.get(message.chat.id, {}).get('nature_pic') != message.photo[-1].file_id:
+        bot.send_message(message.chat.id, "❌ This image does not match the nature page. Please forward the correct Moveset page.")
+        return
+
+    # ✅ Store the Moveset image
+    user_cache[message.chat.id]['moveset_pic'] = message.photo[-1].file_id
+
+    bot.send_message(
+            message.chat.id,
+            f"══════════════════════════\n"
+            f"🏆 Submission Progress\n"
+            f"══════════════════════════\n\n"
+            f"✮ 𝘗𝘰𝘬𝘦𝘮𝘰𝘯/𝘛𝘮 : <b>{pokemon_name}</b>\n"
+            f"➥ 𝘚𝘵𝘦𝘱 4: 𝘐𝘴 𝘈𝘯𝘺 𝘚𝘵𝘢𝘵 𝘉𝘰𝘰𝘴𝘵𝘦𝘥?\n\n"
+            f"▬▬▬▬▬▬▬▭▭▭▭ (60%) 🟢\n"
+            f"━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+            f"<blockquote><b>📢 𝘛𝘺𝘱𝘦 𝘵𝘩𝘦 𝘣𝘰𝘰𝘴𝘵𝘦𝘥 𝘴𝘵𝘢𝘵 𝘰𝘳 𝘳𝘦𝘱𝘭𝘺 '𝘕𝘰'.</b>\n</blockquote>"
+            f"━━━━━━━━━━━━━━━━━━━━━━━━━━",
+            parse_mode="HTML"
+        )
+
+
+    bot.register_next_step_handler(message, process_boosted_stat, item_type, pokemon_name, nature, evs, message.caption)
+
+def process_boosted_stat(message, item_type, pokemon_name, nature, evs, moveset):
+    if not sub_process:
+        return
+    
+    boosted = message.text
+    bot.send_message(
+            message.chat.id,
+            f"══════════════════════════\n"
+            f"🏆 Submission Progress\n"
+            f"══════════════════════════\n\n"
+            f"✮ 𝘗𝘰𝘬𝘦𝘮𝘰𝘯/𝘛𝘮 : <b>{pokemon_name}</b>\n"
+            f"➥ 𝘚𝘵𝘦𝘱 5: 𝘌𝘯𝘵𝘦𝘳 𝘉𝘢𝘴𝘦 𝘗𝘳𝘪𝘤𝘦\n\n"
+            f"▬▬▬▬▬▬▬▬▬▭▭ (80%) 🔵\n"
+            f"━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+            f"<blockquote>💰 𝘛𝘺𝘱𝘦 𝘵𝘩𝘦 𝘣𝘢𝘴𝘦 𝘱𝘳𝘪𝘤𝘦 𝘧𝘰𝘳 𝘵𝘩𝘦 𝘗𝘰𝘬𝘦𝘮𝘰𝘯:\n<b>   ─ Example: <code>1k, 2k, 500pd</code></b>\n</blockquote>"
+            f"━━━━━━━━━━━━━━━━━━━━━━━━━━",
+            parse_mode="HTML"
+        )
+
+
+    bot.register_next_step_handler(message, process_base, item_type, pokemon_name, nature, evs, moveset, boosted)
+
+def process_base(message, item_type, pokemon_name, nature, evs, moveset, boosted):
+    if not sub_process:
+        return
+    
+    base = message.text
+    user_id = message.chat.id
+    fn = message.from_user.full_name
+    un = message.from_user.username if message.from_user.username else f'<a href="tg://user?id={user_id}">{fn}</a>'
+    text = ( f"#{item_type.capitalize()}\n"
+    f"<b>User id</b> - {user_id}\n"
+    f"<b>Username</b> : @{un}\n"
+    f"<b>Pokemon Name:</b> {pokemon_name}\n"
+    f"<b>\nAbout Pokemon:-</b> \n{nature}\n\n"
+    f"<b>Evs and Ivs:</b>-\n<code>{evs}</code>\n\n"
+    f"<b>Moveset:-</b> \n{moveset}\n\n"
+    f"<b>Boosted</b> - {boosted}\n"
+    f"<b>\nBase</b> - {base}" )
+    user_cache[user_id]['text'] = text
+    markup = types.InlineKeyboardMarkup()
+    markup.add(types.InlineKeyboardButton('SUBMIT', callback_data='submit'))
+    markup.add(types.InlineKeyboardButton('Delete', callback_data='delete'))
+    bot.send_photo(user_id, user_cache[user_id]['nature_pic'], caption=text, reply_markup=markup, parse_mode='html')
+
+import re
+
+def is_valid_tm_format(message_text):
+    """Checks if the message follows the correct TM format."""
+    lines = message_text.split("\n")
+    return len(lines) > 1  # Ensure there is at least one line for the TM name and another for details
+
+def process_tm(message, item_type):
+    """Processes forwarded TM messages and validates the format."""
+    
+    if not sub_process:
+        return
+    
+    # ✅ Ensure the message is forwarded
+    if not hasattr(message, "forward_date") or not message.forward_date:
+        bot.send_message(message.chat.id, "❌ Please forward the TM details, do not type manually.")
+        return
+    
+    if not is_valid_forwarded_message(message):
+        bot.reply_to(message, "❌ This message is not from the required bot.\nREQUIRED BOT :- @hexamonbot")
+        return
+
+    # ✅ Ensure the message contains text
+    if not message.text:
+        bot.send_message(message.chat.id, "❌ No text detected. Please forward the TM details correctly.")
+        return
+
+    # ✅ Validate the TM format
+    if not is_valid_tm_format(message.text):
+        bot.send_message(message.chat.id, "❌ This doesn't seem like a valid TM format.\nPlease forward the correct TM details.")
+        return
+
+    # ✅ Extract the TM name (first line of the forwarded message)
+    global pokemon_name
+    lines = message.text.split("\n")
+    pokemon_name = lines[0]  # First line is considered the TM name
+
+    bot.send_message(
+            message.chat.id,
+            f"══════════════════════════\n"
+            f"🏆 TM Submission Progress\n"
+            f"══════════════════════════\n\n"
+            f"<i>✮ <b>TM Name:</b> {pokemon_name}\n"
+            f"➥ <b>Step 2:</b> Enter Base Price\n\n</i>"
+            f"▬▬▬▬▬▭▭▭▭▭ (50%) 🟠\n"
+            f"━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+            f"<blockquote>💰 <i>Enter the base price for the TM:</i>\n<b>   ─ Example: <code>1k, 5k, 10pd</code>\n</b></blockquote>"
+            f"━━━━━━━━━━━━━━━━━━━━━━━━━━",
+            parse_mode="HTML"
+        )
+
+    bot.register_next_step_handler(message, process_tm_base, message.text)
+
+def process_tm_base(message, name):
+    if not sub_process:
+        return
+    
+    base = message.text
+    user_id = message.chat.id
+    fn = message.from_user.full_name
+    username = f"@{message.from_user.username}" if message.from_user.username else f'<a href="tg://user?id={user_id}">{fn}</a>'
+    text = (
+            f"#TMS\n"
+            f"<b>User ID:</b> {user_id}\n"
+            f"<b>Username:</b> {username}\n\n"
+            f"<b>About TM:</b>\n{name}\n\n"
+            f"<b>Base:</b> {base}\n\n"
+        )
+
+    user_cache[user_id] = {'text': text}
+    markup = types.InlineKeyboardMarkup()
+    markup.add(types.InlineKeyboardButton('SUBMIT', callback_data='submi'))
+    markup.add(types.InlineKeyboardButton('Delete', callback_data='delet'))
+    bot.send_message(user_id, text, reply_markup=markup,parse_mode='html')
+
+
+def submit_item(call):
+    bot.delete_message(call.message.chat.id, call.message.message_id)
+    user_id = call.from_user.id
+    text = user_cache[user_id]['text']
+    photo = user_cache[user_id]['nature_pic']
+    bl = (
+        f"\n\n══════════════════════════\n"
+        f"🏆 Submission complete !\n"
+        f"══════════════════════════\n\n"
+        f"✮ 𝘗𝘰𝘬𝘦𝘮𝘰𝘯/𝘛𝘮 : <b>{pokemon_name}</b>\n"
+        f"➥ 𝘈𝘶𝘤𝘵𝘪𝘰𝘯 𝘐𝘴 𝘙𝘦𝘢𝘥𝘺!\n\n"
+        f"▬▬▬▬▬▬▬▬▬▬▬▬ (100%) ✅\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+        f"<blockquote>✅ 𝗬𝗼𝘂𝗿 𝗣𝗼𝗸𝗲𝗺𝗼𝗻 𝗜𝘀 𝗦𝗲𝗻𝘁 𝗙𝗼𝗿 𝗦𝘂𝗯𝗺𝗶𝘀𝘀𝗶𝗼𝗻!\n📢 𝗔𝗳𝘁𝗲𝗿 𝗔𝗰𝗰𝗲𝗽𝘁 𝗢𝗿 𝗥𝗲𝗷𝗲𝗰𝘁 𝗬𝗼𝘂 𝗪𝗶𝗹𝗹 𝗕𝗲 𝗡𝗼𝘁𝗶𝗳𝗶𝗲𝗱\n</blockquote>"
+        f"━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    )
+
+    bot.send_message(call.message.chat.id, text + bl,parse_mode='html', reply_markup=types.InlineKeyboardMarkup().add(types.InlineKeyboardButton('AUCTION GROUP', url=AUCTION_GROUP_LINK)))
+    bot.send_photo(log_channel, photo, caption=text, parse_mode='html', reply_markup=types.InlineKeyboardMarkup().add(
+        types.InlineKeyboardButton('APPROVE', callback_data=f'approve_{user_id}'),
+        types.InlineKeyboardButton('REJECT', callback_data=f'reject_{user_id}')))
+
+
+def submit_tm(call):
+    global pokemon_name
+    bot.delete_message(call.message.chat.id, call.message.message_id)
+    user_id = call.from_user.id
+    text = user_cache[user_id]['text']
+    ls = (
+            f"══════════════════════════\n<b>🏆 Submission complete !</b>\n══════════════════════════\n\n✮ 𝘗𝘰𝘬𝘦𝘮𝘰𝘯/𝘛𝘮 : <b>{pokemon_name}</b>!\n\n▬▬▬▬▬▬▬▬▬▬▬▬ (100%) \n━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            f"<blockquote> <i>✅ 𝗬𝗼𝘂𝗿 𝗧𝗠 𝗜𝘀 𝗦𝗲𝗻𝘁 𝗙𝗼𝗿 𝗦𝘂𝗯𝗺𝗶𝘀𝘀𝗶𝗼𝗻!</i>\n"
+            f"⏳ <b>📢 𝗔𝗳𝘁𝗲𝗿 𝗔𝗰𝗰𝗲𝗽𝘁 𝗢𝗿 𝗥𝗲𝗷𝗲𝗰𝘁 𝗬𝗼𝘂 𝗪𝗶𝗹𝗹 𝗕𝗲 𝗡𝗼𝘁𝗶𝗳𝗶𝗲𝗱</b>\n</blockquote>"
+            f"━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            )
+    bot.send_message(call.message.chat.id, text+ls , parse_mode='html',reply_markup=types.InlineKeyboardMarkup().add(types.InlineKeyboardButton('AUCTION GROUP', url=AUCTION_GROUP_LINK)))
+    bot.send_message(log_channel, text, parse_mode='html', reply_markup=types.InlineKeyboardMarkup().add(types.InlineKeyboardButton('APPROVE', callback_data=f'approve_{user_id}'),                                                                                      
+                                                                                      types.InlineKeyboardButton('REJECT', callback_data=f'reject_{user_id}'),))
+
+import json
+
+DATA_FILE = "data.json"
+
+# Function to load existing data (or initialize empty lists)
+def load_data():
+    try:
+        with open(DATA_FILE, "r") as file:
+            return json.load(file)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {
+            "crat_id": [],
+            "chat_id": [],
+            "brat_id": [],
+            "craft_id": [],
+            "trat_id": [],
+            "legpoke_name": [],
+            "nonleg_name": [],
+            "tmen": [],
+            "shineiess": [],
+            "teams": [],
+            "msg_leg": [],
+            "msg_nonleg": [],
+            "msg_shiny": [],
+            "msg_tm": [],
+            "msg_team": [],
+        }
+
+# Function to save data back to JSON
+def save_data():
+    data = {
+        "crat_id": crat_id,
+        "chat_id": chat_id,
+        "brat_id": brat_id,
+        "craft_id": craft_id,
+        "trat_id": trat_id,
+        "legpoke_name": legpoke_name,
+        "nonleg_name": nonleg_name,
+        "tmen": tmen,
+        "shineiess": shineiess,
+        "teams": teams,
+        "msg_leg": msg_leg,
+        "msg_nonleg": msg_nonleg,
+        "msg_shiny": msg_shiny,
+        "msg_tm": msg_tm,
+        "msg_team": msg_team
+    }
+    with open(DATA_FILE, "w") as file:
+        json.dump(data, file, indent=4)
+
+# Load data into lists
+data = load_data()
+crat_id = data["crat_id"]
+chat_id = data["chat_id"]
+brat_id = data["brat_id"]
+craft_id = data["craft_id"]
+trat_id = data["trat_id"]
+legpoke_name = data["legpoke_name"]
+nonleg_name = data["nonleg_name"]
+tmen = data["tmen"]
+shineiess = data["shineiess"]
+teams = data["teams"]
+msg_leg = data["msg_leg"]
+msg_nonleg = data["msg_nonleg"]
+msg_shiny = data["msg_shiny"]
+msg_tm = data["msg_tm"]
+msg_team = data["msg_team"]
+
+# Save updated lists back to JSON
+save_data()
+
+import json
+import os
+
+# Initialize your global variables
+users_nich = {}
+
+# File path
+USERS_DATA_FILE = "users_ata.json"
+
+def save_users_data():
+    try:
+        data = {
+            "users_nich": users_nich
+        }
+        with open(USERS_DATA_FILE, "w") as f:
+            json.dump(data, f, indent=4)
+        print("✅ User data saved.")
+    except Exception as e:
+        print(f"❌ Error saving users_data: {e}")
+
+def load_users_data():
+    global users_nich
+    if not os.path.exists(USERS_DATA_FILE):
+        users_nich = {}
+        approved_counts = {}
+        print("⚠️ users_ata.json not found. Initialized empty data.")
+        return
+
+    try:
+        with open(USERS_DATA_FILE, "r") as f:
+            data = json.load(f)
+            users_nich = data.get("users_nich", {})
+        print("✅ User data loaded.")
+    except Exception as e:
+        print(f"❌ Error loading users_data: {e}")
+        users_nich = {}
+
+# Load at startup
+load_users_data()
+
+def extract_pokemon_name(message_text):
+    """
+    Extracts the Pokémon name (e.g., 'dred') from the message text.
+    """
+    import re
+
+    # Search for the line starting with 'Pokemon Name:' and capture the name
+    match = re.search(r"Pokemon Name:\s*(\w+)", message_text)
+    if match:
+        return match.group(1)  # Return the captured Pokémon name
+    return None  # Return None if no Pokémon name is found
+
+def extract_team_details(message_text):
+    """
+    Extracts the Pokémon name (e.g., 'dred') from the message text.
+    """
+    import re
+
+    # Search for the line starting with 'Pokemon Name:' and capture the name
+    match = re.search(r"Team name:\s*(\w+)", message_text)
+    if match:
+        return match.group(1)  # Return the captured Pokémon name
+    return None  # Return None if no Pokémon name is found
+
+def extract_tm_details(message_text):
+    """
+    Extracts the TM code (e.g., 'TM13') from the message text.
+    """
+    import re
+    print(message_text)
+    # Use a regular expression to find 'TM' followed by digits
+    match = re.search(r"TM\d+", message_text, re.IGNORECASE)
+    if match:
+        return match.group(0)  # Return just 'TM13'
+    return None  # Return None if no TM code is found
+
