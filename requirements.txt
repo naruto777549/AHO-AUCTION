@@ -1,0 +1,7 @@
+kurigram
+tgcrypto 
+pymongo
+motor
+brain
+humanize
+psutil
