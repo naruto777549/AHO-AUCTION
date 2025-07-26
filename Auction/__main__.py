@@ -191,3 +191,373 @@ reject_channel = -1002611946558  # Replace with your reject channel ID
 pokemon_name = ""
 items = []
 msg = []
+
+@bot.message_handler(commands=['add'])
+def sell(message):
+    user_id = message.from_user.id
+    first_name = message.from_user.first_name
+    username = message.from_user.username
+    
+    if not has_started_bot(user_id):
+        markup=InlineKeyboardMarkup()
+        markup.add(InlineKeyboardButton('start',url='https://t.me/aho_auction_bot?start=start'))
+        bot.reply_to(message, '<blockquote><b>start the bot first.</b></blockquote>', parse_mode='html',reply_markup=markup,disable_web_page_preview=True)
+        return
+    
+    if not is_user_updated(user_id):
+        markup=InlineKeyboardMarkup()
+        markup.add(InlineKeyboardButton('update',url='https://t.me/aho_auction_bot?start=update'))
+        bot.reply_to(message, '<blockquote><b>update the bot first.</b></blockquote>', parse_mode='html',reply_markup=markup,disable_web_page_preview=True)
+        return
+
+    if message.chat.type != 'private':
+        markup=InlineKeyboardMarkup()
+        markup.add(InlineKeyboardButton('ADD',url='https://t.me/Aho_auction_bot?start=add'))
+        bot.reply_to(message, '<blockquote><b>Use this command in my dm.</b></blockquote>', parse_mode='html',reply_markup=markup,disable_web_page_preview=True)
+        return
+    
+    if user_id in dxgays:
+        bot.send_message(user_id, f"Ho Ho Ho\n\nIf you want to sell something in auction how about you sell your mom to xmods. "
+                                 f"Although your moms are already free WHORE whose price is free for a year to use by anyone and they have such loose pussy.\n\n"
+                                 f"{first_name} mom has got best whore award, {first_name} is trying to find about his real dad, when {first_name} fills any form in father section he writes xmods and 3.97 billion others.")
+    else:
+        markup = types.InlineKeyboardMarkup()
+        markup.add(types.InlineKeyboardButton('Yes', callback_data='yes'))
+        markup.add(types.InlineKeyboardButton('No', callback_data='No'))
+        if username:
+            bot.send_sticker(message.chat.id,THINK_STICKER_ID)
+            bot.send_message(user_id, f"𝘏𝘦𝘭𝘭𝘰 @{username}!\n\n<blockquote>𝘞𝘰𝘶𝘭𝘥 𝘠𝘰𝘶 𝘓𝘪𝘬𝘦 𝘛𝘰 𝘚𝘦𝘭𝘭 𝘚𝘰𝘮𝘦𝘵𝘩𝘪𝘯𝘨 𝘐𝘯 𝘈𝘶𝘤𝘵𝘪𝘰𝘯?</blockquote>",parse_mode="html", reply_markup=markup)
+        else:
+            bot.send_sticker(message.chat.id,THINK_STICKER_ID)
+            bot.send_message(user_id, "<blockquote>𝘏𝘦𝘭𝘭𝘰!\n\n𝘞𝘰𝘶𝘭𝘥 𝘠𝘰𝘶 𝘓𝘪𝘬𝘦 𝘛𝘰 𝘚𝘦𝘭𝘭 𝘚𝘰𝘮𝘦𝘵𝘩𝘪𝘯𝘨 𝘐𝘯 𝘈𝘶𝘤𝘵𝘪𝘰𝘯?</blockquote>",parse_mode="html", reply_markup=markup)
+
+@bot.callback_query_handler(func=lambda call: call.data in ['team','deletet','submitt','yes', 'No','tea', 'legendary', 'ol', 'shiny', 'tms', 'submit', 'delete', 'submi', 'delet', 'approve', 'reject', 'rejtrash', 'rejinco', 'highbase', 'scammer','lls','pls','shini','tme','back'])
+def callback_handler(call):
+    global sub_process
+    if call.data.startswith("s_"):
+        handle_sell_pokemon(call)
+        return
+    user_id = call.from_user.id
+    if call.data == 'yes':
+        markup = types.InlineKeyboardMarkup()
+        markup.add(types.InlineKeyboardButton('𝟲𝗹⚡️', callback_data='legendary'))
+        markup.add(types.InlineKeyboardButton('𝟬𝗹 🌪', callback_data='ol'))
+        markup.add(types.InlineKeyboardButton('𝗦𝗵𝗶𝗻𝘆 ✨', callback_data='shiny'))
+        markup.add(types.InlineKeyboardButton('𝗧𝗺𝘀 💿', callback_data='tms'))
+        markup.add(types.InlineKeyboardButton('𝗧𝗲𝗮𝗺𝘀 🎯', callback_data='tea'))
+        bot.edit_message_text('𝘚𝘰 𝘞𝘩𝘢𝘵 𝘞𝘰𝘶𝘭𝘥 𝘠𝘰𝘶 𝘓𝘪𝘬𝘦 𝘛𝘰 𝘚𝘦𝘭𝘭?', call.message.chat.id, call.message.message_id, reply_markup=markup)
+    elif call.data == 'No':
+        bot.edit_message_text('𝙾𝙺! 𝙷𝙰𝚅𝙴 𝙰 𝙶𝚁𝙴𝙰𝚃 𝙳𝙰𝚈 ✨', call.message.chat.id, call.message.message_id)
+    elif call.data == 'legendary':
+        if len(legpoke_name) > 19:
+            sub_process = True
+            bot.edit_message_text('ʟɪᴍɪᴛ ʀᴇᴀᴄʜᴇᴅ ɪɴ ᴛʜɪs ᴄᴀᴛᴇɢᴏʀʏ\n --ʏᴏᴜ ᴄᴀɴ ᴀᴅᴅ ʏᴏᴜʀ ɪᴛᴇᴍs ɪɴ ɴᴇxᴛ ᴀᴜᴄᴛɪᴏɴ.....', call.message.chat.id, call.message.message_id)
+        else:    
+            handle_legendary(call)
+            sub_process = True
+    elif call.data == 'ol':
+        if len(nonleg_name) > 49:
+            sub_process = True
+            bot.edit_message_text('ʟɪᴍɪᴛ ʀᴇᴀᴄʜᴇᴅ ɪɴ ᴛʜɪs ᴄᴀᴛᴇɢᴏʀʏ\n --ʏᴏᴜ ᴄᴀɴ ᴀᴅᴅ ʏᴏᴜʀ ɪᴛᴇᴍs ɪɴ ɴᴇxᴛ ᴀᴜᴄᴛɪᴏɴ.....', call.message.chat.id, call.message.message_id)
+        else:
+            handle_non_legendary(call)
+            sub_process = True
+    elif call.data == 'shiny':
+        if len(shineiess) > 9:
+            sub_process = True
+            bot.edit_message_text('ʟɪᴍɪᴛ ʀᴇᴀᴄʜᴇᴅ ɪɴ ᴛʜɪs ᴄᴀᴛᴇɢᴏʀʏ\n --ʏᴏᴜ ᴄᴀɴ ᴀᴅᴅ ʏᴏᴜʀ ɪᴛᴇᴍs ɪɴ ɴᴇxᴛ ᴀᴜᴄᴛɪᴏɴ.....', call.message.chat.id, call.message.message_id)
+        else:
+            handle_shiny(call)
+            sub_process = True
+    elif call.data == 'tms':
+        if len(tmen) > 14:
+            sub_process = True
+            bot.edit_message_text('ʟɪᴍɪᴛ ʀᴇᴀᴄʜᴇᴅ ɪɴ ᴛʜɪs ᴄᴀᴛᴇɢᴏʀʏ\n --ʏᴏᴜ ᴄᴀɴ ᴀᴅᴅ ʏᴏᴜʀ ɪᴛᴇᴍs ɪɴ ɴᴇxᴛ ᴀᴜᴄᴛɪᴏɴ.....', call.message.chat.id, call.message.message_id)
+        else:
+            handle_tms(call)
+            sub_process = True
+    elif call.data == 'tea':
+        if len(teams) > 4:
+            sub_process = True
+            bot.edit_message_text('ʟɪᴍɪᴛ ʀᴇᴀᴄʜᴇᴅ ɪɴ ᴛʜɪs ᴄᴀᴛᴇɢᴏʀʏ\n --ʏᴏᴜ ᴄᴀɴ ᴀᴅᴅ ʏᴏᴜʀ ɪᴛᴇᴍs ɪɴ ɴᴇxᴛ ᴀᴜᴄᴛɪᴏɴ.....', call.message.chat.id, call.message.message_id)
+        else:
+            handle_teams(call)
+            sub_process = True
+    elif call.data == 'submit':
+        submit_item(call)
+    elif call.data == 'delete':
+        bot.edit_message_text("RESPONSE DELETED", call.message.chat.id, call.message.message_id)
+    elif call.data == 'submitt':
+        submit_teams(call)
+    elif call.data == 'deletet':
+        bot.edit_message_text("RESPONSE DELETED", call.message.chat.id, call.message.message_id)
+    elif call.data == 'back':
+        bot.edit_message_caption("𝙾𝙺! 𝙷𝙰𝚅𝙴 𝙰 𝙶𝚁𝙴𝙰𝚃 𝙳𝙰𝚈 ✨", call.message.chat.id, call.message.message_id)
+    elif call.data == 'lls':
+        legendary_ele(call)
+    elif call.data == 'pls':
+        nonleg_ele(call)
+    elif call.data == 'shini':
+        shiny_ele(call)
+    elif call.data == 'tme':
+        tm_ele(call)
+    elif call.data == 'submi':
+        submit_tm(call)
+    elif call.data == 'delet':
+        bot.edit_message_text("RESPONSE DELETED", call.message.chat.id, call.message.message_id)
+    elif call.data in ['approve', 'reject', 'rejtrash', 'rejinco', 'highbase', 'scammer']:
+        handle_admin_actions(call)
+    elif call.data == 'team':
+        team_ele(call)
+
+def handle_legendary(call):
+    bot.edit_message_text(f"━━━━━━━━━━━━━━━━━━━━━━━━━━\n✨ OK! ✨\n📜 Send Legendary Pokémon Details 🏆\n━━━━━━━━━━━━━━━━━━━━━━━━━━",call.message.chat.id, call.message.message_id)
+    bot.send_message(call.from_user.id, 
+                        f"━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+                        f"🎮 𝙿𝚘𝚔𝚎𝚖𝚘𝚗 Submission 𝚂𝚝𝚊𝚛𝚝𝚎𝚍!\n"
+                        f"━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+                        f"🖊️ 𝙴𝚗𝚝𝚎𝚛 𝚝𝚑𝚎 𝙿𝚘𝚔𝚎𝚖𝚘𝚗 𝙽𝚊𝚖𝚎 ⬇️\n\n"
+                        f"✅ 𝙼𝚊𝚔𝚎 𝚜𝚞𝚛𝚎 𝚒𝚝’𝚜 𝚝𝚑𝚎 𝚌𝚘𝚛𝚛𝚎𝚌𝚝 𝚗𝚊𝚖𝚎!\n"
+                        f"━━━━━━━━━━━━━━━━━━━━━━━━━━"
+                        )
+    bot.register_next_step_handler_by_chat_id(call.from_user.id, process_pokemon_name, 'legendary')
+
+def handle_non_legendary(call):
+    bot.edit_message_text(f"━━━━━━━━━━━━━━━━━━━━━━━━━━\n✨ OK! ✨\n📜 Send Non-Legendary Pokémon Details 🏆\n━━━━━━━━━━━━━━━━━━━━━━━━━━",call.message.chat.id, call.message.message_id)
+    bot.send_message(call.from_user.id, 
+                        f"━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+                        f"🎮 𝙿𝚘𝚔𝚎𝚖𝚘𝚗 Submission 𝚂𝚝𝚊𝚛𝚝𝚎𝚍!\n"
+                        f"━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+                        f"🖊️ 𝙴𝚗𝚝𝚎𝚛 𝚝𝚑𝚎 𝙿𝚘𝚔𝚎𝚖𝚘𝚗 𝙽𝚊𝚖𝚎 ⬇️\n\n"
+                        f"✅ 𝙼𝚊𝚔𝚎 𝚜𝚞𝚛𝚎 𝚒𝚝’𝚜 𝚝𝚑𝚎 𝚌𝚘𝚛𝚛𝚎𝚌𝚝 𝚗𝚊𝚖𝚎!\n"
+                        f"━━━━━━━━━━━━━━━━━━━━━━━━━━"
+                        )
+    bot.register_next_step_handler_by_chat_id(call.from_user.id, process_pokemon_name, 'non_legendary')
+
+def handle_shiny(call):
+    bot.edit_message_text(f"━━━━━━━━━━━━━━━━━━━━━━━━━━\n✨ OK! ✨\n?? Send Shiny Pokémon Details 🏆\n━━━━━━━━━━━━━━━━━━━━━━━━━━",call.message.chat.id, call.message.message_id)
+    bot.send_message(call.from_user.id, 
+                        f"━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+                        f"🎮 𝙿𝚘𝚔𝚎𝚖𝚘𝚗 Submission 𝚂𝚝𝚊𝚛𝚝𝚎𝚍!\n"
+                        f"━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+                        f"🖊️ 𝙴𝚗𝚝𝚎𝚛 𝚝𝚑𝚎 𝙿𝚘𝚔𝚎𝚖𝚘𝚗 𝙽𝚊𝚖𝚎 ⬇️\n\n"
+                        f"✅ 𝙼𝚊𝚔𝚎 𝚜𝚞𝚛𝚎 𝚒𝚝’𝚜 𝚝𝚑𝚎 𝚌𝚘𝚛𝚛𝚎𝚌𝚝 𝚗𝚊𝚖𝚎!\n"
+                        f"━━━━━━━━━━━━━━━━━━━━━━━━━━"
+                        )
+    bot.register_next_step_handler_by_chat_id(call.from_user.id, process_pokemon_name, 'shiny')
+
+def handle_tms(call):
+    bot.edit_message_text(f"━━━━━━━━━━━━━━━━━━━━━━━━━━\n✨ OK! ✨\n📜 Send TM Details 🏆\n━━━━━━━━━━━━━━━━━━━━━━━━━━",call.message.chat.id, call.message.message_id)
+    bot.send_message(
+        call.message.chat.id,
+            f"══════════════════════════\n"
+            f"🏆 TM Submission Started!\n"
+            f"══════════════════════════\n\n"
+            f"<i>✮ <b>TM Name</b> \n"
+            f"➥ <b>Step 1:</b> Forward the TM Details Page\n\n</i>"
+            f"▭▭▭▭▭▭▭▭▭▭ (0%) 🔴\n"
+            f"━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+            f"<blockquote><i>⚠️ Only <b>Forwarded Messages</b> from @hexamonbot are accepted.\n</i></blockquote>"
+            f"━━━━━━━━━━━━━━━━━━━━━━━━━━",
+            parse_mode="html"
+        )
+
+    bot.register_next_step_handler_by_chat_id(call.from_user.id, process_tm, 'tm')
+    
+def handle_teams(call):
+    bot.edit_message_text(f"━━━━━━━━━━━━━━━━━━━━━━━━━━\n✨ OK! ✨\n📜 Send Training Team Details 🏆\n━━━━━━━━━━━━━━━━━━━━━━━━━━",call.message.chat.id, call.message.message_id)
+    bot.send_message(call.from_user.id, 
+                        f"━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+                        f"🎮 𝚃𝚎𝚊𝚖 𝚂𝚞𝚋𝚖𝚒𝚜𝚜𝚒𝚘𝚗 𝚂𝚝𝚊𝚛𝚝𝚎𝚍!\n"
+                        f"━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+                        f"🖊️ 𝙴𝚗𝚝𝚎𝚛 𝚝𝚑𝚎 Training team 𝙽𝚊𝚖𝚎 ⬇️\n\n"
+                        f"⚡️ <b>𝙴𝚡𝚊𝚖𝚙𝚕𝚎: Spa , Speed , Etc </b>\n\n"
+                        f"✅ 𝙼𝚊𝚔𝚎 𝚜𝚞𝚛𝚎 𝚒𝚝’𝚜 𝚝𝚑𝚎 𝚌𝚘𝚛𝚛𝚎𝚌𝚝 𝚗𝚊𝚖𝚎!\n"
+                        f"━━━━━━━━━━━━━━━━━━━━━━━━━━",
+                        parse_mode='html'
+                        )
+    bot.register_next_step_handler_by_chat_id(call.from_user.id, process_team)
+    
+def process_team(message):
+    if not sub_process:
+        return
+    
+    global pokemon_name
+    pokemon_name = message.text
+    bot.send_message(message.chat.id,
+                    f"══════════════════════════\n"
+                    f"🏆 Submission Process Started!\n"
+                    f"══════════════════════════\n\n"
+                    f"✮ Team : <b>{pokemon_name}</b>\n"
+                    f"➥ 𝘚𝘵𝘦𝘱 1: 𝘍𝘰𝘳𝘸𝘢𝘳𝘥 𝘛eam 𝘗𝘢𝘨𝘦\n\n"
+                    f"▭▭▭▭▭▭▭▭▭▭ (0%) 🔴\n"
+                    f"━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+                    f"<blockquote>⚠️ 𝘖𝘯𝘭𝘺 𝘍𝘰𝘳𝘸𝘢𝘳𝘥𝘦𝘥 𝘔𝘦𝘴𝘴𝘢𝘨𝘦 𝘍𝘳𝘰𝘮 @hexamonbot 𝘈𝘳𝘦 𝘈𝘤𝘤𝘦𝘱𝘵𝘦𝘥\n<i><b>  -- only with level are accepted</b></i></blockquote>\n"
+                    f"━━━━━━━━━━━━━━━━━━━━━━━━━━",
+                    parse_mode="HTML"
+            )
+    bot.register_next_step_handler(message, process_team_page, pokemon_name)
+    
+import re
+
+def is_valid_team_format(message):
+    """
+    Checks if the given message follows one of these formats:
+    1. '<Number>. <Pokémon Name> - Lv. <Level>'
+    2. '<Pokémon Name> - Lv. <Level>'
+    """
+
+    message_text = message.text.strip()
+    lines = message_text.split("\n")
+
+    # Regex patterns for both formats
+    numbered_format = re.compile(r"^\d+\.\s.+\s-\sLv\.\s\d+$")  # '1. A ablast - Lv. 36'
+    non_numbered_format = re.compile(r"^.+\s-\sLv\.\s\d+$")  # 'A ablast - Lv. 36'
+
+    # Check if any line matches either format
+    valid_lines = [line for line in lines if numbered_format.match(line) or non_numbered_format.match(line)]
+
+    return len(valid_lines) > 0  # Return True if at least one valid line exists 
+
+def process_team_page(message, name):
+    if not sub_process:
+        return
+    
+    if not is_valid_forwarded_message(message):
+        bot.reply_to(message,"It is not sent from @hexamonbot Please start the process again")
+        return 
+    
+    if not message.forward_date:  # ✅ Check if the message is forwarded
+        bot.send_message(message.chat.id, "❌ Please forward the Team page, not upload a new one.")
+        return
+    
+    if not is_valid_team_format(message):
+        bot.reply_to(message, "Format is wrong send in correct format with its level")
+        return
+    
+    bot.send_message(
+            message.chat.id,
+            f"══════════════════════════\n"
+            f"🏆 🏆 Team Submission Progress\n"
+            f"══════════════════════════\n\n"
+            f"✮ <b>TM Name:</b> {pokemon_name}\n"
+            f"➥ <b>Step 2:</b> Enter Base Price\n\n"
+            f"▬▬▬▬▬▭▭▭▭▭ (50%) 🟠\n"
+            f"━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+            f"<blockquote> <b>💰𝘛𝘺𝘱𝘦 𝘛𝘩𝘦 𝘉𝘢𝘴𝘦 𝘗𝘳𝘪𝘤𝘦 𝘍𝘰𝘳 𝘛𝘩𝘦 𝘛𝘦𝘢𝘮𝘴 :\n  ─ Example: <code>1k, 5k, 10pd</code></b>\n</blockquote>"
+            f"━━━━━━━━━━━━━━━━━━━━━━━━━━",
+            parse_mode="HTML"
+        )
+    
+    tname = name
+    bot.register_next_step_handler(message, process_team_base, message.text, tname)
+    
+def process_team_base(message, team, name):
+    if not sub_process:
+        return
+    
+    base = message.text
+    user_id = message.chat.id
+    fn = message.from_user.full_name
+    username = f"@{message.from_user.username}" if message.from_user.username else f'<a href="tg://user?id={user_id}">{fn}</a>'
+    text = (
+            f"#Teams\n"
+            f"<b>User ID:</b> {user_id}\n"
+            f"<b>Username:</b> {username}\n"
+            f"<b>Base:</b> {base}\n"
+            f"<b>Team name:</b> {name}\n\n"
+            f"<b>About Team:\n</b>{team}\n\n"
+        )
+
+    user_cache[user_id] = {'text': text}
+    markup = types.InlineKeyboardMarkup()
+    markup.add(types.InlineKeyboardButton('SUBMIT', callback_data='submitt'))
+    markup.add(types.InlineKeyboardButton('Delete', callback_data='deletet'))
+    bot.send_message(user_id, text, reply_markup=markup,parse_mode='markdown')
+    
+def submit_teams(call):
+    global pokemon_name
+    bot.delete_message(call.message.chat.id, call.message.message_id)
+    user_id = call.from_user.id
+    text = user_cache[user_id]['text']
+    ls = (
+            f"<b>📜 Step 3: Team Submission</b>\n\n"
+            f"▬▬▬▬▬▬▬▬▬▬▬▬ (100% Complete) ✅\n"
+            f"<blockquote>✅ _Your TEAM has been successfully submitted for auction!_\n"
+            f"⏳ <b>Approval Time:</b> Usually takes 3-4 hours.\n</blockquote>"
+            f"━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            )
+    bot.send_message(call.message.chat.id, text+ls , parse_mode='html',reply_markup=types.InlineKeyboardMarkup().add(types.InlineKeyboardButton('AUCTION GROUP', url=AUCTION_GROUP_LINK)))
+    bot.send_message(log_channel, text, parse_mode='html', reply_markup=types.InlineKeyboardMarkup().add(types.InlineKeyboardButton('APPROVE', callback_data=f'approve_{user_id}'),                                                                                
+                                                                                      types.InlineKeyboardButton('REJECT', callback_data=f'reject_{user_id}')))
+    
+def process_pokemon_name(message, item_type):
+    if not sub_process:
+        return
+    
+    global pokemon_name
+    pokemon_name = message.text
+    bot.send_message(
+            message.chat.id,
+            f"══════════════════════════\n"
+            f"🏆 Submission Process Started!\n"
+            f"══════════════════════════\n\n"
+            f"✮ 𝘗𝘰𝘬𝘦𝘮𝘰𝘯/𝘛𝘮 : <b>{pokemon_name}</b>\n"
+            f"➥ 𝘚𝘵𝘦𝘱 1: 𝘍𝘰𝘳𝘸𝘢𝘳𝘥 𝘛𝘩𝘦 𝘕𝘢𝘵𝘶𝘳𝘦 𝘗𝘢𝘨𝘦\n\n"
+            f"▭▭▭▭▭▭▭▭▭▭ (0%) 🔴\n"
+            f"━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+            f"<blockquote>⚠️ 𝘖𝘯𝘭𝘺 𝘍𝘰𝘳𝘸𝘢𝘳𝘥𝘦𝘥 𝘔𝘦𝘴𝘴𝘢𝘨𝘦 𝘍𝘳𝘰𝘮 @hexamonbot 𝘈𝘳𝘦 𝘈𝘤𝘤𝘦𝘱𝘵𝘦𝘥\n</blockquote>"
+            f"━━━━━━━━━━━━━━━━━━━━━━━━━━",
+            parse_mode="HTML"
+        )
+    bot.register_next_step_handler(message, process_nature_pic, item_type, pokemon_name)
+    
+BOT_ID = 572621020  # Replace with the actual bot's ID
+
+def is_valid_forwarded_message(message):
+    """
+    Checks if the forwarded message is from the required bot.
+    Returns True if valid, False otherwise.
+    """
+    return message.forward_from and message.forward_from.id == BOT_ID
+
+import re
+
+def is_valid_nature_page(caption):
+    """Checks if the caption contains a valid Pokémon nature description."""
+    return bool(re.search(r"Nature:\s*(\w+)", caption))  # Matches 'Nature: <some_nature>'
+
+def process_nature_pic(message, item_type, pokemon_name):
+    """Processes the forwarded nature picture and validates the content."""
+    
+    if not sub_process:
+        return
+    
+    if not message.forward_date:  # ✅ Check if the message is forwarded
+        bot.send_message(message.chat.id, "❌ Please forward the nature page, not upload a new one.")
+        return
+    
+    if not is_valid_forwarded_message(message):
+        bot.reply_to(message, "❌ This message is not from the required bot.\nREQUIRED BOT :- @hexamonbot")
+        return
+
+    if message.photo and message.caption:
+        if is_valid_nature_page(message.caption):  # ✅ Check if caption has valid nature details
+            user_cache[message.chat.id] = {
+                'pokemon_name': pokemon_name,
+                'nature_pic': message.photo[-1].file_id
+            }
+            
+            bot.send_message(
+                    message.chat.id,
+                    f"══════════════════════════\n"
+                    f"🏆 Submission Progress\n"
+                    f"══════════════════════════\n\n"
+                    f"✮ 𝘗𝘰𝘬𝘦𝘮𝘰𝘯/𝘛𝘮 : <b>{pokemon_name}</b>\n"
+                    f"➥ 𝘚𝘵𝘦𝘱 2: 𝘍𝘰𝘳𝘸𝘢𝘳𝘥 𝘐𝘝𝘴/𝘌𝘝𝘴 𝘗𝘢𝘨𝘦\n\n"
+                    f"▬▬▬▭▭▭▭▭▭▭ (20%) 🟠\n"
+                    f"━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+                    f"<blockquote>🔄 𝘔𝘶𝘴𝘵 𝘉𝘦 𝘛𝘩𝘦 𝘚𝘢𝘮𝘦 𝘐𝘮𝘢𝘨𝘦 𝘈𝘴 𝘛𝘩𝘦 𝘕𝘢𝘵𝘶𝘳𝘦 𝘗𝘢𝘨𝘦.\n⚠️ 𝘖𝘯𝘭𝘺 𝘍𝘰𝘳𝘸𝘢𝘳𝘥𝘦𝘥 𝘔𝘦𝘴𝘴𝘢𝘨𝘦 𝘍𝘳𝘰𝘮 @hexamonbot 𝘈𝘳𝘦 𝘈𝘤𝘤𝘦𝘱𝘵𝘦𝘥\n</blockquote>"
+                    f"━━━━━━━━━━━━━━━━━━━━━━━━━━",
+                    parse_mode="HTML"
+                )
