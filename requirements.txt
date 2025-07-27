@@ -2,6 +2,7 @@ kurigram
 tgcrypto 
 pymongo
 telebot
+jinja2
 motor
 brain
 humanize
