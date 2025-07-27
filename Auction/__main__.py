@@ -4971,6 +4971,8 @@ bot.skip_pending = True
 
 user_ids = set()
 
+bot.infinity_polling(none_stop=true)
+
 
 
 
