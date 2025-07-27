@@ -1,6 +1,7 @@
 kurigram
 tgcrypto 
 pymongo
+telebot
 motor
 brain
 humanize
