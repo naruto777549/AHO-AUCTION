@@ -9,9 +9,9 @@ from telebot.types import InputMediaPhoto
 from jinja2 import Template
 
 
-API_TOKEN = '7980655265:AAEuy-ZPVxkOSY8BydegX0MAJRLfEiG-eOM'
-admin_id = [6969086416,7406582778,6642049252,1897434080] 
-xmods = [6969086416,7406582778,6642049252,1897434080] 
+API_TOKEN = '8320447631:AAHiZGAM0sbpxi9Ksm-tNw644ddPXgg8y1E'
+admin_id = [7576729648,6642049252] 
+xmods = [7576729648,6642049252] 
 import telebot
 bot = telebot.TeleBot(API_TOKEN)
 
