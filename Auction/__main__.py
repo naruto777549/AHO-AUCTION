@@ -562,20 +562,22 @@ def process_nature_pic(message, item_type, pokemon_name):
                     parse_mode="HTML"
                 )
 
-    # Check if message.caption exists first
-if message.caption:
-    if valid_nature_page(message):
-        bot.register_next_step_handler(message, process_evs_pic, item_type, pokemon_name, message.caption)
+# Add this decorator and function definition
+@bot.message_handler(content_types=['photo', 'document'])
+def handle_nature_page(message):
+    if message.caption:
+        if valid_nature_page(message):
+            bot.register_next_step_handler(message, process_evs_pic, item_type, pokemon_name, message.caption)
+        else:
+            bot.send_message(
+                message.chat.id,
+                "❌ This doesn't seem like a valid nature page.\nPlease forward the Pokémon's nature screenshot."
+            )
     else:
         bot.send_message(
             message.chat.id,
-            "❌ This doesn't seem like a valid nature page.\nPlease forward the Pokémon's nature screenshot."
+            "❌ An error occurred.\nPlease restart the process and ensure you forward the correct nature page."
         )
-else:
-    bot.send_message(
-        message.chat.id,
-        "❌ An error occurred.\nPlease restart the process and ensure you forward the correct nature page."
-    )
 
 import re
 
