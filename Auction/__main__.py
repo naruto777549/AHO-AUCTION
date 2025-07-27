@@ -2753,24 +2753,36 @@ def auctop(message):
     top_sellers = get_top_sellers()
 
     # Generate buyer list text
-    buyers_text = "🏆 <b>Top 5 Buyers</b> 🛒\n\n"
-    for i, (buyer_id, username, full_name, count) in enumerate(top_buyers, start=1):
-        buyers_text += (
-            f"🔹 <b>{i}. {full_name}</b>\n"
-            f"   🆔 <code>{buyer_id}</code>\n"
-            f"   🏷 @{username if username else f'<a href="tg://user?id={user_id}">{full_name}</a>'}\n"
-            f"   📦 <b>{count}</b> items bought\n\n"
-        )
+buyers_text = "🏆 <b>Top 5 Buyers</b> 🛒\n\n"
+for i, (buyer_id, username, full_name, count) in enumerate(top_buyers, start=1):
+    if username:
+        name_line = f"   🏷 @{username}"
+    else:
+        name_line = f'   🏷 <a href="tg://user?id={buyer_id}">{full_name}</a>'
+
+    buyers_text += (
+        f"🔹 <b>{i}. {full_name}</b>\n"
+        f"   🆔 <code>{buyer_id}</code>\n"
+        f"{name_line}\n"
+        f"   📦 <b>{count}</b> items bought\n\n"
+    )
+
 
     # Generate seller list text
-    sellers_text = "🏆 <b>Top 5 Sellers</b> 💰\n\n"
-    for i, (seller_id, username, full_name, count) in enumerate(top_sellers, start=1):
-        sellers_text += (
-            f"🔹 <b>{i}. {full_name}</b>\n"
-            f"   🆔 <code>{seller_id}</code>\n"
-            f"   🏷 @{username if username else f'<a href="tg://user?id={user_id}">{full_name}</a>'}\n"
-            f"   💰 <b>{count}</b> items sold\n\n"
-        )
+sellers_text = "🏆 <b>Top 5 Sellers</b> 💰\n\n"
+for i, (seller_id, username, full_name, count) in enumerate(top_sellers, start=1):
+    if username:
+        name_line = f"   🏷 @{username}"
+    else:
+        name_line = f'   🏷 <a href="tg://user?id={seller_id}">{full_name}</a>'
+
+    sellers_text += (
+        f"🔹 <b>{i}. {full_name}</b>\n"
+        f"   🆔 <code>{seller_id}</code>\n"
+        f"{name_line}\n"
+        f"   💰 <b>{count}</b> items sold\n\n"
+    )
+
 
     # Inline Keyboard
     markup = InlineKeyboardMarkup()
