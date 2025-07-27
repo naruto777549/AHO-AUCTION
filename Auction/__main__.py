@@ -562,11 +562,18 @@ def process_nature_pic(message, item_type, pokemon_name):
                     parse_mode="HTML"
                 )
 
-bot.register_next_step_handler(message, process_evs_pic, item_type, pokemon_name, message.caption)
-        else:
-            bot.send_message(message.chat.id, "❌ This doesn't seem like a valid nature page.\nPlease forward the Pokémon's nature screenshot.")
+    if valid_nature_page(message):
+        bot.register_next_step_handler(message, process_evs_pic, item_type, pokemon_name, message.caption)
     else:
-        bot.send_message(message.chat.id, "❌ An error occurred.\nPlease restart the process and ensure you forward the correct nature page.")
+        bot.send_message(
+            message.chat.id,
+            "❌ This doesn't seem like a valid nature page.\nPlease forward the Pokémon's nature screenshot."
+        )
+else:
+    bot.send_message(
+        message.chat.id,
+        "❌ An error occurred.\nPlease restart the process and ensure you forward the correct nature page."
+    )
 
 import re
 
