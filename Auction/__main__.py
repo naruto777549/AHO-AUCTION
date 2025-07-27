@@ -4272,7 +4272,8 @@ def set_profile_pic(message):
         bot.reply_to(message, '<blockquote><b>start the bot first.</b></blockquote>', parse_mode='html',reply_markup=markup,disable_web_page_preview=True)
         return
 
-"""Allows users to set a new profile picture."""
+def set_profile_picture(message):
+    """Allows users to set a new profile picture."""
     try:
         user_id = message.from_user.id
         send_template_options(user_id)
