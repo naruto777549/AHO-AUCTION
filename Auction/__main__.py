@@ -4110,12 +4110,866 @@ def escape_markdown(text):
 
 
 
-
 import telebot
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from PIL import Image, ImageDraw, ImageOps
 import requests
 from io import BytesIO
+
+# Public URLs to profile templates
+TEMPLATES = {
+    1: "https://i.postimg.cc/9FWJBGr8/photo-2025-02-03-17-25-42.jpg",
+    2: "https://i.postimg.cc/rwHjc3g3/photo-2025-02-03-17-30-24.jpg",
+    3: "https://i.postimg.cc/KjmrJ2vk/photo-2025-02-03-17-33-32.jpg",
+    4: "https://i.postimg.cc/sxKPLNvn/photo-2025-02-03-17-51-49.jpg",
+    5: "https://i.postimg.cc/7LTVL9W6/photo-2025-02-03-17-54-38.jpg",
+    6: "https://i.postimg.cc/gkkHhmT1/photo-2025-02-03-18-39-00.jpg",
+    7: "https://i.postimg.cc/sgbYbSgR/photo-2025-02-03-18-39-01.jpg",
+    8: "https://i.postimg.cc/VsFF5dDj/photo-2025-02-03-18-39-01-2.jpg",
+    9: "https://i.postimg.cc/K8179QFN/photo-2025-02-03-18-39-01-3.jpg",
+    10: "https://i.postimg.cc/tTjh4j6S/photo-2025-02-03-18-39-01-4.jpg",
+    11: "https://i.postimg.cc/RhPfdJDy/photo-2025-02-03-18-39-02.jpg",
+    12: "https://i.postimg.cc/xC3Lk4y0/photo-2025-02-03-18-39-02-2.jpg",
+    13: "https://i.postimg.cc/RhCKwLXw/photo-2025-02-03-18-39-02-3.jpg"
+}
+
+# Dictionary to store user-selected templates
+user_templates = {}
+
+def fetch_user_profile_picture(user_id):
+    """Fetches the user's Telegram profile picture."""
+    try:
+        photos = bot.get_user_profile_photos(user_id, limit=1)
+        if photos.total_count > 0:
+            file_id = photos.photos[0][0].file_id
+            file_info = bot.get_file(file_id)
+            file_url = f"https://api.telegram.org/file/bot{API_TOKEN}/{file_info.file_path}"
+            response = requests.get(file_url)
+            profile_pic = Image.open(BytesIO(response.content)).convert("RGBA")
+            return profile_pic
+        else:
+            return Image.new("RGBA", (200, 200), (128, 128, 128))  # Gray placeholder
+    except Exception as e:
+        print(f"Error fetching profile picture: {e}")
+        return Image.new("RGBA", (200, 200), (128, 128, 128))  # Gray placeholder
+
+def create_profile_picture_with_template(template_url, profile_picture):
+    """Combines the user's profile picture with the selected template."""
+    response = requests.get(template_url)
+    template = Image.open(BytesIO(response.content)).convert("RGBA")
+
+    # Resize and crop the profile picture to fit into a circular frame
+    profile_picture = profile_picture.resize((80, 90))
+    mask = Image.new("L", profile_picture.size, 0)
+    draw = ImageDraw.Draw(mask)
+    draw.ellipse((2.5, 2.5) + profile_picture.size, fill=255)
+    profile_picture = ImageOps.fit(profile_picture, mask.size, centering=(3, 3))
+    profile_picture.putalpha(mask)
+
+    # Paste the profile picture onto the template
+    template.paste(profile_picture, (40, 50), profile_picture)
+    return template
+
+@bot.message_handler(commands=["profile"])
+def view_profile(message):
+    """Sends the user's profile picture with the selected template."""
+    user_id = message.from_user.id
+    
+    if not has_started_bot(user_id):
+        markup=InlineKeyboardMarkup()
+        markup.add(InlineKeyboardButton('start',url='https://t.me/Auct_he_bot?start=start'))
+        bot.reply_to(message, '<blockquote><b>start the bot first.</b></blockquote>', parse_mode='html',reply_markup=markup,disable_web_page_preview=True)
+        return
+    
+    if not is_user_updated(user_id):
+        markup=InlineKeyboardMarkup()
+        markup.add(InlineKeyboardButton('update',url='https://t.me/Auct_he_bot?start=update'))
+        bot.reply_to(message, '<blockquote><b>update the bot first.</b></blockquote>', parse_mode='html',reply_markup=markup,disable_web_page_preview=True)
+        return
+    
+    try:
+        user_id = message.from_user.id
+        template_id = user_templates.get(user_id, 1)  # Default to template 1
+        template_url = TEMPLATES.get(template_id, TEMPLATES[1])
+
+        # Fetch and create profile picture
+        profile_picture = fetch_user_profile_picture(user_id)
+        combined_image = create_profile_picture_with_template(template_url, profile_picture)
+
+        # Save image to BytesIO and send
+        image_bytes = BytesIO()
+        combined_image.save(image_bytes, format="PNG")
+        image_bytes.seek(0)
+        
+        user_id = message.from_user.id
+        first_name = message.from_user.first_name
+        username = message.from_user.username if message.from_user.username else "No Username"
+
+        from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
+        userd = str(user_id)
+        bought_count = len(purchase_history.get(userd, []))
+        sold_count = len(sales_history.get(userd, []))
+
+        # Create inline button to change the profile picture
+        markup = InlineKeyboardMarkup()
+        markup.add(InlineKeyboardButton("Change Profile Picture", url="https://t.me/auct_he_bot?start=profile"))
+
+        text = (
+            "═════════════════════\n"
+            f"🏅 𝖯𝖱𝖮𝖥𝖨𝖫𝖤 𝖨𝖭𝖥𝖮 🏅\n"
+            "═════════════════════\n\n"
+            f"👤 𝗡𝗮𝗺𝗲: {first_name}\n"
+            f"🔗 𝗨𝘀𝗲𝗿𝗻𝗮𝗺𝗲: @{username if username else 'No Username'}\n"
+            f"🆔 𝗨𝘀𝗲𝗿 𝗜𝗗: {user_id}\n\n"
+            "═════════════════════\n"
+            "🛒 𝗧𝗥𝗔𝗗𝗜𝗡𝗚 𝗔𝗖𝗧𝗜𝗩𝗜𝗧𝗬\n"
+            "═════════════════════\n\n"
+            f"📥 𝗜𝘁𝗲𝗺𝘀 𝗕𝗼𝘂𝗴𝗵𝘁: {bought_count}\n"
+            f"📤 𝗜𝘁𝗲𝗺𝘀 𝗦𝗼𝗹𝗱: {sold_count}\n\n"
+            "═════════════════════\n"
+            "🔥 𝗞𝗲𝗲𝗽 𝗧𝗿𝗮𝗱𝗶𝗻𝗴 & 𝗦𝘂𝗽𝗽𝗼𝗿𝘁 𝗨𝘀!\n"
+            "═════════════════════"
+        )
+        bot.send_photo(
+            chat_id=message.chat.id,
+            photo=image_bytes,
+            caption=text,
+            reply_markup=markup,
+            reply_to_message_id=message.message_id,
+            has_spoiler=True
+        )
+    except Exception as e:
+        print(f"Error in /profile: {e}")
+        bot.reply_to(message, "An error occurred while processing your request.")
+
+@bot.message_handler(commands=["setprofilepic"])
+def set_profile_pic(message):
+    user_id = message.from_user.id
+    if not has_started_bot(user_id):
+        markup=InlineKeyboardMarkup()
+        markup.add(InlineKeyboardButton('start',url='https://t.me/Auct_he_bot?start=start'))
+        bot.reply_to(message, '<blockquote><b>start the bot first.</b></blockquote>', parse_mode='html',reply_markup=markup,disable_web_page_preview=True)
+        return
+
+"""Allows users to set a new profile picture."""
+    try:
+        user_id = message.from_user.id
+        send_template_options(user_id)
+    except Exception as e:
+        print(f"Error in /setprofilepic: {e}")
+        bot.reply_to(message, "An error occurred while processing your request.")
+
+@bot.callback_query_handler(func=lambda call: call.data.startswith("template_"))
+def handle_template_selection(call):
+    """Handles template selection and updates the user's profile picture."""
+    try:
+        user_id = call.from_user.id
+        _, original_user_id, template_id = call.data.split("_")
+        original_user_id = int(original_user_id)
+        template_id = int(template_id)
+
+        if user_id != original_user_id:
+            bot.answer_callback_query(call.id, "❌ This action is not intended for you.")
+            return
+
+        if template_id in TEMPLATES:
+            user_templates[user_id] = template_id
+            bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text=f"<blockquote><b>✅ 𝚃𝙴𝙼𝙿𝙻𝙰𝚃𝙴 {template_id} 𝚂𝙴𝙻𝙴𝙲𝚃𝙴𝙳 𝚂𝚄𝙲𝙲𝙴𝚂𝚂𝙵𝚄𝙻𝙻𝚈! </b></blockquote>",parse_mode='html')
+            bot.answer_callback_query(call.id, "Template selected!")
+
+            # Send updated profile picture
+            profile_picture = fetch_user_profile_picture(user_id)
+            combined_image = create_profile_picture_with_template(TEMPLATES[template_id], profile_picture)
+
+            image_bytes = BytesIO()
+            combined_image.save(image_bytes, format="PNG")
+            image_bytes.seek(0)
+            bot.send_photo(chat_id=call.message.chat.id, photo=image_bytes, caption="Here is your updated profile picture!",has_spoiler=True)
+        else:
+            bot.answer_callback_query(call.id, "❌ Invalid template selection.")
+    except Exception as e:
+        print(f"Error in handle_template_selection: {e}")
+        bot.answer_callback_query(call.id, "An error occurred while processing your request.")
+
+def send_template_options(user_id):
+    """Sends template options to the user in a structured row format."""
+    try:
+        markup = InlineKeyboardMarkup()
+        buttons = [InlineKeyboardButton(f"{template_id}", callback_data=f"template_{user_id}_{template_id}") for template_id in TEMPLATES]
+
+        # Add buttons in rows of 5
+        for i in range(0, len(buttons), 5):
+            markup.row(*buttons[i:i+5])  # Add 5 buttons per row
+
+        bot.send_message(user_id, "Select a template for your profile picture:", reply_markup=markup)
+    except Exception as e:
+        print(f"Error in send_template_options: {e}")
+
+nature_info = {
+    "modest": {
+        "increase": "𝘚𝘱𝘦𝘤𝘪𝘢𝘭 𝘈𝘵𝘵𝘢𝘤𝘬",
+        "decrease": "𝘈𝘵𝘵𝘢𝘤𝘬",
+        "photo": "https://i.postimg.cc/HshBYmPH/IMG-20241228-161817-810.jpg"  # Example URL from PostImage
+    },
+    "bold": {
+        "increase": "𝘋𝘦𝘧𝘦𝘯𝘴𝘦",
+        "decrease": "𝘈𝘵𝘵𝘢𝘤𝘬",
+        "photo": "https://i.postimg.cc/ncqRFg7P/IMG-20241228-161758-388.jpg"
+    },
+    "timid": {
+        "increase": "𝘚𝘱𝘦𝘦𝘥",
+        "decrease": "𝘈𝘵𝘵𝘢𝘤𝘬",
+        "photo": "https://i.postimg.cc/4xMfQYLM/IMG-20241228-161835-358.jpg"
+    },
+    "naive": {
+        "increase": "𝘚𝘱𝘦𝘦𝘥",
+        "decrease": "𝘚𝘱𝘦𝘤𝘪𝘢𝘭 𝘋𝘦𝘧𝘦𝘯𝘴𝘦",
+        "photo": "https://i.postimg.cc/zDPcBTV9/IMG-20241228-161819-937.jpg"
+    },
+    "calm": {
+        "increase": "𝘚𝘱𝘦𝘤𝘪𝘢𝘭 𝘋𝘦𝘧𝘦𝘯𝘴𝘦",
+        "decrease": "𝘈𝘵𝘵𝘢𝘤𝘬",
+        "photo": "https://i.postimg.cc/T38K9W5S/IMG-20241228-161802-132.jpg"
+    },
+    "hasty": {
+        "increase": "𝘚𝘱𝘦𝘦𝘥",
+        "decrease": "𝘋𝘦𝘧𝘦𝘯𝘴𝘦",
+        "photo": "https://i.postimg.cc/9M7X6hML/IMG-20241228-165756-787.jpg"
+    },
+    "brave": {
+        "increase": "𝘈𝘵𝘵𝘢𝘤𝘬",
+        "decrease": "𝘚𝘱𝘦𝘦𝘥",
+        "photo": "https://i.postimg.cc/fTfGHGVN/IMG-20241228-161800-265.jpg"
+    },
+    "mild": {
+        "increase": "𝘚𝘱𝘦𝘤𝘪𝘢𝘭 𝘈𝘵𝘵𝘢𝘤𝘬",
+        "decrease": "𝘋𝘦𝘧𝘦𝘯𝘴𝘦",
+        "photo": "https://i.postimg.cc/9fJvYKQf/IMG-20241228-161815-768.jpg"
+    },
+    "sassy": {
+        "increase": "𝘚𝘱𝘦𝘤𝘪𝘢𝘭 𝘋𝘦𝘧𝘦𝘯𝘴𝘦",
+        "decrease": "𝘚𝘱𝘦𝘦𝘥",
+        "photo": "https://i.postimg.cc/XYQbsp23/IMG-20241228-161831-500.jpg"
+    },
+    "lax": {
+        "increase": "𝘋𝘦𝘧𝘦𝘯𝘴𝘦",
+        "decrease": "𝘚𝘱𝘦𝘤𝘪𝘢𝘭 𝘋𝘦𝘧𝘦𝘯𝘴𝘦",
+        "photo": "https://i.postimg.cc/wByGDvZw/IMG-20241228-161812-611.jpg"
+    },
+    "relaxed": {
+        "increase": "𝘋𝘦𝘧𝘦𝘯𝘴𝘦",
+        "decrease": "𝘚𝘱𝘦𝘦𝘥",
+        "photo": "https://i.postimg.cc/Y92LJG73/IMG-20241228-161828-397.jpg"
+    },
+    "bashful": {
+        "increase": "𝘕𝘰𝘯𝘦",
+        "decrease": "𝘕𝘰𝘯𝘦",
+        "photo": "https://i.postimg.cc/xTLHNS6L/IMG-20241228-161757-079.jpg"
+    },
+    "quirky": {
+        "increase": "𝘕𝘰𝘯𝘦",
+        "decrease": "𝘕𝘰𝘯𝘦",
+        "photo": "https://i.postimg.cc/R02VTWFh/IMG-20241228-161824-484.jpg"
+    },
+    "docile": {
+        "increase": "𝘕𝘰𝘯𝘦",
+        "decrease": "𝘕𝘰𝘯𝘦",
+        "photo": "https://i.postimg.cc/Pf20GBWz/IMG-20241228-161805-126.jpg"
+    },
+    "gentle": {
+        "increase": "𝘚𝘱𝘦𝘤𝘪𝘢𝘭 𝘋𝘦𝘧𝘦𝘯𝘴𝘦",
+        "decrease": "𝘋𝘦𝘧𝘦𝘯𝘴𝘦",
+        "photo": "https://i.postimg.cc/zG1Cxfyd/IMG-20241228-161806-107.jpg"
+    },
+    "impish": {
+        "increase": "𝘋𝘦𝘧𝘦𝘯𝘴𝘦",
+        "decrease": "𝘚𝘱𝘦𝘤𝘪𝘢𝘭 𝘈𝘵𝘵𝘢𝘤𝘬",
+        "photo": "https://i.postimg.cc/rpHDrj3t/IMG-20241228-161809-393.jpg"
+    },
+    "jolly": {
+        "increase": "𝘚𝘱𝘦𝘦𝘥",
+        "decrease": "𝘚𝘱𝘦𝘤𝘪𝘢𝘭 𝘈𝘵𝘵𝘢𝘤𝘬",
+        "photo": "https://i.postimg.cc/0yFvG45x/IMG-20241228-161810-601.jpg"
+    },
+    "lonely": {
+        "increase": "𝘈𝘵𝘵𝘢𝘤𝘬",
+        "decrease": "𝘋𝘦𝘧𝘦𝘯𝘴𝘦",
+        "photo": "https://i.postimg.cc/HLgZC0BX/IMG-20241228-161813-346.jpg"
+    },
+    "serious": {
+        "increase": "𝘕𝘰𝘯𝘦",
+        "decrease": "𝘕𝘰𝘯𝘦",
+        "photo": "https://i.postimg.cc/KjSrnxwL/IMG-20241228-161833-838.jpg"
+    },
+    "rash": {
+        "increase": "𝘚𝘱𝘦𝘤𝘪𝘢𝘭 𝘈𝘵𝘵𝘢𝘤𝘬",
+        "decrease": "𝘚𝘱𝘦𝘤𝘪𝘢𝘭 𝘋𝘦𝘧𝘦𝘯𝘴𝘦",
+        "photo": "https://i.postimg.cc/HW97Sw7F/IMG-20241228-161826-488.jpg"
+    },
+    "quiet": {
+        "increase": "𝘚𝘱𝘦𝘤𝘪𝘢𝘭 𝘈𝘵𝘵𝘢𝘤𝘬",
+        "decrease": "𝘚𝘱𝘦𝘦𝘥",
+        "photo": "https://i.postimg.cc/ydvsR8kp/IMG-20241228-161823-342.jpg"
+    },
+    "hardy": {
+        "increase": "𝘕𝘰𝘯𝘦",
+        "decrease": "𝘕𝘰𝘯𝘦",
+        "photo": "https://i.postimg.cc/DZJ3SP30/IMG-20241228-161807-859.jpg"
+    },
+    "careful": {
+        "increase": "𝘚𝘱𝘦𝘤𝘪𝘢𝘭 𝘋𝘦𝘧𝘦𝘯𝘴𝘦",
+        "decrease": "𝘚𝘱𝘦𝘤𝘪𝘢𝘭 𝘈𝘵𝘵𝘢𝘤𝘬",
+        "photo": "https://i.postimg.cc/dtpFKfbX/IMG-20241228-161803-023.jpg"
+    },
+    "naughty": {
+        "increase": "𝘈𝘵𝘵𝘢𝘤𝘬",
+        "decrease": "𝘚𝘱𝘦𝘤𝘪𝘢𝘭 𝘋𝘦𝘧𝘦𝘯𝘴𝘦",
+        "photo": "https://i.postimg.cc/2jtMqZ0L/IMG-20241228-161821-490.jpg"
+    },
+    "adamant": {
+        "increase": "𝘈𝘵𝘵𝘢𝘤𝘬",
+        "decrease": "𝘚𝘱𝘦𝘤𝘪𝘢𝘭 𝘈𝘵𝘵𝘢𝘤𝘬",
+        "photo": "https://i.postimg.cc/MKpCFsVf/IMG-20241228-161755-038.jpg"
+    }
+}
+
+@bot.message_handler(commands=['natures'])
+def natures(message):
+    if str(message.from_user.id) in banned:
+        bot.reply_to(message, "You Are Banned By an Administrator")
+    else:
+        user_id = message.from_user.id
+        if not has_started_bot(user_id):
+            markup=InlineKeyboardMarkup()
+            markup.add(InlineKeyboardButton('start',url='https://t.me/Auct_he_bot?start=start'))
+            bot.reply_to(message, '<blockquote><b>start the bot first.</b></blockquote>', parse_mode='html',reply_markup=markup,disable_web_page_preview=True)
+            return
+    
+        if not is_user_updated(user_id):
+            markup=InlineKeyboardMarkup()
+            markup.add(InlineKeyboardButton('update',url='https://t.me/Auct_he_bot?start=update'))
+            bot.reply_to(message, '<blockquote><b>update the bot first.</b></blockquote>', parse_mode='html',reply_markup=markup,disable_web_page_preview=True)
+            return
+        
+        response = "Nature Types:\n"
+        for nature in nature_info:
+            response += f"- {nature.capitalize()}\n"
+        bot.reply_to(message, response)
+
+# Handler for nature-specific information
+@bot.message_handler(func=lambda message: message.text.lower() in nature_info)
+def handle_nature(message):
+    nature_name = message.text.lower()
+    info = nature_info[nature_name]
+    response = f"""
+    <blockquote>
+┏━━━━《✮ {nature_name.capitalize()} ✮》
+ ➥ {info['increase']} 🔺
+ ➥ {info['decrease']} 🔻
+ ▱▱▱▱▱▱▱▱▱▱
+   Powered By <a href='https://t.me/Auct_he_bot'>𝘈𝘐𝘖 𝘈𝘜𝘊𝘛𝘐𝘖𝘕 𝘉𝘖𝘛 </a>
+┗━━━━━━━━━━━━━━━━━━━
+    </blockquote>
+    """
+    # Send nature stats and photo
+    bot.send_photo(message.chat.id, info['photo'],caption=response,parse_mode="html")
+
+
+tm_data = {
+    2: {"name": "Dragon Claw", "power": 80, "accuracy": 100, "category": "P"},   
+    3: {"name": "Psyshock", "power": 80, "accuracy": 100, "category": "S"},
+    9: {"name": "Venoshock", "power": 65, "accuracy": 100, "category": "S"},
+    10: {"name": "Hidden Power", "power": 60, "accuracy": 100, "category": "S"},
+    13: {"name": "Ice Beam", "power": 90, "accuracy": 100, "category": "S"},
+    14: {"name": "Blizzard", "power": 110, "accuracy": 70, "category": "S"},
+    15: {"name": "Hyper Beam", "power": 150, "accuracy": 90, "category": "S"},
+    22: {"name": "Solar Beam", "power": 120, "accuracy": 100, "category": "S"},
+    23: {"name": "Smack Down", "power": 50, "accuracy": 100, "category": "P"},
+    24: {"name": "Thunderbolt", "power": 90, "accuracy": 100, "category": "S"},
+    25: {"name": "Thunder", "power": 110, "accuracy": 70, "category": "P"},
+    26: {"name": "Earthquake", "power": 100, "accuracy": 100, "category": "P"},
+    28: {"name": "Leech Life", "power": 80, "accuracy": 100, "category": "P"},
+    29: {"name": "Psychic", "power": 90, "accuracy": 100, "category": "S"},
+    30: {"name": "Shadow Ball", "power": 80, "accuracy": 100, "category": "S"},
+    31: {"name": "Brick Break", "power": 75, "accuracy": 100, "category": "P"},
+    34: {"name": "Sludge Wave", "power": 95, "accuracy": 100, "category": "S"},
+    35: {"name": "Flamethrower", "power": 90, "accuracy": 100, "category": "S"},
+    36: {"name": "Sludge Bomb", "power": 90, "accuracy": 100, "category": "S"},
+    38: {"name": "Fire Blast", "power": 110, "accuracy": 85, "category": "S"},
+    39: {"name": "Rock Tomb", "power": 60, "accuracy": 95, "category": "P"},
+    40: {"name": "Aerial Ace", "power": 60, "accuracy": 100, "category": "P"},
+    42: {"name": "Facade", "power": 70, "accuracy": 100, "category": "P"},
+    43: {"name": "Flame Charge", "power": 50, "accuracy": 100, "category": "P"},
+    46: {"name": "Thief", "power": 60, "accuracy": 100, "category": "P"},
+    47: {"name": "Low Sweep", "power": 65, "accuracy": 100, "category": "P"},
+    48: {"name": "Round", "power": 60, "accuracy": 100, "category": "S"},
+    49: {"name": "Echoed Voice", "power": 40, "accuracy": 100, "category": "S"},
+    50: {"name": "Overheat", "power": 130, "accuracy": 90, "category": "S"},
+    51: {"name": "Steel Wing", "power": 70, "accuracy": 90, "category": "P"},
+    52: {"name": "Focus Blast", "power": 120, "accuracy": 70, "category": "S"},
+    53: {"name": "Energy Ball", "power": 90, "accuracy": 100, "category": "S"},
+    54: {"name": "False Swipe", "power": 40, "accuracy": 100, "category": "P"},
+    55: {"name": "Scald", "power": 80, "accuracy": 100, "category": "S"},
+    57: {"name": "Charge Beam", "power": 50, "accuracy": 90, "category": "S"},
+    58: {"name": "Sky Drop", "power": 60, "accuracy": 100, "category": "P"},
+    59: {"name": "Brutal Swing", "power": 60, "accuracy": 100, "category": "P"},
+    62: {"name": "Acrobatics", "power": 55, "accuracy": 100, "category": "P"},
+    65: {"name": "Shadow Claw", "power": 70, "accuracy": 100, "category": "P"},
+    66: {"name": "Payback", "power": 50, "accuracy": 100, "category": "P"},
+    67: {"name": "Smart Strike", "power": 70, "accuracy": 100, "category": "P"},
+    68: {"name": "Giga Impact", "power": 150, "accuracy": 90, "category": "P"},
+    71: {"name": "Stone Edge", "power": 100, "accuracy": 80, "category": "P"},
+    72: {"name": "Volt Switch", "power": 70, "accuracy": 100, "category": "S"},
+    76: {"name": "Fly", "power": 90, "accuracy": 95, "category": "P"},
+    78: {"name": "Bulldoze", "power": 60, "accuracy": 100, "category": "P"},
+    79: {"name": "Frost Breath", "power": 60, "accuracy": 90, "category": "S"},
+    80: {"name": "Rock Slide", "power": 75, "accuracy": 90, "category": "P"},
+    81: {"name": "X-Scissor", "power": 80, "accuracy": 100, "category": "P"},
+    82: {"name": "Dragon Tail", "power": 60, "accuracy": 90, "category": "P"},
+    83: {"name": "Infestation", "power": 70, "accuracy": 100, "category": "S"},
+    84: {"name": "Poison Jab", "power": 80, "accuracy": 100, "category": "P"},
+    85: {"name": "Dream Eater", "power": 100, "accuracy": 100, "category": "S"},
+    89: {"name": "U-Turn", "power": 70, "accuracy": 100, "category": "P"},
+    91: {"name": "Flash Cannon", "power": 80, "accuracy": 100, "category": "S"},
+    93: {"name": "Wild Charge", "power": 90, "accuracy": 100, "category": "P"},
+    94: {"name": "Surf", "power": 90, "accuracy": 100, "category": "S"},
+    95: {"name": "Snarl", "power": 55, "accuracy": 95, "category": "S"},
+    97: {"name": "Dark Pulse", "power": 80, "accuracy": 100, "category": "S"},
+    98: {"name": "Waterfall", "power": 80, "accuracy": 100, "category": "P"},
+    99: {"name": "Dazzling Gleam", "power": 80, "accuracy": 100, "category": "S"},
+}
+
+@bot.message_handler(commands=['tm00'])
+def handle_tm00(message):
+    if str(message.from_user.id) in banned:
+        bot.reply_to(message, "You Are Banned By an Administrator")
+    else:
+        user_id = message.from_user.id
+        if not has_started_bot(user_id):
+            markup=InlineKeyboardMarkup()
+            markup.add(InlineKeyboardButton('start',url='https://t.me/Auct_he_bot?start=start'))
+            bot.reply_to(message, '<blockquote><b>start the bot first.</b></blockquote>', parse_mode='html',reply_markup=markup,disable_web_page_preview=True)
+            return
+        
+        if not is_user_updated(user_id):
+            markup=InlineKeyboardMarkup()
+            markup.add(InlineKeyboardButton('update',url='https://t.me/Auct_he_bot?start=update'))
+            bot.reply_to(message, '<blockquote><b>update the bot first.</b></blockquote>', parse_mode='html',reply_markup=markup,disable_web_page_preview=True)
+            return
+        
+        tm_list = "\n".join(
+            f"|{tm_number}| {tm_info['name']} |  {tm_info['power']}|{tm_info['accuracy']}|{tm_info['category']} |\n"
+            for tm_number, tm_info in tm_data.items()
+        )
+        bot.reply_to(message, f"<blockquote>TM List:\n\n{tm_list}\n\n▱▱▱▱▱▱▱▱▱▱▱▱▱▱▱▱▱▱▱</blockquote>",parse_mode="html")
+
+
+
+@bot.message_handler(func=lambda message: re.match(r'tm\d{2}', message.text.lower()))
+def handle_tm(message):
+    match = re.match(r'tm(\d{2})', message.text.lower())
+    tm_number = int(match.group(1))
+
+    if tm_number not in tm_data:
+        bot.reply_to(message, "TM not found. Please check the TM number and try again.")
+        return
+
+    tm_info = tm_data[tm_number]
+    category = "Physical" if tm_info["category"] == "P" else "Special"
+    response_message = f"""
+<blockquote>╔══   《TM{tm_number} 💿》  ══╗
+  ☛ {tm_info['name']} [{category}]
+  Power: {tm_info['power']} Accuracy: {tm_info['accuracy']}
+╚══   《TM{tm_number} 💿》  ══╝
+  ▱▱▱▱▱▱▱▱▱▱
+  Powered by <a href='https://t.me/Auct_he_bot'>𝘈𝘐𝘖 𝘈𝘜𝘊𝘛𝘐𝘖𝘕 𝘉𝘖𝘛</a>
+┗━━━━━━━━━━━━━━━━━━━</blockquote>
+   
+    """
+
+    # Send the static photo from UploadImage.com with TM details
+    bot.send_photo(
+        chat_id=message.chat.id,
+        photo=TM_IMAGE_URL,
+        caption=response_message,
+        parse_mode="html")
+
+
+@bot.message_handler(commands=['reset_items'])
+def handle_reset_items(message):
+    if str(message.from_user.id) not in admin_ids:
+        bot.reply_to(message, "❌ You don't have permission to reset the auction items.")
+        return
+
+    global items, c, msg
+    items = []  # Clear the items list
+    c=0
+    msg = []
+    bot.reply_to(message, "✅ The auction items have been successfully reset.")
+
+
+@bot.message_handler(commands=['remove_items'])
+def handle_remove_items(message):
+    if str(message.from_user.id) not in admin_ids:
+        bot.reply_to(message, "❌ You don't have permission to remove items from the auction.")
+        return
+
+    try:
+        pokemon_name = message.text.split(' ', 1)[1].strip()
+    except IndexError:
+        bot.reply_to(message, "⚠️ Please specify the Pokémon name to remove.\nExample: /remove Pikachu")
+        return
+
+    global items
+    if pokemon_name in items:
+        items.remove(pokemon_name)
+        bot.reply_to(message, f"✅ '{pokemon_name}' has been removed from the auction items.")
+    else:
+        bot.reply_to(message, f"⚠️ '{pokemon_name}' is not in the auction items.")
+
+@bot.message_handler(commands=['tsold'])
+def handle_tsold(message):
+    if message.from_user.id in banned_users:
+        bot.reply_to(message, "❌ You are banned by an administrator.")
+    else:
+        if message.from_user.id in admin_id:
+            try:
+                command, *args = message.text.split(' ', 1)
+                if len(args) != 1:
+                    raise ValueError
+                tms_name = args[0]
+                if not message.reply_to_message:
+                    raise ValueError
+
+                username = message.reply_to_message.from_user.username
+                amount = message.reply_to_message.text
+
+                # Create the reply message in the desired format
+                reply_message = f"""
+🔊 𝗧𝗠𝗦 𝗦𝗢𝗟𝗗 🚀
+
+<blockquote>𝗧𝗠𝗦 𝗡𝗔𝗠𝗘 -\n {tms_name}
+
+🔸𝗦𝗢𝗟𝗗 𝗧𝗢 - @{username}
+🔸𝗦𝗢𝗟𝗗 𝗙𝗢𝗥 - {amount}</blockquote>
+
+❗<a href='https://t.me/AllinoneHexa'>Join Trade Group</a> To Get Seller Username After Auction
+"""
+                sent_message = bot.reply_to(message, reply_message, parse_mode="HTML", disable_web_page_preview=True)
+
+                # Send a sticker to celebrate the sale
+                bot.send_sticker(message.chat.id, SOLD_STICKER_ID)
+
+                # Pin the sold message in the chat
+                bot.pin_chat_message(message.chat.id, sent_message.id)
+
+                # Track sold items
+                tsold_items.append((tms_name, username, amount))
+
+            except ValueError:
+                # Handle invalid command usage
+                bot.send_sticker(message.chat.id, DOUBT_STICKER_ID)
+                bot.reply_to(
+                    message,
+                    "❌ <b>Invalid usage!</b> Please use the command in the format:\n<code>/tsold (TMS name)</code>",
+                    parse_mode="HTML"
+                )
+        else:
+            # Handle unauthorized users attempting to use the command
+            bot.send_sticker(message.chat.id, ANGRY_STICKER_ID)
+            bot.reply_to(
+                message,
+                "❌ <b>You are not authorized to use this command.</b>",
+                parse_mode="HTML"
+            )
+
+tsold_items=[]
+
+
+@bot.message_handler(commands=['tbuyers'])
+def handle_tbuyers(message):
+    if str(message.from_user.id) in banned_users:
+        bot.reply_to(message, "You Are Banned By an Administrator")
+    else:
+        if message.from_user.id not in admin_id:
+            bot.reply_to(message, "You are not authorized to use this command.")
+            return
+
+        if not tsold_items:
+            bot.reply_to(message, "No items have been sold yet.")
+            return
+
+        buyers_list = "📋 List of Buyers:\n\n"
+        for tms_name, buyer_username, amount in tsold_items:
+            buyers_list += f"🔹 {tms_name} sold to @{buyer_username} for {amount}\n"
+
+        bot.reply_to(message, buyers_list)
+
+
+@bot.message_handler(commands=['reset_tbuyers'])
+def reset_tbuyers(message):
+    if str(message.from_user.id) in banned_users:
+        bot.reply_to(message, "You Are Banned By an Administrator")
+    else:
+        if message.from_user.id not in admin_id:
+            bot.reply_to(message, "You are not authorized to use this command.")
+            return
+
+        global tsold_items
+        tsold_items.clear()  # Clear the buyers list
+        bot.reply_to(message, "The buyers list has been reset.")
+
+
+@bot.message_handler(commands=['remove_tbuyer'])
+def remove_tbuyer(message):
+    if str(message.from_user.id) in banned_users:
+        bot.reply_to(message, "❌ You Are Banned By an Administrator.")
+        return
+
+    if message.from_user.id not in admin_id:
+        bot.reply_to(message, "🚫 You are not authorized to use this command.")
+        return
+
+    # Extract the username from the command
+    try:
+        username_to_remove = message.text.split()[1]  # Expecting format: /remove_buyer @username
+    except IndexError:
+        bot.reply_to(message, "❗ Please provide a username to remove.\nUsage: `/remove_buyer @username`", parse_mode="Markdown")
+        return
+
+    global tsold_items
+    # Find and remove the matching buyer
+    for item in tsold_items:
+        if item[1] == username_to_remove:  # Check if the username matches
+            tsold_items.remove(item)
+            bot.reply_to(message, f"✅ Buyer @{username_to_remove} has been removed from the list.")
+            return
+
+    bot.reply_to(message, f"⚠️ Buyer @{username_to_remove} not found in the list.")
+
+@bot.message_handler(commands=['update'])
+def update_prompt(message):
+    userd = message.from_user.id
+    if message.chat.type != 'private':
+        bot.reply_to(
+            message,
+            "please click below button to go for update",
+            reply_markup=InlineKeyboardMarkup().add(InlineKeyboardButton('update',url='https://t.me/auct_he_bot?start=update'))
+            )
+        return
+    
+    pic = 'AgACAgQAAyEFAASBkeyOAAL09WfW7HIZPPLKorA4ltmGh9kzUNnnAAKDtzEbplu8Un0NeLOT25NjAQADAgADeAADNgQ'
+    text = 'To update the bot click the button down.'
+    chat_id = message.chat.id
+    
+    bot.send_photo(
+        chat_id,
+        photo=pic,
+        caption=text,
+        reply_markup=InlineKeyboardMarkup().add(InlineKeyboardButton('Update',callback_data=f'update_{chat_id}_{userd}'))
+    )
+    
+@bot.callback_query_handler(func=lambda call: call.data.startswith("update_"))
+def call_bcv(call):
+    dat = call.data.split('_')
+    user_id = call.from_user.id
+    first_name = call.from_user.full_name
+    username = f'@{call.from_user.username}' if call.from_user.username else f'<a href="tg://user?id={user_id}">{first_name}</a>'
+    chatd = int(dat[1])
+    usered = int(dat[2])  # Extracted user ID as integer
+
+    # Fetch user data correctly from `users` dictionary
+    userd = users.get(str(usered), {})  # Get user data or an empty dict
+
+    bot.delete_message(call.message.chat.id, call.message.message_id)
+
+    # Check if the user exists and is already updated
+    if userd.get('version') == CURRENT_BOT_VERSION:
+        bot.send_message(chatd, "✅ You already have the latest bot version.")
+        return
+
+    # Sending update message
+    bro = bot.send_message(chatd, "🔄 Your bot is updating now...")
+    time.sleep(2)
+
+    # Countdown update message
+    for i in range(5, 0, -1):
+        bot.edit_message_text(
+            chat_id=bro.chat.id,
+            message_id=bro.message_id,
+            text=f"⚙️ Updating bot in {i}..."
+        )
+        time.sleep(1)
+
+    bot.delete_message(bro.chat.id, bro.message_id)
+
+    # Update the user's version if they exist in the dictionary
+    if str(usered) in users:
+        users[str(usered)].update({
+            "name": first_name,  # Update name
+            "username": username,  # Update username
+            "version": CURRENT_BOT_VERSION  # Update version
+        })
+        save_user(users)
+    else:
+        bot.send_message(chatd, "⚠️ Update failed. Please try again.")
+        return  # Exit if user is not found
+
+    time.sleep(3)
+    bot.send_photo(
+        chatd,
+        photo='AgACAgQAAyEFAASBkeyOAAL0-mfW7VLcXsO59L5wup6iXOv6Bq5UAALOtjEbQ911UCHDAowlfJWrAQADAgADeQADNgQ',
+        caption="✅ Your bot has been updated successfully!\nYou can now start using the new features. 🚀",
+        reply_markup=types.InlineKeyboardMarkup().add(
+            types.InlineKeyboardButton('Trade Group', url='https://t.me/allinonehexa')
+        )
+    )
+
+@bot.message_handler(commands=['getid'])
+def get_file_id(message):
+    if not message.reply_to_message:
+        bot.reply_to(message, "Please reply to a sticker or photo to get its ID.")
+        return
+    
+    replied = message.reply_to_message
+    
+    if replied.sticker:  # If it's a sticker
+        file_id = replied.sticker.file_id
+        bot.reply_to(message, f"Sticker ID: `{file_id}`", parse_mode='Markdown')
+
+    elif replied.photo:  # If it's a photo (photo has multiple sizes, take the last one)
+        file_id = replied.photo[-1].file_id
+        bot.reply_to(message, f"Photo ID: `{file_id}`", parse_mode='Markdown')
+
+    else:
+        bot.reply_to(message, "This command only works when replying to a sticker or a photo.")
+
+import re
+
+# ✅ Replace with your actual values
+TRADE_GROUP_ID = -1002128413716  # Replace with the actual trade group ID
+
+# ✅ Function to check if the message is a valid bid (numbers, numbers + 'k', or "/pass")
+def is_valid_bid(text):
+    return re.fullmatch(r"\d+(\.\d+)?[kK]?|/pass", text) is not None
+
+# ✅ Function to check if the user is an admin (checks against the list)
+def is_admin(user_id):
+    return user_id in xmods
+
+# ✅ Function to check if the user is a member of the trade group
+def is_user_in_trade_group(user_id):
+    try:
+        member = bot.get_chat_member(TRADE_GROUP_ID, user_id)
+        return member.status in ["member", "administrator", "creator"]
+    except Exception as e:
+        print(f"Error checking user {user_id} in trade group: {e}")
+        return False
+
+# ✅ Check if the user has started the bot
+def has_started_bot(user_id):
+    users = load_user()
+    return str(user_id) in users
+
+def is_user_updated(user_id):
+    """Check if the user's bot version matches the current bot version."""
+    user_data = users.get(str(user_id), {})  # Fetch user data safely
+    
+    return user_data.get("version") == CURRENT_BOT_VERSION
+
+@bot.message_handler(func=lambda message: True, content_types=["text"])
+def filter_messages(message):
+    user_id = message.from_user.id
+    username = message.from_user.username
+    full_name = message.from_user.full_name
+    chat_id = message.chat.id
+
+    global auce_active
+
+    if not auce_active:
+        return
+    
+    if chat_id != -1002022693265:
+        return 
+
+    # ✅ Skip admin messages
+    if is_admin(user_id):
+        return
+
+    if is_valid_bid(message.text):
+        # ✅ Check if the user has started the bot
+        if not has_started_bot(user_id):
+            bot.delete_message(chat_id, message.message_id)
+            mention = f"<a href='tg://user?id={user_id}'>{full_name}</a>"
+            warning_text = (
+                f"{mention}, please start the bot before participating in the auction! "
+                f"➡️ <a href='https://t.me/auct_he_bot?start=start'>Start Bot</a>."
+            )
+            bot.send_message(chat_id, warning_text, disable_web_page_preview=True, parse_mode='html')
+            return
+        
+        if not is_user_updated(user_id):
+            bot.delete_message(chat_id, message.message_id)
+            mention = f"<a href='tg://user?id={user_id}'>{full_name}</a>"
+            warning_text = (
+                f"{mention}, please start the bot before participating in the auction! "
+                f"➡️ <a href='https://t.me/auct_he_bot?start=update'>Update Bot</a>."
+            )
+            bot.send_message(chat_id, warning_text, disable_web_page_preview=True, parse_mode='html')
+            return
+
+        # ✅ Check if the user is in the trade group
+        if not is_user_in_trade_group(user_id):
+            bot.delete_message(chat_id, message.message_id)
+            mention = f"<a href='tg://user?id={user_id}'>{full_name}</a>"
+            warning_text = (
+                f"{mention}, you haven't joined the <a href='https://t.me/AllinoneHexa'>Trade Group</a> yet!"
+            )
+            bot.send_message(chat_id, warning_text, disable_web_page_preview=True, parse_mode='html')
+        return
+
+    # ✅ Delete invalid bid messages
+    bot.delete_message(chat_id, message.message_id)
+
+@bot.message_handler(commands=['sellerinfo'])
+def send_sellerinfo(message):
+    if str(message.from_user.id) in banned_users:
+        bot.reply_to(message, "You Are Banned By an Administrator")
+    else:
+        if message.chat.type == 'private':
+            sellerinfo_message = """
+🔺Formats For Use Seller Command:-
+
+🔹To Find 0l Seller :-
+/seller <pokename>
+E.g. /seller slakoth, /seller Abra
+
+🔹To Find 6l Seller:-
+/seller 6l <pokename>
+E.g. /seller 6l yveltal, /seller 6l mewtwo
+
+🔹To Find Shiny Seller:-
+/seller shiny <pokename>
+E.g. /seller shiny ponyta, /seller shiny steelix
+
+🔹To Find TMs Seller :-
+/seller <tm>
+E.g. /seller TM12, /seller TM73
+
+🔹To Find Team Seller :-
+/seller <teamname> Team
+E.g. /seller HP Team, /seller Spa Team
+"""
+            bot.reply_to(message, sellerinfo_message)
+        else:
+            bot.reply_to(message, "This command can only be used in private messages.")
+            
+# Start bot polling
+print("Bot is running...")
+
+bot.skip_pending = True
+
+user_ids = set()
 
 
 
