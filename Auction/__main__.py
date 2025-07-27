@@ -562,7 +562,8 @@ def process_nature_pic(message, item_type, pokemon_name):
                     parse_mode="HTML"
                 )
 
-    if valid_nature_page(message):
+    if message.caption:  # outer check
+    if valid_nature_page(message):  # inner check
         bot.register_next_step_handler(message, process_evs_pic, item_type, pokemon_name, message.caption)
     else:
         bot.send_message(
