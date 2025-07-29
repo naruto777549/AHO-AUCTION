@@ -1,6 +1,6 @@
 from pyrogram import filters
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
-from config import bot
+from Auction import bot
 from Auction.db import start_tag, stop_tag, is_tagging_active, get_tag_data
 import asyncio
 import random
