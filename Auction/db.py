@@ -1,4 +1,6 @@
 import os
+import json
+from config import USER_DATA_FILE, admin_id
 from motor.motor_asyncio import AsyncIOMotorClient
 
 # MongoDB URI
@@ -133,9 +135,6 @@ async def remove_pending(user_id):
 
 # ── ADMIN FUNCTIONS ──
 
-async def is_admin(user_id):
-    return await admins_collection.find_one({"user_id": user_id}) is not None
-
 async def add_admin(user_id):
     if not await is_admin(user_id):
         await admins_collection.insert_one({"user_id": user_id})
@@ -218,3 +217,17 @@ async def start_submission():
 
 async def end_submission():
     await submission_status_collection.update_one({"status": "active"}, {"$set": {"status": "inactive"}}, upsert=True)
+
+def load_user():
+    try:
+        with open(USER_DATA_FILE, "r") as file:
+            return json.load(file)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {}
+
+def save_user(users):
+    with open(USER_DATA_FILE, "w") as file:
+        json.dump(users, file, indent=4)
+
+def is_admin(user_id):
+    return user_id in admin_id
