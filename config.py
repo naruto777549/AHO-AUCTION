@@ -1,26 +1,30 @@
 import os
 
-API_ID = int(os.getenv("API_ID"))
-API_HASH = os.getenv("API_HASH")
-BOT_TOKEN = os.getenv("BOT_TOKEN")
+API_ID = int(os.getenv("API_ID", "21218274"))
+API_HASH = os.getenv("API_HASH", "3474a18b61897c672d315fb330edb213")
+BOT_TOKEN = os.getenv("BOT_TOKEN", "8320447631:AAHiZGAM0sbpxi9Ksm-tNw644ddPXgg8y1E")
 
-admin_id = list(map(int, os.getenv("ADMIN_ID", "").split(",")))
-xmods = list(map(int, os.getenv("XMODS", "").split(",")))
+# Admins and Mods as list of integers
+ADMIN_ID = list(map(int, os.getenv("ADMIN_ID", "7576729648,6642049252").split(",")))
+XMODS = list(map(int, os.getenv("XMODS", "7576729648,6642049252").split(",")))
 
-WELCOME_STICKER_ID = os.getenv("WELCOME_STICKER_ID")
-WARNING_STICKER_ID = os.getenv("WARNING_STICKER_ID")
-SOLD_STICKER_ID = os.getenv("SOLD_STICKER_ID")
-THINK_STICKER_ID = os.getenv("THINK_STICKER_ID")
-ANGRY_STICKER_ID = os.getenv("ANGRY_STICKER_ID")
-DOUBT_STICKER_ID = os.getenv("DOUBT_STICKER_ID")
-SAD_STICKER_ID = os.getenv("SAD_STICKER_ID")
-OK_STICKER_ID = os.getenv("OK_STICKER_ID")
+# Sticker IDs
+WELCOME_STICKER_ID = os.getenv("WELCOME_STICKER_ID", "CAACAgEAAxkBAAENYoZnagebeFQjjClqjKELnFcaaBvPLwACkgADy7gIFZplGy0ksfj_NgQ")
+WARNING_STICKER_ID = os.getenv("WARNING_STICKER_ID", "CAACAgEAAxkBAAENYoxnagn4itpNSinKqSfWqPjFYz-oagACnQADy7gIFdZeCTVtYsoMNgQ")
+SOLD_STICKER_ID = os.getenv("SOLD_STICKER_ID", "CAACAgEAAxkBAAENYpRnahIw3vamSFqCymixG_N5ZYsqdQAClAADy7gIFek9gAdhFRVrNgQ")
+THINK_STICKER_ID = os.getenv("THINK_STICKER_ID", "CAACAgEAAxkBAAENYpZnahU0RlgFICbPg9MhVFIYFJSkqgACmwADy7gIFfkLQu4X9LxKNgQ")
+ANGRY_STICKER_ID = os.getenv("ANGRY_STICKER_ID", "CAACAgEAAxkBAAENYphnahXJlDkmAWZ9JN_oKgbTFMSmFwACmAADy7gIFV4YOsvxViF8NgQ")
+DOUBT_STICKER_ID = os.getenv("DOUBT_STICKER_ID", "CAACAgEAAxkBAAENYp9naiCsJ12HhsCs_La-GP8gkWSvyAACnAADy7gIFSmDoxff0TD-NgQ")
+SAD_STICKER_ID = os.getenv("SAD_STICKER_ID", "CAACAgEAAxkBAAENYqFnaiFpobLesctRj96Dzz7cS2iLWwACmgADy7gIFTcqDPitqlYdNgQ")
+OK_STICKER_ID = os.getenv("OK_STICKER_ID", "CAACAgEAAxkBAAENYp1nah-WgtzXbsGIKOaFd3srA0x3uAACmQADy7gIFdZWbyekt05INgQ")
 
-AUCTION_GROUP_LINK = os.getenv("AUCTION_GROUP_LINK")
-log_channel = int(os.getenv("LOG_CHANNEL"))
-post_channel = int(os.getenv("POST_CHANNEL"))
-approve_channel = int(os.getenv("APPROVE_CHANNEL"))
-reject_channel = int(os.getenv("REJECT_CHANNEL"))
+# Links and Channel IDs
+AUCTION_GROUP_LINK = os.getenv("AUCTION_GROUP_LINK", "https://t.me/+PXgGASqusSMxZjU9")
+LOG_CHANNEL = int(os.getenv("LOG_CHANNEL", "-1002611946558"))
+POST_CHANNEL = int(os.getenv("POST_CHANNEL", "-1002785272450"))
+APPROVE_CHANNEL = int(os.getenv("APPROVE_CHANNEL", "-1002611946558"))
+REJECT_CHANNEL = int(os.getenv("REJECT_CHANNEL", "-1002611946558"))
 
+# Misc
 CURRENT_BOT_VERSION = os.getenv("CURRENT_BOT_VERSION", "3.0.0")
 USER_DATA_FILE = os.getenv("USER_DATA_FILE", "users.json")
