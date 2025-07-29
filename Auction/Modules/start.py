@@ -1,6 +1,6 @@
 from telebot.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 from config import *
-from db import load_user, save_user, is_admin
+from Auction.db import load_user, save_user, is_admin
 from main import bot  # Make sure bot is defined in main and imported here
 
 users = load_user()
