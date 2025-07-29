@@ -1,9 +1,20 @@
 from pyrogram import filters
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from Auction import bot  
+from Auction.db import save_user, save_group  # ✅ import added
 
-@bot.on_message(filters.command("start") & filters.private)
+@bot.on_message(filters.command("start"))
 async def start(_, message: Message):
+
+    # ✅ Save user or group to DB
+    if message.chat.type == "private":
+        await save_user(message.from_user.id)
+    else:
+        await save_group(message.chat.id)
+
+    if message.chat.type != "private":
+        return  # ✅ Only reply in private chats
+
     await message.reply_text(
         """🌀 ᴛᴀɢᴀʟʟ ʙᴏᴛ
 ➖➖➖➖➖➖➖➖➖➖➖➖
