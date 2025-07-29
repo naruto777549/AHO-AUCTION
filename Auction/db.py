@@ -11,3 +11,31 @@ if not MONGO_URI or "null" in MONGO_URI:
 # Connect to MongoDB
 mongo_client = AsyncIOMotorClient(MONGO_URI)
 db = mongo_client["TAG_BOT"]
+
+tag_collection = db["active_tags"]
+
+# Start tagging
+async def start_tag(chat_id: int, user_id: int, text: str = None):
+    await tag_collection.update_one(
+        {"chat_id": chat_id},
+        {"$set": {
+            "chat_id": chat_id,
+            "user_id": user_id,
+            "text": text,
+            "active": True
+        }},
+        upsert=True
+    )
+
+# Stop tagging
+async def stop_tag(chat_id: int):
+    await tag_collection.delete_one({"chat_id": chat_id})
+
+# Check if active
+async def is_tagging_active(chat_id: int):
+    data = await tag_collection.find_one({"chat_id": chat_id})
+    return bool(data and data.get("active", False))
+
+# Get tag data
+async def get_tag_data(chat_id: int):
+    return await tag_collection.find_one({"chat_id": chat_id})
