@@ -12,7 +12,22 @@ if not MONGO_URI or "null" in MONGO_URI:
 mongo_client = AsyncIOMotorClient(MONGO_URI)
 db = mongo_client["TAG_BOT"]
 
+# Add this collection
 tag_collection = db["active_tags"]
+users_collection = db["users"]
+groups_collection = db["groups"]
+
+async def save_user(user_id):
+    await users_collection.update_one({"_id": user_id}, {"$set": {"_id": user_id}}, upsert=True)
+
+async def save_group(group_id):
+    await groups_collection.update_one({"_id": group_id}, {"$set": {"_id": group_id}}, upsert=True)
+
+async def get_all_users():
+    return users_collection.find()
+
+async def get_all_groups():
+    return groups_collection.find()
 
 # Start tagging
 async def start_tag(chat_id: int, user_id: int, text: str = None):
