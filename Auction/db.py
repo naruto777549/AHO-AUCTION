@@ -62,7 +62,7 @@ async def get_tag_data(chat_id: int):
     return await tag_collection.find_one({"chat_id": chat_id})
 
 async def get_total_users():
-    return await Users.count_documents({})
+    return await users_collection.count_documents({})
 
 async def get_total_groups():
-    return await Groups.count_documents({})
+    return await groups_collection.count_documents({})
