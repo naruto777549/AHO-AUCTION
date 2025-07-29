@@ -2,21 +2,21 @@ from pyrogram import filters
 from pyrogram.types import Message
 from Auction import bot
 from Auction.db import get_all_users, get_all_groups
+from config import ADMINS
 import asyncio
 
-OWNER_ID = 7576729648  # 🔁 Replace with your real owner ID
-
-@bot.on_message(filters.command("bcast") & filters.user(OWNER_ID))
+@bot.on_message(filters.command("bcast") & filters.user(ADMINS))
 async def broadcast_handler(_, message: Message):
     if message.reply_to_message:
         content = message.reply_to_message
     else:
         text = message.text.split(None, 1)
         if len(text) < 2:
-            return await message.reply("❌ Give a message or reply to one.")
+            return await message.reply("❌ ᴇxᴀᴍᴘʟᴇ:\n\n`/bcast [ᴍᴇssᴀɢᴇ ᴏʀ ʀᴇᴘʟʏ ᴛᴏ ᴀ ᴍᴇssᴀɢᴇ]`")
         content = text[1]
 
-    sent, failed = 0, 0
+    status = await message.reply("» sᴛᴀʀᴛᴇᴅ ʙʀᴏᴀᴅᴄᴀsᴛɪɴɢ...")
+    total, pinned = 0, 0
 
     # Users
     async for user in get_all_users():
@@ -25,21 +25,26 @@ async def broadcast_handler(_, message: Message):
                 await content.copy(user["_id"])
             else:
                 await bot.send_message(user["_id"], content)
-            sent += 1
-            await asyncio.sleep(0.05)
+            total += 1
+            await asyncio.sleep(0.03)
         except:
-            failed += 1
+            pass
 
     # Groups
     async for group in get_all_groups():
         try:
             if isinstance(content, Message):
-                await content.copy(group["_id"])
+                sent = await content.copy(group["_id"])
             else:
-                await bot.send_message(group["_id"], content)
-            sent += 1
-            await asyncio.sleep(0.05)
+                sent = await bot.send_message(group["_id"], content)
+            total += 1
+            try:
+                await sent.pin(disable_notification=True)
+                pinned += 1
+            except:
+                pass
+            await asyncio.sleep(0.03)
         except:
-            failed += 1
+            pass
 
-    await message.reply(f"✅ Broadcast Done!\n\n✅ Sent: {sent}\n❌ Failed: {failed}")
+    await status.edit(f"» ʙʀᴏᴀᴅᴄᴀsᴛᴇᴅ ᴍᴇssᴀɢᴇ ᴛᴏ {total} ᴄʜᴀᴛs ᴡɪᴛʜ {pinned} ᴘɪɴs ғʀᴏᴍ ᴛʜᴇ ʙᴏᴛ.")
