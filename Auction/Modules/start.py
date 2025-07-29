@@ -1,14 +1,14 @@
 from pyrogram import filters
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
-from Auction import bot  
+from Auction import bot
 from Auction.db import save_user, save_group
 
 @bot.on_message(filters.command("start"))
 async def start(_, message: Message):
-
     if message.chat.type == "private":
         await save_user(message.from_user.id)
 
+        me = await bot.get_me()  # ✅ Ensure bot username is fetched here
         await message.reply_text(
             """🌀 ᴛᴀɢᴀʟʟ ʙᴏᴛ
 ➖➖➖➖➖➖➖➖➖➖➖➖
@@ -19,7 +19,7 @@ async def start(_, message: Message):
 ➖➖➖➖➖➖➖➖➖➖➖➖
 ᴇᴀsʏ ᴛᴏ ᴜsᴇ & ғᴜʟʟʏ ғᴜɴᴄᴛɪᴏɴᴀʟ ᴛᴀɢɢɪɴɢ ʙᴏᴛ ғᴏʀ ɢʀᴏᴜᴘs 🚀""",
             reply_markup=InlineKeyboardMarkup([
-                [InlineKeyboardButton("➕ ᴀᴅᴅ ᴍᴇ ᴛᴏ ʏᴏᴜʀ ɢʀᴏᴜᴘ", url=f"https://t.me/{bot.me.username}?startgroup=true")],
+                [InlineKeyboardButton("➕ ᴀᴅᴅ ᴍᴇ ᴛᴏ ʏᴏᴜʀ ɢʀᴏᴜᴘ", url=f"https://t.me/{me.username}?startgroup=true")],
                 [
                     InlineKeyboardButton("ᴏᴡɴᴇʀ", url="https://t.me/Uzumaki_X_Naruto_6"),
                     InlineKeyboardButton("sᴜᴘᴘᴏʀᴛ ᴄʜᴀᴛ", url="https://t.me/Aho_Hexa_Auction")
