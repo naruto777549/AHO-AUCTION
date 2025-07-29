@@ -24,6 +24,13 @@ submission_status_collection = db["submission_status"]
 sold_collection = db["sold_submissions"]
 super_admins_collection = db["super_admins"]
 group_chats_collection = db["group_chats"]
+user_join_status = {}
+user_states = {}
+started_users = set()
+banned_users = set()
+broad_users = []
+c = 0
+sub_process = False
 
 # ── USER FUNCTIONS ──
 
