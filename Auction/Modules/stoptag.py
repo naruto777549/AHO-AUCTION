@@ -1,7 +1,7 @@
 from pyrogram import filters
 from pyrogram.types import Message
-from config import bot
-from Database.state import active_tags
+from Auction import bot
+from Auction.db import start_tag, stop_tag, is_tagging_active, get_tag_data
 
 @bot.on_message(filters.command("stoptag") & filters.group)
 async def stop_tag(_, message: Message):
