@@ -6,7 +6,7 @@ import asyncio
 import random
 
 # Emojis for tagging
-EMOJIS = ["👨‍🌾", "👩‍🍳", "🧑‍🚀", "👩‍🏫", "💀", "🧑‍🦽", "👩‍🦳", "👨‍🍳", "🧛", "🧙", "🐮"]
+EMOJIS = ["🦁", "🐯", "🐱", "🐶", "🐺", "🐻", "🐻‍❄️", "🐨", "🐼", "🐹", "🐭", "🐰", "🦊", "🦝", "🐮", "🐷"]
 
 # /tagall command handler
 @bot.on_message(filters.command("tagall") & filters.group)
