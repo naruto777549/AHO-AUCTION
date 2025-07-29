@@ -1,6 +1,6 @@
 import os
 import json
-from config import USER_DATA_FILE, admin_id
+from config import USER_DATA_FILE, ADMIN_ID
 from motor.motor_asyncio import AsyncIOMotorClient
 
 # MongoDB URI
