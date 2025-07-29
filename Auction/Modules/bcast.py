@@ -1,20 +1,45 @@
 from pyrogram import filters
 from pyrogram.types import Message
 from Auction import bot
+from Auction.db import get_all_users, get_all_groups
+import asyncio
 
-@bot.on_message(filters.command("bcast") & filters.private)
-async def broadcast(_, message: Message):
-    if message.from_user.id not in [7576729648]:  # Replace OWNER_ID
-        return await message.reply("Only owner can broadcast.")
+OWNER_ID = 7576729648  # 🔁 Replace with your real owner ID
 
-    if not message.reply_to_message:
-        return await message.reply("Reply to a message to broadcast.")
+@bot.on_message(filters.command("bcast") & filters.user(OWNER_ID))
+async def broadcast_handler(_, message: Message):
+    if message.reply_to_message:
+        content = message.reply_to_message
+    else:
+        text = message.text.split(None, 1)
+        if len(text) < 2:
+            return await message.reply("❌ Give a message or reply to one.")
+        content = text[1]
 
-    count = 0
-    async for dialog in bot.get_dialogs():
+    sent, failed = 0, 0
+
+    # Users
+    async for user in get_all_users():
         try:
-            await bot.send_message(dialog.chat.id, message.reply_to_message.text)
-            count += 1
+            if isinstance(content, Message):
+                await content.copy(user["_id"])
+            else:
+                await bot.send_message(user["_id"], content)
+            sent += 1
+            await asyncio.sleep(0.05)
         except:
-            continue
-    await message.reply(f"✅ Broadcast sent to `{count}` chats.")
+            failed += 1
+
+    # Groups
+    async for group in get_all_groups():
+        try:
+            if isinstance(content, Message):
+                await content.copy(group["_id"])
+            else:
+                await bot.send_message(group["_id"], content)
+            sent += 1
+            await asyncio.sleep(0.05)
+        except:
+            failed += 1
+
+    await message.reply(f"✅ Broadcast Done!\n\n✅ Sent: {sent}\n❌ Failed: {failed}")
