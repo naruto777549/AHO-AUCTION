@@ -18,8 +18,9 @@ async def broadcast_handler(_, message: Message):
     status = await message.reply("» sᴛᴀʀᴛᴇᴅ ʙʀᴏᴀᴅᴄᴀsᴛɪɴɢ...")
     total, pinned = 0, 0
 
-    # Users
-    async for user in get_all_users():
+    # ✅ Await the coroutine first
+    users_cursor = await get_all_users()
+    async for user in users_cursor:
         try:
             if isinstance(content, Message):
                 await content.copy(user["_id"])
@@ -30,8 +31,8 @@ async def broadcast_handler(_, message: Message):
         except:
             pass
 
-    # Groups
-    async for group in get_all_groups():
+    groups_cursor = await get_all_groups()
+    async for group in groups_cursor:
         try:
             if isinstance(content, Message):
                 sent = await content.copy(group["_id"])
@@ -47,4 +48,6 @@ async def broadcast_handler(_, message: Message):
         except:
             pass
 
-    await status.edit(f"» ʙʀᴏᴀᴅᴄᴀsᴛᴇᴅ ᴍᴇssᴀɢᴇ ᴛᴏ {total} ᴄʜᴀᴛs ᴡɪᴛʜ {pinned} ᴘɪɴs ғʀᴏᴍ ᴛʜᴇ ʙᴏᴛ.")
+    await status.edit(
+        f"» ʙʀᴏᴀᴅᴄᴀsᴛᴇᴅ ᴍᴇssᴀɢᴇ ᴛᴏ {total} ᴄʜᴀᴛs ᴡɪᴛʜ {pinned} ᴘɪɴs ғʀᴏᴍ ᴛʜᴇ ʙᴏᴛ."
+    )
