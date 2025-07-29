@@ -9,7 +9,7 @@ from Auction.db import get_total_users, get_total_groups
 @bot.on_message(filters.command("ping"))
 async def ping_command(_, message: Message):
     start = time.time()
-    sent_msg = await message.reply("🏓")
+    sent_msg = await message.reply("🔍")
     end = time.time()
 
     ping = round((end - start) * 1000)
