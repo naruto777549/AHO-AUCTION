@@ -1,6 +1,6 @@
 from pyrogram import filters
 from pyrogram.types import Message
-from config import bot
+from Auction import bot
 
 @bot.on_message(filters.command("bcast") & filters.private)
 async def broadcast(_, message: Message):
