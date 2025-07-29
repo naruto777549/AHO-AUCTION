@@ -1,10 +1,5 @@
 kurigram
 tgcrypto 
 pymongo
-telebot
-jinja2
 python-dotenv
 motor
-brain
-humanize
-psutil
