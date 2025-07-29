@@ -4,7 +4,7 @@ from config import bot
 
 @bot.on_message(filters.command("bcast") & filters.private)
 async def broadcast(_, message: Message):
-    if message.from_user.id not in [OWNER_ID]:  # Replace OWNER_ID
+    if message.from_user.id not in [7576729648]:  # Replace OWNER_ID
         return await message.reply("Only owner can broadcast.")
 
     if not message.reply_to_message:
