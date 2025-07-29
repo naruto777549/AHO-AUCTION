@@ -1,12 +1,14 @@
 from pyrogram import filters
-from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
+from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 from Auction import bot
 from Auction.db import start_tag, stop_tag, is_tagging_active, get_tag_data
 import asyncio
 import random
 
+# Emojis for tagging
 EMOJIS = ["👨‍🌾", "👩‍🍳", "🧑‍🚀", "👩‍🏫", "💀", "🧑‍🦽", "👩‍🦳", "👨‍🍳", "🧛", "🧙", "🐮"]
 
+# /tagall command handler
 @bot.on_message(filters.command("tagall") & filters.group)
 async def tagall(_, message: Message):
     if message.reply_to_message:
@@ -14,13 +16,15 @@ async def tagall(_, message: Message):
     else:
         tag_text = " ".join(message.command[1:]) or None
 
-    markup = InlineKeyboardMarkup(
+    # Inline buttons
+    markup = InlineKeyboardMarkup([
         [
-            [InlineKeyboardButton("✅ Send", callback_data="send_tag"),
-             InlineKeyboardButton("❌ Cancel", callback_data="cancel_tag")]
+            InlineKeyboardButton("✅ Send", callback_data="send_tag"),
+            InlineKeyboardButton("❌ Cancel", callback_data="cancel_tag")
         ]
-    )
+    ])
 
+    # Emoji preview
     emojiline = " ".join(random.choices(EMOJIS, k=10))
     await message.reply(
         f"{tag_text if tag_text else ''}\n\n{emojiline}",
@@ -28,15 +32,16 @@ async def tagall(_, message: Message):
         quote=True
     )
 
-    active_tags[message.chat.id] = {
-        "text": tag_text,
-        "from_id": message.from_user.id,
-        "message_id": message.id,
-        "start_msg": message
-    }
+    # Save tag state in DB
+    await start_tag(
+        chat_id=message.chat.id,
+        user_id=message.from_user.id,
+        text=tag_text
+    )
 
+# Callback button handler
 @bot.on_callback_query(filters.regex("^(send_tag|cancel_tag)$"))
-async def handle_buttons(_, cb):
+async def handle_buttons(_, cb: CallbackQuery):
     chat_id = cb.message.chat.id
     user_id = cb.from_user.id
 
@@ -51,11 +56,13 @@ async def handle_buttons(_, cb):
     if cb.data == "send_tag":
         await cb.edit_message_text("🚀 Tagging started...")
 
+        # Fetch all users
         users = []
         async for member in bot.get_chat_members(chat_id):
             if not member.user.is_bot:
                 users.append(member.user)
 
+        # Tag in chunks
         chunk_size = 5
         text = data.get("text") or ""
         for i in range(0, len(users), chunk_size):
@@ -72,6 +79,7 @@ async def handle_buttons(_, cb):
             await bot.send_message(chat_id, msg.strip(), disable_web_page_preview=True)
             await asyncio.sleep(2)
 
+        # Final status message
         if await is_tagging_active(chat_id):
             await stop_tag(chat_id)
             await bot.send_message(
