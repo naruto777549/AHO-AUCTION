@@ -14,10 +14,10 @@ async def start(_, message: Message):
 ➖➖➖➖➖➖➖➖➖➖➖➖
 ᴇᴀsʏ ᴛᴏ ᴜsᴇ & ғᴜʟʟʏ ғᴜɴᴄᴛɪᴏɴᴀʟ ᴛᴀɢɢɪɴɢ ʙᴏᴛ ғᴏʀ ɢʀᴏᴜᴘs 🚀""",
         reply_markup=InlineKeyboardMarkup([
-            [InlineKeyboardButton("➕ Add me to your Group", url=f"https://t.me/{bot.me.username}?startgroup=true")],
+            [InlineKeyboardButton("➕ ᴀᴅᴅ ᴍᴇ ᴛᴏ ʏᴏᴜʀ ɢʀᴏᴜᴘ", url=f"https://t.me/{bot.me.username}?startgroup=true")],
             [
-                InlineKeyboardButton("👑 Owner", url="https://t.me/Uzumaki_X_Naruto_6"),
-                InlineKeyboardButton("💬 Support Chat", url="https://t.me/Aho_Hexa_Auction")
+                InlineKeyboardButton("ᴏᴡɴᴇʀ", url="https://t.me/Uzumaki_X_Naruto_6"),
+                InlineKeyboardButton("sᴜᴘᴘᴏʀᴛ ᴄʜᴀᴛ", url="https://t.me/Aho_Hexa_Auction")
             ]
         ]),
         disable_web_page_preview=True
