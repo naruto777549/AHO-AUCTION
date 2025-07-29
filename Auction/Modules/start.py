@@ -1,6 +1,6 @@
 from pyrogram import filters
 from pyrogram.types import Message
-from config import bot
+from Auction import bot
 
 @bot.on_message(filters.command("start") & filters.private)
 async def start(_, message: Message):
