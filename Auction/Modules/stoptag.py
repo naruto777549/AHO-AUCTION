@@ -1,14 +1,14 @@
 from pyrogram import filters
 from pyrogram.types import Message
 from Auction import bot
-from Auction.db import start_tag, stop_tag, is_tagging_active, get_tag_data
+from Auction.db import stop_tag, is_tagging_active
 
 @bot.on_message(filters.command("stoptag") & filters.group)
-async def stop_tag(_, message: Message):
+async def stop_tag_command(_, message: Message):
     chat_id = message.chat.id
 
-    if chat_id in active_tags:
-        active_tags.pop(chat_id)
-        await message.reply("🛑 Tagging stopped.")
+    if await is_tagging_active(chat_id):
+        await stop_tag(chat_id)
+        await message.reply("🛑 Tagging stopped successfully.")
     else:
-        await message.reply("⚠️ No ongoing tag process.")
+        await message.reply("⚠️ There is no ongoing tagging process.")
