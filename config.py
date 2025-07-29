@@ -1,4 +1,4 @@
-Import os
+import os
 
 API_ID = 21218274
 API_HASH = '3474a18b61897c672d315fb330edb213'
