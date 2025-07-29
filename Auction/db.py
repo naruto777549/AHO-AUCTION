@@ -23,6 +23,12 @@ async def save_user(user_id):
 async def save_group(group_id):
     await groups_collection.update_one({"_id": group_id}, {"$set": {"_id": group_id}}, upsert=True)
 
+async def save_user(user_id):
+    await users_collection.update_one({"_id": user_id}, {"$set": {"_id": user_id}}, upsert=True)
+
+async def save_group(group_id):
+    await groups_collection.update_one({"_id": group_id}, {"$set": {"_id": group_id}}, upsert=True)
+
 async def get_all_users():
     return users_collection.find()
 
