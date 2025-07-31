@@ -2,7 +2,7 @@ from pyrogram import filters
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 from Auction import bot
 from Auction.db import start_tag, stop_tag, is_tagging_active, get_tag_data
-from Auction.utils import is_user_admin  # Import from utils
+from Auction.utils import is_user_admin
 import asyncio
 import random
 import logging
