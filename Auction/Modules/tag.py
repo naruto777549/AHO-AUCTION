@@ -1,6 +1,6 @@
 from pyrogram import filters
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
-from pyrogram.enums import ChatMemberStatus  # Import enum for status
+from pyrogram.enums import ChatMemberStatus
 from Auction import bot
 from Auction.db import start_tag, stop_tag, is_tagging_active, get_tag_data
 import asyncio
@@ -18,10 +18,13 @@ EMOJIS = ["🦁", "🐯", "🐱", "🐶", "🐺", "🐻", "🐻‍❄️", "🐨
 async def is_user_admin(chat_id: int, user_id: int) -> bool:
     try:
         member = await bot.get_chat_member(chat_id, user_id)
-        logger.info(f"Checking admin status for user {user_id} in chat {chat_id}: Status = {member.status}")
-        return member.status in [ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.CREATOR]
+        status = member.status
+        logger.info(f"Checking admin status for user {user_id} in chat {chat_id}: Status = {status}")
+        is_admin = status in [ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.CREATOR]
+        logger.info(f"User {user_id} is {'admin' if is_admin else 'not admin'}")
+        return is_admin
     except Exception as e:
-        logger.error(f"Error checking admin status for user {user_id} in chat {chat_id}: {str(e)}")
+        logger.error(f"Error checking admin status for user {user_id} in chat {chat_id}: {type(e).__name__}: {str(e)}")
         return False
 
 # /tagall command handler
