@@ -2,7 +2,7 @@ from pyrogram import filters
 from pyrogram.types import Message
 from Auction import bot
 from Auction.db import stop_tag, is_tagging_active
-from Auction.utils import is_user_admin  # Import from utils
+from Auction.utils import is_user_admin
 import logging
 
 # Set up logging
