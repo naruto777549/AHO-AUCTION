@@ -8,9 +8,21 @@ import random
 # Emojis for tagging
 EMOJIS = ["🦁", "🐯", "🐱", "🐶", "🐺", "🐻", "🐻‍❄️", "🐨", "🐼", "🐹", "🐭", "🐰", "🦊", "🦝", "🐮", "🐷"]
 
+# Function to check if user is admin
+async def is_user_admin(chat_id: int, user_id: int) -> bool:
+    try:
+        member = await bot.get_chat_member(chat_id, user_id)
+        return member.status in ["administrator", "creator"]
+    except:
+        return False
+
 # /tagall command handler
 @bot.on_message(filters.command("tagall") & filters.group)
 async def tagall(_, message: Message):
+    # Check if user is admin
+    if not await is_user_admin(message.chat.id, message.from_user.id):
+        return await message.reply("❌ You must be an admin to use this command!", quote=True)
+
     if message.reply_to_message:
         tag_text = message.reply_to_message.text
     else:
