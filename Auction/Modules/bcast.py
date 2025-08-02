@@ -1,9 +1,9 @@
+import asyncio
 from pyrogram import filters
 from pyrogram.types import Message
-from Auction import bot
-from Auction.db import get_all_users, get_all_groups
-from config import ADMINS
-import asyncio
+from Naruto import bot
+from config import ADMIN_ID
+from Naruto.db import get_all_users, get_all_groups
 
 @bot.on_message(filters.command("bcast") & filters.user(ADMINS))
 async def broadcast_handler(_, message: Message):
@@ -18,7 +18,7 @@ async def broadcast_handler(_, message: Message):
     status = await message.reply("» sᴛᴀʀᴛᴇᴅ ʙʀᴏᴀᴅᴄᴀsᴛɪɴɢ...")
     total, pinned = 0, 0
 
-    # ✅ Await the coroutine first
+    # Broadcast to Users
     users_cursor = await get_all_users()
     async for user in users_cursor:
         try:
@@ -31,13 +31,14 @@ async def broadcast_handler(_, message: Message):
         except:
             pass
 
-    groups_cursor = await get_all_groups()
-    async for group in groups_cursor:
+    # Broadcast to Groups
+    groups = await get_all_groups()
+    for group_id in groups:
         try:
             if isinstance(content, Message):
-                sent = await content.copy(group["_id"])
+                sent = await content.copy(group_id)
             else:
-                sent = await bot.send_message(group["_id"], content)
+                sent = await bot.send_message(group_id, content)
             total += 1
             try:
                 await sent.pin(disable_notification=True)
@@ -49,5 +50,5 @@ async def broadcast_handler(_, message: Message):
             pass
 
     await status.edit(
-        f"» ʙʀᴏᴀᴅᴄᴀsᴛᴇᴅ ᴍᴇssᴀɢᴇ ᴛᴏ {total} ᴄʜᴀᴛs ᴡɪᴛʜ {pinned} ᴘɪɴs ғʀᴏᴍ ᴛʜᴇ ʙᴏᴛ."
+        f"✅ ʙʀᴏᴀᴅᴄᴀsᴛᴇᴅ ᴍᴇssᴀɢᴇ ᴛᴏ `{total}` ᴄʜᴀᴛs\n📌 ᴍᴇssᴀɢᴇ ᴘɪɴɴᴇᴅ ɪɴ `{pinned}` ɢʀᴏᴜᴘs."
     )
