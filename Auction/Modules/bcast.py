@@ -2,7 +2,7 @@ import asyncio
 from pyrogram import filters
 from pyrogram.types import Message
 from Naruto import bot
-from config import ADMIN_ID
+from config import ADMINS
 from AUCTION.db import get_all_users, get_all_groups
 
 @bot.on_message(filters.command("bcast") & filters.user(ADMINS))
