@@ -3,7 +3,7 @@ from pyrogram import filters
 from pyrogram.types import Message
 from Naruto import bot
 from config import ADMIN_ID
-from Naruto.db import get_all_users, get_all_groups
+from AUCTION.db import get_all_users, get_all_groups
 
 @bot.on_message(filters.command("bcast") & filters.user(ADMINS))
 async def broadcast_handler(_, message: Message):
