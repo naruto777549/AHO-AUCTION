@@ -1,7 +1,7 @@
 import asyncio
 from pyrogram import filters
 from pyrogram.types import Message
-from Naruto import bot
+from Auction import bot
 from config import ADMINS
 from AUCTION.db import get_all_users, get_all_groups
 
