@@ -1,8 +1,8 @@
 from pyrogram import filters
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 from pyrogram.enums import ChatMemberStatus
-from Tagger import bot
-from Tagger.db import start_tag, stop_tag, is_tagging_active, get_tag_data
+from Auction import bot
+from Auction.db import start_tag, stop_tag, is_tagging_active, get_tag_data
 import asyncio
 import random
 import logging
@@ -11,8 +11,12 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Emojis for tagging
-EMOJIS = ["🦁", "🐯", "🐱", "🐶", "🐺", "🐻", "🐻‍❄️", "🐨", "🐼", "🐹", "🐭", "🐰", "🦊", "🦝", "🐮", "🐷"]
+# Emojis for tagging (Animal)
+EMOJIS = [
+    "🦁", "🐯", "🐱", "🐶", "🐺", "🐻",
+    "🐻‍❄️", "🐨", "🐼", "🐹", "🐭",
+    "🐰", "🦊", "🦝", "🐮", "🐷"
+]
 
 # Function to check if user is group admin
 async def is_user_admin(bot, chat_id, user_id):
@@ -20,7 +24,6 @@ async def is_user_admin(bot, chat_id, user_id):
         member = await bot.get_chat_member(chat_id, user_id)
         status = member.status
         logger.info(f"Checking admin status for user {user_id} in chat {chat_id}: {status}")
-
         return status in (ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.OWNER)
     except Exception as e:
         logger.error(f"Error checking admin status: {e}")
@@ -88,8 +91,8 @@ async def handle_buttons(_, cb: CallbackQuery):
             if not member.user.is_bot:
                 users.append(member.user)
 
-        # Tag in chunks
-        chunk_size = 5
+        # Tag in chunks (Now 12 at a time)
+        chunk_size = 12
         text = data.get("text") or ""
         for i in range(0, len(users), chunk_size):
             if not await is_tagging_active(chat_id):
@@ -103,7 +106,7 @@ async def handle_buttons(_, cb: CallbackQuery):
                 msg += f"[{emoji}](tg://user?id={u.id}) "
 
             await bot.send_message(chat_id, msg.strip(), disable_web_page_preview=True)
-            await asyncio.sleep(2)
+            await asyncio.sleep(2)  # Delay between messages
 
         # Final status message
         if await is_tagging_active(chat_id):
