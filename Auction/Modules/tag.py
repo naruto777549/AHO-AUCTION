@@ -12,11 +12,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Emojis for tagging
-EMOJIS = [
-    "🍓", "🥭", "🍟", "🍕", "🥞", "🍱", "🥮", "🧁", "🍰",
-    "🍡", "🍧", "🍨", "🍭", "🍬", "🍫", "🍩", "🎂", "🍮",
-    "🍹", "🧋"
-]
+EMOJIS = ["🦁", "🐯", "🐱", "🐶", "🐺", "🐻", "🐻‍❄️", "🐨", "🐼", "🐹", "🐭", "🐰", "🦊", "🦝", "🐮", "🐷"]
 
 # Function to check if user is group admin
 async def is_user_admin(bot, chat_id, user_id):
