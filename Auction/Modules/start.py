@@ -32,7 +32,7 @@ async def start_private(_, message: Message):
             ],
             [
                 InlineKeyboardButton("ᴅᴇᴠᴇʟᴏᴘᴇʀ", url="https://t.me/Uzumaki_X_Naruto_6"),
-                InlineKeyboardButton("ᴀᴄᴛɪᴏɴ ɢᴄ", url="https://t.me/+3GuE8k8XsuJhODY1")
+                InlineKeyboardButton("ᴀᴜᴄᴛɪᴏɴ ɢᴄ", url="https://t.me/+3GuE8k8XsuJhODY1")
             ]
         ])
     )
