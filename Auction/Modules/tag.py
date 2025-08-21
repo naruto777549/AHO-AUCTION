@@ -105,7 +105,7 @@ async def handle_buttons(_, cb: CallbackQuery):
                 emoji = random.choice(EMOJIS)
                 msg += f"[{emoji}](tg://user?id={u.id}) "
 
-            await bot.send_message(chat_id, msg.strip(), disable_web_page_preview=True)
+            await bot.send_message(chat_id, msg.strip())
             await asyncio.sleep(2)  # Delay between messages
 
         # Final status message
@@ -115,6 +115,5 @@ async def handle_buttons(_, cb: CallbackQuery):
                 chat_id,
                 f"✅ Process Completed!\n"
                 f"👤 Number of tagged users: `{len(users)}`\n"
-                f"💬 Tag operation started by: [{cb.from_user.first_name}](tg://user?id={user_id})",
-                disable_web_page_preview=True
+                f"💬 Tag operation started by: [{cb.from_user.first_name}](tg://user?id={user_id})"
             )
