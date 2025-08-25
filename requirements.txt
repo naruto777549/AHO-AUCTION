@@ -1,6 +1,6 @@
 kurigram 
-tgcrypto==1.4.2
-asyncio==3.4.3
+tgcrypto==1.2.5
+motor==4.3.3
 pytz==2025.7
 psutil==5.9.5
 motor
