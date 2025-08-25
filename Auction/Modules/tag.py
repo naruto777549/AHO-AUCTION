@@ -1,17 +1,9 @@
 import asyncio
 import random
 import logging
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ChatMember
 from telegram.constants import ParseMode
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
-from Auction.db import (
-    start_tag,
-    stop_tag,
-    is_tagging_active,
-    get_tag_data,
-    get_all_users
-)
-from telegram import ChatMember
 
 # Logging
 logging.basicConfig(level=logging.INFO)
@@ -24,7 +16,7 @@ EMOJIS = [
     "🐰", "🦊", "🦝", "🐮", "🐷"
 ]
 
-# Check if user is admin
+# --- Check if user is admin ---
 async def is_user_admin(update: Update, context: ContextTypes.DEFAULT_TYPE, user_id: int):
     try:
         member: ChatMember = await context.bot.get_chat_member(update.effective_chat.id, user_id)
@@ -33,7 +25,7 @@ async def is_user_admin(update: Update, context: ContextTypes.DEFAULT_TYPE, user
         logger.error(f"Error checking admin status: {e}")
         return False
 
-# /tagall command
+# --- /tagall command ---
 async def tagall(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     user_id = update.effective_user.id
@@ -45,7 +37,7 @@ async def tagall(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Tag text
     tag_text = update.message.reply_to_message.text if update.message.reply_to_message else " ".join(context.args) or ""
 
-    # Inline buttons
+    # Inline buttons (optional)
     markup = InlineKeyboardMarkup([
         [InlineKeyboardButton("✅ Send", callback_data="send_tag"),
          InlineKeyboardButton("❌ Cancel", callback_data="cancel_tag")]
@@ -53,68 +45,56 @@ async def tagall(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # Emoji preview
     emojiline = " ".join(random.choices(EMOJIS, k=10))
-    await update.message.reply_text(
-        f"{tag_text}\n\n{emojiline}",
-        reply_markup=markup
-    )
+    await update.message.reply_text(f"{tag_text}\n\nPreview: {emojiline}", reply_markup=markup)
 
-    # Save tag state
-    await start_tag(chat_id=chat_id, user_id=user_id, text=tag_text)
-
-# Callback buttons
+# --- Handle send_tag button ---
 async def handle_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-
     chat_id = query.message.chat.id
     user_id = query.from_user.id
 
-    data = await get_tag_data(chat_id)
-    if not data:
-        return await query.answer("❌ No tag operation pending.", show_alert=True)
-
     if query.data == "cancel_tag":
-        await stop_tag(chat_id)
         return await query.edit_message_text("❌ Tagging cancelled.")
 
     if query.data == "send_tag":
         await query.edit_message_text("🚀 Tagging started...")
 
-        # Fetch all users from DB
-        all_users = await get_all_users()
-        users = [u["_id"] for u in all_users]  # TAG ALL USERS, ignore 'groups'
+        # Fetch all members in the chat dynamically
+        members = []
+        try:
+            async for m in context.bot.get_chat_members(chat_id):
+                if m.user.is_bot or m.user.is_deleted:
+                    continue
+                members.append(m.user)
+        except Exception as e:
+            return await query.edit_message_text(f"⚠️ Failed to fetch members: {e}")
 
-        if not users:
-            await query.edit_message_text("⚠️ No users to tag.")
-            return
+        if not members:
+            return await query.edit_message_text("⚠️ No valid members found to tag.")
 
-        chunk_size = 12
-        text = data.get("text") or ""
-
-        for i in range(0, len(users), chunk_size):
-            if not await is_tagging_active(chat_id):
-                break
-
-            chunk = users[i:i+chunk_size]
+        # Tag in batches
+        chunk_size = 5
+        text = query.message.text.split("\n\n")[0]  # Use original tag text
+        for i in range(0, len(members), chunk_size):
+            chunk = members[i:i+chunk_size]
             msg = text + "\n\n"
-            for u_id in chunk:
+            for u in chunk:
                 emoji = random.choice(EMOJIS)
-                msg += f"[{emoji}](tg://user?id={u_id}) "
-
-            await context.bot.send_message(chat_id, msg.strip(), parse_mode=ParseMode.MARKDOWN)
+                msg += f"[{emoji}](tg://user?id={u.id}) "
+            try:
+                await context.bot.send_message(chat_id, msg.strip(), parse_mode=ParseMode.MARKDOWN)
+            except Exception as e:
+                logger.warning(f"Failed to send chunk: {e}")
             await asyncio.sleep(2)
 
-        if await is_tagging_active(chat_id):
-            await stop_tag(chat_id)
-            await context.bot.send_message(
-                chat_id,
-                f"✅ Process Completed!\n"
-                f"👤 Number of tagged users: `{len(users)}`\n"
-                f"💬 Tag operation started by: [{query.from_user.first_name}](tg://user?id={user_id})",
-                parse_mode=ParseMode.MARKDOWN
-            )
+        await context.bot.send_message(
+            chat_id,
+            f"✅ Tagging completed!\n👤 Number of users tagged: `{len(members)}`\n💬 Started by: [{query.from_user.first_name}](tg://user?id={user_id})",
+            parse_mode=ParseMode.MARKDOWN
+        )
 
-# Register handlers
+# --- Register handlers ---
 def register(application: Application):
     application.add_handler(CommandHandler("tagall", tagall))
     application.add_handler(CallbackQueryHandler(handle_buttons, pattern="^(send_tag|cancel_tag)$"))
