@@ -3,5 +3,5 @@ tgcrypto==1.2.5
 motor==4.3.3
 pytz==2025.7
 psutil==5.9.5
-motor
-pymongo 
+motor==3.1.2
+pymongo==4.4.1
