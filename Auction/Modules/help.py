@@ -17,5 +17,5 @@ async def help_cmd(client: Client, message):
 # --- register function for __main__.py ---
 def register(app: Client):
     app.add_handler(
-        app.on_message(filters.command("help") & filters.private)(help_cmd)
+        app.on_message(filters.command("help"))(help_cmd)
     )
