@@ -6,8 +6,7 @@ from pyrogram import Client, filters
 from Auction.db import get_total_users, get_total_groups
 
 # --- /ping command ---
-@Client.on_message(filters.command("ping") & filters.private)
-async def ping_command(client, message):
+async def ping_command(client: Client, message):
     start = time.time()
     sent_msg = await message.reply_text("🔍")
     end = time.time()
@@ -34,4 +33,10 @@ async def ping_command(client, message):
 ├ 👥 ᴛᴏᴛᴀʟ ᴜsᴇʀs: {total_users}
 ├ 🏘️ ᴛᴏᴛᴀʟ ɢʀᴏᴜᴘs: {total_groups}
 ╰─────────────"""
+    )
+
+# --- register function for __main__.py ---
+def register(app: Client):
+    app.add_handler(
+        app.on_message(filters.command("ping"))(ping_command)
     )
