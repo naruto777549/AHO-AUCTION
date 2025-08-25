@@ -7,8 +7,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # --- /stoptag command ---
-@Client.on_message(filters.command("stoptag") & filters.group)
-async def stop_tag_command(client, message):
+async def stop_tag_command(client: Client, message):
     chat_id = message.chat.id
     user_id = message.from_user.id
 
@@ -23,3 +22,7 @@ async def stop_tag_command(client, message):
         await message.reply_text("🛑 Tagging stopped successfully.")
     else:
         await message.reply_text("⚠️ There is no ongoing tagging process.")
+
+# --- Register function for __main__.py ---
+def register(app: Client):
+    app.add_handler(app.on_message(filters.command("stoptag") & filters.group)(stop_tag_command))
