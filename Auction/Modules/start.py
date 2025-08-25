@@ -3,8 +3,7 @@ from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from Auction.db import save_user, save_group
 
 # --- /start command ---
-@Client.on_message(filters.command("start"))
-async def start_handler(client, message):
+async def start_handler(client: Client, message):
     chat_type = message.chat.type
     user_id = message.from_user.id
     chat_id = message.chat.id
@@ -49,3 +48,7 @@ async def start_handler(client, message):
         await message.reply_text(
             "✅ ʙᴏᴛ ᴀᴅᴅᴇᴅ ᴛᴏ ɢʀᴏᴜᴘ & sᴀᴠᴇᴅ ɪɴ ᴅᴀᴛᴀʙᴀsᴇ.\n\n💡 ᴘʟᴇᴀsᴇ ᴜsᴇ /start ɪɴ ᴅᴍ ғᴏʀ ғᴜʟʟ ᴍᴇɴᴜ"
         )
+
+# --- register function for __main__.py ---
+def register(app: Client):
+    app.add_handler(app.on_message(filters.command("start"))(start_handler))
