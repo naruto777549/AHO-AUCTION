@@ -16,11 +16,11 @@ async def start_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [InlineKeyboardButton("➕ ᴀᴅᴅ ᴍᴇ ᴛᴏ ʏᴏᴜʀ ɢʀᴏᴜᴘ", url=f"https://t.me/{me.username}?startgroup=true")],
             [
                 InlineKeyboardButton("ᴏᴡɴᴇʀ", url="https://t.me/God_X_Pawan"),
-                InlineKeyboardButton("sᴜᴘᴘᴏʀᴛ ᴄʜᴀᴛ", url="https://t.me/Aho_Hexa_Auction")
+                InlineKeyboardButton("sᴜᴘᴘᴏʀᴛ ᴄʜᴀɴɴᴇʟ", url="https://t.me/Aho_Community")
             ],
             [
                 InlineKeyboardButton("ᴅᴇᴠᴇʟᴏᴘᴇʀ", url="https://t.me/Uzumaki_X_Naruto_6"),
-                InlineKeyboardButton("ᴀᴜᴄᴛɪᴏɴ ɢᴄ", url="https://t.me/+3GuE8k8XsuJhODY1")
+                InlineKeyboardButton("ᴍᴀɪɴ ɢᴄ", url="https://t.me/+3GuE8k8XsuJhODY1")
             ]
         ])
 
