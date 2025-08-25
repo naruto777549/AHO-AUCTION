@@ -3,7 +3,7 @@ import asyncio
 from pyrogram import Client
 from config import BOT_TOKEN, API_ID, API_HASH
 
-# Import Pyrogram handlers
+# Import handlers
 from Auction.Modules import start, tag, stoptag, ping, help, bcast
 
 # Logging
@@ -13,33 +13,23 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Create Pyrogram client using config values
+# Create Pyrogram client
 app = Client(
     "AhoTagBot",
-    api_id=API_ID,
-    api_hash=API_HASH,
     bot_token=BOT_TOKEN,
+    api_id=API_ID,
+    api_hash=API_HASH
 )
 
-async def main():
-    # Start the client
-    await app.start()
-    print("🚀 Aho Tagall Bot Started!")
-
-    # Keep the bot running
-    await asyncio.Event().wait()
+# Register handlers if they have register functions
+start.register(app)
+tag.register(app)
+stoptag.register(app)
+ping.register(app)
+help.register(app)
+bcast.register(app)
 
 if __name__ == "__main__":
-    # Register handlers if your modules have register functions
-    # start.register(app)
-    # tag.register(app)
-    # stoptag.register(app)
-    # ping.register(app)
-    # help.register(app)
-    # bcast.register(app)
-
-    # Run bot
-    try:
-        asyncio.run(main())
-    except (KeyboardInterrupt, SystemExit):
-        print("🛑 Bot stopped.")
+    print("🚀 Aho Tagall Bot Started!")
+    # Use run() instead of asyncio.run()
+    app.run()
