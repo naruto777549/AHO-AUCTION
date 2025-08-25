@@ -4,28 +4,31 @@ import logging
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.constants import ParseMode
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
-from Auction.db import start_tag, stop_tag, is_tagging_active, get_tag_data
-
+from Auction.db import (
+    start_tag,
+    stop_tag,
+    is_tagging_active,
+    get_tag_data,
+    get_group_users  # NEW: fetch all users in a group from your DB
+)
 from telegram import ChatMember
 
-# Set up logging
+# Logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Emojis for tagging (Animal)
+# Emojis
 EMOJIS = [
     "🦁", "🐯", "🐱", "🐶", "🐺", "🐻",
     "🐻‍❄️", "🐨", "🐼", "🐹", "🐭",
     "🐰", "🦊", "🦝", "🐮", "🐷"
 ]
 
-# Check if user is group admin
+# Check if user is admin
 async def is_user_admin(update: Update, context: ContextTypes.DEFAULT_TYPE, user_id: int):
     try:
         member: ChatMember = await context.bot.get_chat_member(update.effective_chat.id, user_id)
-        status = member.status
-        logger.info(f"Checking admin status for user {user_id} in chat {update.effective_chat.id}: {status}")
-        return status in ("administrator", "creator")
+        return member.status in ("administrator", "creator")
     except Exception as e:
         logger.error(f"Error checking admin status: {e}")
         return False
@@ -37,14 +40,10 @@ async def tagall(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # Admin check
     if not await is_user_admin(update, context, user_id):
-        logger.info(f"Non-admin user {user_id} tried to use /tagall in chat {chat_id}")
         return await update.message.reply_text("❌ Only group admins can use this command!", quote=True)
 
     # Tag text
-    if update.message.reply_to_message:
-        tag_text = update.message.reply_to_message.text
-    else:
-        tag_text = " ".join(context.args) or None
+    tag_text = update.message.reply_to_message.text if update.message.reply_to_message else " ".join(context.args) or None
 
     # Inline buttons
     markup = InlineKeyboardMarkup([
@@ -59,10 +58,10 @@ async def tagall(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=markup
     )
 
-    # Save tag state in DB
+    # Save tag state
     await start_tag(chat_id=chat_id, user_id=user_id, text=tag_text)
 
-# Callback button handler
+# Callback buttons
 async def handle_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -81,31 +80,28 @@ async def handle_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if query.data == "send_tag":
         await query.edit_message_text("🚀 Tagging started...")
 
-        # Fetch all users
-        users = []
-        async for member in context.bot.get_chat_administrators(chat_id):
-            # skip bots
-            if not member.user.is_bot:
-                users.append(member.user)
+        # Fetch all users from DB (excluding bots)
+        users = await get_group_users(chat_id)
+        if not users:
+            await query.edit_message_text("⚠️ No users to tag in this group.")
+            return
 
-        # Tag in chunks
         chunk_size = 12
         text = data.get("text") or ""
+
         for i in range(0, len(users), chunk_size):
             if not await is_tagging_active(chat_id):
                 break
 
             chunk = users[i:i+chunk_size]
             msg = text + "\n\n"
-
-            for u in chunk:
+            for u_id in chunk:
                 emoji = random.choice(EMOJIS)
-                msg += f"[{emoji}](tg://user?id={u.id}) "
+                msg += f"[{emoji}](tg://user?id={u_id}) "
 
             await context.bot.send_message(chat_id, msg.strip(), parse_mode=ParseMode.MARKDOWN)
             await asyncio.sleep(2)
 
-        # Final status message
         if await is_tagging_active(chat_id):
             await stop_tag(chat_id)
             await context.bot.send_message(
@@ -116,7 +112,7 @@ async def handle_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 parse_mode=ParseMode.MARKDOWN
             )
 
-# Function to register handlers
+# Register handlers
 def register(application: Application):
     application.add_handler(CommandHandler("tagall", tagall))
     application.add_handler(CallbackQueryHandler(handle_buttons, pattern="^(send_tag|cancel_tag)$"))
