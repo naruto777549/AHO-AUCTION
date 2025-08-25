@@ -1,11 +1,12 @@
-from pyrogram import filters
-from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
-from pyrogram.enums import ChatMemberStatus
-from Auction import bot
-from Auction.db import start_tag, stop_tag, is_tagging_active, get_tag_data
 import asyncio
 import random
 import logging
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.constants import ParseMode
+from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
+from Auction.db import start_tag, stop_tag, is_tagging_active, get_tag_data
+
+from telegram import ChatMember
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -18,80 +19,76 @@ EMOJIS = [
     "🐰", "🦊", "🦝", "🐮", "🐷"
 ]
 
-# Function to check if user is group admin
-async def is_user_admin(bot, chat_id, user_id):
+# Check if user is group admin
+async def is_user_admin(update: Update, context: ContextTypes.DEFAULT_TYPE, user_id: int):
     try:
-        member = await bot.get_chat_member(chat_id, user_id)
+        member: ChatMember = await context.bot.get_chat_member(update.effective_chat.id, user_id)
         status = member.status
-        logger.info(f"Checking admin status for user {user_id} in chat {chat_id}: {status}")
-        return status in (ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.OWNER)
+        logger.info(f"Checking admin status for user {user_id} in chat {update.effective_chat.id}: {status}")
+        return status in ("administrator", "creator")
     except Exception as e:
         logger.error(f"Error checking admin status: {e}")
         return False
 
-# /tagall command handler
-@bot.on_message(filters.command("tagall") & filters.group)
-async def tagall(_, message: Message):
-    chat_id = message.chat.id
-    user_id = message.from_user.id
+# /tagall command
+async def tagall(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat_id = update.effective_chat.id
+    user_id = update.effective_user.id
 
-    # Check if user is group admin (no bot admin check)
-    if not await is_user_admin(bot, chat_id, user_id):
+    # Admin check
+    if not await is_user_admin(update, context, user_id):
         logger.info(f"Non-admin user {user_id} tried to use /tagall in chat {chat_id}")
-        return await message.reply("❌ Only group admins can use this command!", quote=True)
+        return await update.message.reply_text("❌ Only group admins can use this command!", quote=True)
 
-    if message.reply_to_message:
-        tag_text = message.reply_to_message.text
+    # Tag text
+    if update.message.reply_to_message:
+        tag_text = update.message.reply_to_message.text
     else:
-        tag_text = " ".join(message.command[1:]) or None
+        tag_text = " ".join(context.args) or None
 
     # Inline buttons
     markup = InlineKeyboardMarkup([
-        [
-            InlineKeyboardButton("✅ Send", callback_data="send_tag"),
-            InlineKeyboardButton("❌ Cancel", callback_data="cancel_tag")
-        ]
+        [InlineKeyboardButton("✅ Send", callback_data="send_tag"),
+         InlineKeyboardButton("❌ Cancel", callback_data="cancel_tag")]
     ])
 
     # Emoji preview
     emojiline = " ".join(random.choices(EMOJIS, k=10))
-    await message.reply(
+    await update.message.reply_text(
         f"{tag_text if tag_text else ''}\n\n{emojiline}",
-        reply_markup=markup,
-        quote=True
+        reply_markup=markup
     )
 
     # Save tag state in DB
-    await start_tag(
-        chat_id=message.chat.id,
-        user_id=message.from_user.id,
-        text=tag_text
-    )
+    await start_tag(chat_id=chat_id, user_id=user_id, text=tag_text)
 
 # Callback button handler
-@bot.on_callback_query(filters.regex("^(send_tag|cancel_tag)$"))
-async def handle_buttons(_, cb: CallbackQuery):
-    chat_id = cb.message.chat.id
-    user_id = cb.from_user.id
+async def handle_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+
+    chat_id = query.message.chat.id
+    user_id = query.from_user.id
 
     data = await get_tag_data(chat_id)
     if not data:
-        return await cb.answer("❌ No tag operation pending.", show_alert=True)
+        return await query.answer("❌ No tag operation pending.", show_alert=True)
 
-    if cb.data == "cancel_tag":
+    if query.data == "cancel_tag":
         await stop_tag(chat_id)
-        return await cb.edit_message_text("❌ Tagging cancelled.")
+        return await query.edit_message_text("❌ Tagging cancelled.")
 
-    if cb.data == "send_tag":
-        await cb.edit_message_text("🚀 Tagging started...")
+    if query.data == "send_tag":
+        await query.edit_message_text("🚀 Tagging started...")
 
         # Fetch all users
         users = []
-        async for member in bot.get_chat_members(chat_id):
+        async for member in context.bot.get_chat_administrators(chat_id):
+            # skip bots
             if not member.user.is_bot:
                 users.append(member.user)
 
-        # Tag in chunks (Now 12 at a time)
+        # Tag in chunks
         chunk_size = 12
         text = data.get("text") or ""
         for i in range(0, len(users), chunk_size):
@@ -105,15 +102,21 @@ async def handle_buttons(_, cb: CallbackQuery):
                 emoji = random.choice(EMOJIS)
                 msg += f"[{emoji}](tg://user?id={u.id}) "
 
-            await bot.send_message(chat_id, msg.strip())
-            await asyncio.sleep(2)  # Delay between messages
+            await context.bot.send_message(chat_id, msg.strip(), parse_mode=ParseMode.MARKDOWN)
+            await asyncio.sleep(2)
 
         # Final status message
         if await is_tagging_active(chat_id):
             await stop_tag(chat_id)
-            await bot.send_message(
+            await context.bot.send_message(
                 chat_id,
                 f"✅ Process Completed!\n"
                 f"👤 Number of tagged users: `{len(users)}`\n"
-                f"💬 Tag operation started by: [{cb.from_user.first_name}](tg://user?id={user_id})"
+                f"💬 Tag operation started by: [{query.from_user.first_name}](tg://user?id={user_id})",
+                parse_mode=ParseMode.MARKDOWN
             )
+
+# Function to register handlers
+def register(application: Application):
+    application.add_handler(CommandHandler("tagall", tagall))
+    application.add_handler(CallbackQueryHandler(handle_buttons, pattern="^(send_tag|cancel_tag)$"))
