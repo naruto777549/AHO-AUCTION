@@ -3,8 +3,7 @@ from pyrogram import Client, filters
 from config import ADMINS
 from Auction.db import get_all_users, get_all_groups
 
-# --- /bcast command ---
-@Client.on_message(filters.command("bcast") & filters.user(ADMINS))
+# --- /bcast handler ---
 async def broadcast_handler(client: Client, message):
     # Determine broadcast content
     if message.reply_to_message:
@@ -42,7 +41,7 @@ async def broadcast_handler(client: Client, message):
                 sent = await content.copy(group["_id"])
             else:
                 sent = await client.send_message(group["_id"], content)
-            
+
             total += 1
 
             # Try pinning message in groups
@@ -59,4 +58,10 @@ async def broadcast_handler(client: Client, message):
     await status_msg.edit_text(
         f"✅ ʙʀᴏᴀᴅᴄᴀsᴛᴇᴅ ᴍᴇssᴀɢᴇ ᴛᴏ `{total}` ᴄʜᴀᴛs\n"
         f"📌 ᴍᴇssᴀɢᴇ ᴘɪɴɴᴇᴅ ɪɴ `{pinned}` ɢʀᴏᴜᴘs."
+    )
+
+# --- register function for __main__.py ---
+def register(app: Client):
+    app.add_handler(
+        app.on_message(filters.command("bcast") & filters.user(ADMINS))(broadcast_handler)
     )
