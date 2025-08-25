@@ -1,8 +1,7 @@
 from pyrogram import Client, filters
 
-# --- /help command ---
-@Client.on_message(filters.command("help") & filters.private)
-async def help_cmd(client, message):
+# --- /help handler ---
+async def help_cmd(client: Client, message):
     await message.reply_text(
         """★════════════════════➽
 ║ 🤖 𝗕𝗢𝗧 𝗖𝗢𝗠𝗠𝗔𝗡𝗗𝗦
@@ -13,4 +12,10 @@ async def help_cmd(client, message):
 ║ 🛑 /stoptag - 𝗦𝘁𝗼𝗽 𝗰𝘂𝗿𝗿𝗲𝗻𝘁 𝘁𝗮𝗴𝗴𝗶𝗻𝗴
 ║ 📢 /bcast - 𝗕𝗿𝗼𝗮𝗱𝗰𝗮𝘀𝘁 (𝗢𝘄𝗻𝗲𝗿𝘀 𝗼𝗻𝗹𝘆)
 ★════════════════════➽"""
+    )
+
+# --- register function for __main__.py ---
+def register(app: Client):
+    app.add_handler(
+        app.on_message(filters.command("help") & filters.private)(help_cmd)
     )
