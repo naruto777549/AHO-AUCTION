@@ -1,7 +1,7 @@
 import logging
 from telegram.ext import Application
-from AlphaWaifu.config import BOT_TOKEN
-from AlphaWaifu.Modules import start, tag, stoptag, ping, help, bcast
+from config import BOT_TOKEN
+from Auction.Modules import start, tag, stoptag, ping, help, bcast
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -19,7 +19,7 @@ def main():
     help.register(application)
     bcast.register(application)
             
-    print("🚀 AlphaWaifu Bot Started!")
+    print("🚀 Aho Tagall Bot Started!")
     application.run_polling()
 
 if __name__ == "__main__":
