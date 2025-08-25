@@ -1,71 +1,62 @@
 import asyncio
-from telegram import Update, Message as TGMessage
-from telegram.ext import Application, CommandHandler, ContextTypes
+from pyrogram import Client, filters
 from config import ADMINS
 from Auction.db import get_all_users, get_all_groups
 
-async def broadcast_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = update.effective_user.id
-
-    # Admin check
-    if user_id not in ADMINS:
-        return await update.message.reply_text("❌ You are not authorized to use this command.")
-
+# --- /bcast command ---
+@Client.on_message(filters.command("bcast") & filters.user(ADMINS))
+async def broadcast_handler(client: Client, message):
     # Determine broadcast content
-    if update.message.reply_to_message:
-        content: TGMessage = update.message.reply_to_message
+    if message.reply_to_message:
+        content = message.reply_to_message
     else:
-        text = update.message.text.split(None, 1)
+        text = message.text.split(None, 1)
         if len(text) < 2:
-            return await update.message.reply_text(
+            return await message.reply(
                 "❌ ᴇxᴀᴍᴘʟᴇ:\n\n`/bcast [ᴍᴇssᴀɢᴇ ᴏʀ ʀᴇᴘʟʏ ᴛᴏ ᴀ ᴍᴇssᴀɢᴇ]`",
-                parse_mode="Markdown"
+                quote=True
             )
         content = text[1]
 
-    status = await update.message.reply_text("» sᴛᴀʀᴛᴇᴅ ʙʀᴏᴀᴅᴄᴀsᴛɪɴɢ...")
+    status_msg = await message.reply("» sᴛᴀʀᴛᴇᴅ ʙʀᴏᴀᴅᴄᴀsᴛɪɴɢ...")
     total, pinned = 0, 0
 
     # ✅ Broadcast to Users
     users = await get_all_users()
     for user in users:
         try:
-            if isinstance(content, TGMessage):
+            if message.reply_to_message:
                 await content.copy(user["_id"])
             else:
-                await context.bot.send_message(user["_id"], content)
+                await client.send_message(user["_id"], content)
             total += 1
             await asyncio.sleep(0.03)
-        except:
+        except Exception:
             continue
 
     # ✅ Broadcast to Groups
     groups = await get_all_groups()
     for group in groups:
-        group_id = group["_id"]
         try:
-            if isinstance(content, TGMessage):
-                sent = await content.copy(group_id)
+            if message.reply_to_message:
+                sent = await content.copy(group["_id"])
             else:
-                sent = await context.bot.send_message(group_id, content)
+                sent = await client.send_message(group["_id"], content)
+            
             total += 1
 
-            # Pin message in groups
+            # Try pinning message in groups
             try:
-                await sent.pin(disable_notification=True)
+                await client.pin_chat_message(group["_id"], sent.message_id, disable_notification=True)
                 pinned += 1
-            except:
+            except Exception:
                 pass
 
             await asyncio.sleep(0.03)
-        except:
+        except Exception:
             continue
 
-    await status.edit_text(
+    await status_msg.edit_text(
         f"✅ ʙʀᴏᴀᴅᴄᴀsᴛᴇᴅ ᴍᴇssᴀɢᴇ ᴛᴏ `{total}` ᴄʜᴀᴛs\n"
-        f"📌 ᴍᴇssᴀɢᴇ ᴘɪɴɴᴇᴅ ɪɴ `{pinned}` ɢʀᴏᴜᴘs.",
-        parse_mode="Markdown"
+        f"📌 ᴍᴇssᴀɢᴇ ᴘɪɴɴᴇᴅ ɪɴ `{pinned}` ɢʀᴏᴜᴘs."
     )
-
-def register(application: Application):
-    application.add_handler(CommandHandler("bcast", broadcast_handler))
