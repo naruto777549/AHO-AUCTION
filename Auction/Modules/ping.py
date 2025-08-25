@@ -1,15 +1,12 @@
 import time
 import psutil
-import platform
-from pyrogram import filters
-from pyrogram.types import Message
-from Auction import bot
+from telegram import Update
+from telegram.ext import Application, CommandHandler, ContextTypes
 from Auction.db import get_total_users, get_total_groups
 
-@bot.on_message(filters.command("ping"))
-async def ping_command(_, message: Message):
+async def ping_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     start = time.time()
-    sent_msg = await message.reply("🔍")
+    sent_msg = await update.message.reply_text("🔍")
     end = time.time()
 
     ping = round((end - start) * 1000)
@@ -20,7 +17,7 @@ async def ping_command(_, message: Message):
     total_users = await get_total_users()
     total_groups = await get_total_groups()
 
-    await sent_msg.edit(
+    await sent_msg.edit_text(
         f"""🏓 ᴘᴏɴɢ! ʙᴏᴛ ɪs ᴀʟɪᴠᴇ!
 
 ╭──[ 𝙎𝙔𝙎𝙏𝙀𝙈 𝙎𝙏𝘼𝙏𝙎 ]
@@ -35,3 +32,6 @@ async def ping_command(_, message: Message):
 ├ 🏘️ ᴛᴏᴛᴀʟ ɢʀᴏᴜᴘs: {total_groups}
 ╰─────────────"""
     )
+
+def register(application: Application):
+    application.add_handler(CommandHandler("ping", ping_command))
