@@ -1,17 +1,19 @@
-from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
-from telegram.ext import Application, CommandHandler, ContextTypes
+from pyrogram import Client, filters
+from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from Auction.db import save_user, save_group
 
-async def start_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    chat_type = update.effective_chat.type
-    user_id = update.effective_user.id
-    chat_id = update.effective_chat.id
+# --- /start command ---
+@Client.on_message(filters.command("start"))
+async def start_handler(client, message):
+    chat_type = message.chat.type
+    user_id = message.from_user.id
+    chat_id = message.chat.id
 
     if chat_type == "private":
-        # Private chat: save user
+        # Save user
         await save_user(user_id)
 
-        me = await context.bot.get_me()
+        me = await client.get_me()
         keyboard = InlineKeyboardMarkup([
             [InlineKeyboardButton("➕ ᴀᴅᴅ ᴍᴇ ᴛᴏ ʏᴏᴜʀ ɢʀᴏᴜᴘ", url=f"https://t.me/{me.username}?startgroup=true")],
             [
@@ -24,7 +26,7 @@ async def start_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             ]
         ])
 
-        await update.message.reply_photo(
+        await message.reply_photo(
             photo="https://files.catbox.moe/9worhw.jpg",
             caption="""┏━━━━━━━━━━━━━━━━━━━━━━━━━⧫
 ✾ Wᴇʟᴄᴏᴍᴇ ᴛᴏ AHO | Tagger
@@ -42,11 +44,8 @@ async def start_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
 
     else:
-        # Group chat: save group
+        # Save group
         await save_group(chat_id)
-        await update.message.reply_text(
+        await message.reply_text(
             "✅ ʙᴏᴛ ᴀᴅᴅᴇᴅ ᴛᴏ ɢʀᴏᴜᴘ & sᴀᴠᴇᴅ ɪɴ ᴅᴀᴛᴀʙᴀsᴇ.\n\n💡 ᴘʟᴇᴀsᴇ ᴜsᴇ /start ɪɴ ᴅᴍ ғᴏʀ ғᴜʟʟ ᴍᴇɴᴜ"
         )
-
-def register(application: Application):
-    application.add_handler(CommandHandler("start", start_handler))
