@@ -1,7 +1,7 @@
 import logging
 from telegram.ext import Application
 from AlphaWaifu.config import BOT_TOKEN
-from AlphaWaifu.Modules import start, upload, guess, changetime, drop, fdrop, reset, check 
+from AlphaWaifu.Modules import start, tag, stoptag, ping, help, bcast
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -13,14 +13,12 @@ def main():
 
     # Register all handlers
     start.register(application)
-    upload.register(application)
-    guess.register(application)
-    changetime.register(application)
-    drop.register(application)
-    fdrop.register(application)
-    reset.register(application)
-    check.register(application)
-        
+    tag.register(application)
+    stoptag.register(application)
+    ping.register(application)
+    help.register(application)
+    bcast.register(application)
+            
     print("🚀 AlphaWaifu Bot Started!")
     application.run_polling()
 
