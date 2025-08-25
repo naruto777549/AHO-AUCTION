@@ -1,10 +1,8 @@
-from pyrogram import filters
-from pyrogram.types import Message
-from Auction import bot
+from telegram import Update
+from telegram.ext import Application, CommandHandler, ContextTypes
 
-@bot.on_message(filters.command("help"))
-async def help_cmd(_, message: Message):
-    await message.reply(
+async def help_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(
         """★════════════════════➽
 ║ 🤖 𝗕𝗢𝗧 𝗖𝗢𝗠𝗠𝗔𝗡𝗗𝗦
 ★════════════════════➽
@@ -15,3 +13,6 @@ async def help_cmd(_, message: Message):
 ║ 📢 /bcast - 𝗕𝗿𝗼𝗮𝗱𝗰𝗮𝘀𝘁 (𝗢𝘄𝗻𝗲𝗿𝘀 𝗼𝗻𝗹𝘆)
 ★════════════════════➽"""
     )
+
+def register(application: Application):
+    application.add_handler(CommandHandler("help", help_cmd))
