@@ -9,7 +9,7 @@ from Auction.db import (
     stop_tag,
     is_tagging_active,
     get_tag_data,
-    get_group_users  # NEW: fetch all users in a group from your DB
+    get_all_users  # use this to fetch all users
 )
 from telegram import ChatMember
 
@@ -80,8 +80,11 @@ async def handle_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if query.data == "send_tag":
         await query.edit_message_text("🚀 Tagging started...")
 
-        # Fetch all users from DB (excluding bots)
-        users = await get_group_users(chat_id)
+        # Fetch all users from DB
+        all_users = await get_all_users()
+        # Filter users that are in this group if you store group info, else tag all
+        users = [u["_id"] for u in all_users if "groups" not in u or chat_id in u.get("groups", [])]
+
         if not users:
             await query.edit_message_text("⚠️ No users to tag in this group.")
             return
