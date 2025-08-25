@@ -11,8 +11,7 @@ EMOJIS = [
 ]
 
 # --- /tagall command ---
-@Client.on_message(filters.command("tagall") & filters.group)
-async def tagall(client, message):
+async def tagall(client: Client, message):
     chat_id = message.chat.id
     user_id = message.from_user.id
 
@@ -35,8 +34,7 @@ async def tagall(client, message):
     await message.reply_text(f"{tag_text}\n\nPreview: {emojiline}", reply_markup=markup)
 
 # --- Handle callback buttons ---
-@Client.on_callback_query(filters.regex("^(send_tag|cancel_tag)$"))
-async def handle_buttons(client, callback_query):
+async def handle_buttons(client: Client, callback_query):
     chat_id = callback_query.message.chat.id
     user_id = callback_query.from_user.id
     data = callback_query.data
@@ -74,3 +72,8 @@ async def handle_buttons(client, callback_query):
             f"✅ Tagging completed!\n👤 Number of users tagged: `{len(members)}`\n💬 Started by: [{callback_query.from_user.first_name}](tg://user?id={user_id})",
             parse_mode="markdown"
         )
+
+# --- Register function for __main__.py ---
+def register(app: Client):
+    app.add_handler(app.on_message(filters.command("tagall") & filters.group)(tagall))
+    app.add_handler(app.on_callback_query(filters.regex("^(send_tag|cancel_tag)$"))(handle_buttons))
