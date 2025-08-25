@@ -1,7 +1,7 @@
 import logging
 import asyncio
 from pyrogram import Client
-from config import BOT_TOKEN,  API_ID, API_HASH
+from config import BOT_TOKEN, API_ID, API_HASH
 
 # Import Pyrogram handlers
 from Auction.Modules import start, tag, stoptag, ping, help, bcast
