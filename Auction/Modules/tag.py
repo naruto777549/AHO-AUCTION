@@ -9,7 +9,7 @@ from Auction.db import (
     stop_tag,
     is_tagging_active,
     get_tag_data,
-    get_all_users  # use this to fetch all users
+    get_all_users
 )
 from telegram import ChatMember
 
@@ -43,7 +43,7 @@ async def tagall(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return await update.message.reply_text("❌ Only group admins can use this command!", quote=True)
 
     # Tag text
-    tag_text = update.message.reply_to_message.text if update.message.reply_to_message else " ".join(context.args) or None
+    tag_text = update.message.reply_to_message.text if update.message.reply_to_message else " ".join(context.args) or ""
 
     # Inline buttons
     markup = InlineKeyboardMarkup([
@@ -54,7 +54,7 @@ async def tagall(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Emoji preview
     emojiline = " ".join(random.choices(EMOJIS, k=10))
     await update.message.reply_text(
-        f"{tag_text if tag_text else ''}\n\n{emojiline}",
+        f"{tag_text}\n\n{emojiline}",
         reply_markup=markup
     )
 
@@ -82,11 +82,10 @@ async def handle_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         # Fetch all users from DB
         all_users = await get_all_users()
-        # Filter users that are in this group if you store group info, else tag all
-        users = [u["_id"] for u in all_users if "groups" not in u or chat_id in u.get("groups", [])]
+        users = [u["_id"] for u in all_users]  # TAG ALL USERS, ignore 'groups'
 
         if not users:
-            await query.edit_message_text("⚠️ No users to tag in this group.")
+            await query.edit_message_text("⚠️ No users to tag.")
             return
 
         chunk_size = 12
