@@ -3,6 +3,7 @@ import random
 from pyrogram import filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from Auction import app
+from Auction.utils import is_user_admin   # ✅ yahan import
 
 EMOJIS = ["🦁","🐯","🐱","🐶","🐺","🐻","🐼","🐹","🐭","🐰","🦊","🐮","🐷"]
 
@@ -11,8 +12,8 @@ async def tagall(client, message):
     chat_id = message.chat.id
     user_id = message.from_user.id
 
-    member = await client.get_chat_member(chat_id, user_id)
-    if member.status not in ["administrator", "creator"]:
+    # ✅ utils se admin check
+    if not await is_user_admin(client, chat_id, user_id):
         return await message.reply_text("❌ Only admins can use this command!")
 
     tag_text = message.reply_to_message.text if message.reply_to_message else " ".join(message.command[1:]) or ""
