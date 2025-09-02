@@ -5,6 +5,7 @@ from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from pyrogram.enums import ParseMode
 from Auction import app
 from Auction.utils import is_user_admin
+from Auction.db import start_tag, stop_tag, is_tagging_active   # ✅ added
 
 EMOJIS = ["🦁","🐯","🐱","🐶","🐺","🐻","🐼","🐹","🐭","🐰","🦊","🐮","🐷"]
 
@@ -48,12 +49,16 @@ async def handle_buttons(client, cq):
     if data == "send_tag":  
         await cq.edit_message_text("🚀 Tagging started...")  
 
+        # ✅ DB flag ON
+        await start_tag(chat_id)
+
         members = []  
         async for m in client.get_chat_members(chat_id):  
             if not m.user.is_bot and not m.user.is_deleted:  
                 members.append(m.user)  
 
         if not members:  
+            await stop_tag(chat_id)   # clean state
             return await cq.edit_message_text("⚠️ No valid members found!")  
 
         chunk_size = 10   # ✅ ab 10 members ek sath mention honge  
@@ -62,6 +67,11 @@ async def handle_buttons(client, cq):
         reply_to_id = tag_info["reply_id"]  
 
         for i in range(0, len(members), chunk_size):  
+            # ✅ check if stopped manually
+            if not await is_tagging_active(chat_id):
+                await client.send_message(chat_id, "🛑 Tagging stopped manually.")
+                return
+
             chunk = members[i:i+chunk_size]  
             msg = text + "\n\n" if text else ""  
             for u in chunk:  
@@ -72,12 +82,41 @@ async def handle_buttons(client, cq):
                 chat_id,  
                 msg.strip(),  
                 parse_mode=ParseMode.MARKDOWN,  
-                reply_to_message_id=reply_to_id if reply_to_id else None  # ✅ agar reply tha to wahi reply hoga  
+                reply_to_message_id=reply_to_id if reply_to_id else None  
             )  
             await asyncio.sleep(3)  
+
+        # ✅ DB flag OFF
+        await stop_tag(chat_id)
 
         await client.send_message(  
             chat_id,  
             f"✅ Tagging completed!\n👤 Users tagged: `{len(members)}`\n💬 Started by: [{cq.from_user.first_name}](tg://user?id={user_id})",  
             parse_mode=ParseMode.MARKDOWN  
         )
+
+
+# ========================= STOP TAG ========================= #
+
+import logging
+from pyrogram import filters
+from Auction import app
+from Auction.db import stop_tag, is_tagging_active
+from Auction.utils import is_user_admin
+
+logger = logging.getLogger(__name__)
+
+@app.on_message(filters.command("stoptag") & filters.group)
+async def stop_tag_command(client, message):
+    chat_id = message.chat.id
+    user_id = message.from_user.id
+
+    if not await is_user_admin(client, chat_id, user_id):
+        logger.info(f"Non-admin {user_id} tried /stoptag in {chat_id}")
+        return await message.reply_text("❌ Only admins can stop tagging!")
+
+    if await is_tagging_active(chat_id):
+        await stop_tag(chat_id)
+        await message.reply_text("🛑 Tagging stopped successfully.")
+    else:
+        await message.reply_text("⚠️ No ongoing tagging process.")
