@@ -1,8 +1,10 @@
+# ========================= STOP TAG ========================= #
+
 import logging
 from pyrogram import filters
 from Auction import app
 from Auction.db import stop_tag, is_tagging_active
-from Auction.utils import is_user_admin   # ✅ yahan import
+from Auction.utils import is_user_admin
 
 logger = logging.getLogger(__name__)
 
@@ -11,7 +13,6 @@ async def stop_tag_command(client, message):
     chat_id = message.chat.id
     user_id = message.from_user.id
 
-    # ✅ utils se admin check
     if not await is_user_admin(client, chat_id, user_id):
         logger.info(f"Non-admin {user_id} tried /stoptag in {chat_id}")
         return await message.reply_text("❌ Only admins can stop tagging!")
