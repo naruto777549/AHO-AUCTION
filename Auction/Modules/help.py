@@ -1,9 +1,10 @@
-from pyrogram import Client, filters
+from pyrogram import filters
+from Auction import app
 
-# --- /help handler ---
-async def help_cmd(client: Client, message):
+@app.on_message(filters.command("help"))
+async def help_cmd(client, message):
     await message.reply_text(
-        """★════════════════════➽
+"""★════════════════════➽
 ║ 🤖 𝗕𝗢𝗧 𝗖𝗢𝗠𝗠𝗔𝗡𝗗𝗦
 ★════════════════════➽
 ║ 🌀 /start - 𝗕𝗼𝘁 𝘀𝘁𝗮𝗿𝘁 𝗺𝗲𝘀𝘀𝗮𝗴𝗲
@@ -12,10 +13,4 @@ async def help_cmd(client: Client, message):
 ║ 🛑 /stoptag - 𝗦𝘁𝗼𝗽 𝗰𝘂𝗿𝗿𝗲𝗻𝘁 𝘁𝗮𝗴𝗴𝗶𝗻𝗴
 ║ 📢 /bcast - 𝗕𝗿𝗼𝗮𝗱𝗰𝗮𝘀𝘁 (𝗢𝘄𝗻𝗲𝗿𝘀 𝗼𝗻𝗹𝘆)
 ★════════════════════➽"""
-    )
-
-# --- register function for __main__.py ---
-def register(app: Client):
-    app.add_handler(
-        app.on_message(filters.command("help"))(help_cmd)
     )
