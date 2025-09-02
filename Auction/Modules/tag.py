@@ -74,7 +74,7 @@ async def handle_buttons(client, cq):
                 parse_mode=ParseMode.MARKDOWN,  
                 reply_to_message_id=reply_to_id if reply_to_id else None  # ✅ agar reply tha to wahi reply hoga  
             )  
-            await asyncio.sleep(2)  
+            await asyncio.sleep(3)  
 
         await client.send_message(  
             chat_id,  
