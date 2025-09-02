@@ -40,7 +40,7 @@ async def tagall(client, message):
 @app.on_callback_query(filters.regex("^(send_tag|cancel_tag)$"))
 async def handle_buttons(client, cq):
     chat_id = cq.message.chat.id
-    user_id = cq.from_user.id
+    user_id = cq.from_user.id   # ✅ yeh already hai
     data = cq.data
 
     if data == "cancel_tag":  
@@ -49,8 +49,8 @@ async def handle_buttons(client, cq):
     if data == "send_tag":  
         await cq.edit_message_text("🚀 Tagging started...")  
 
-        # ✅ DB flag ON
-        await start_tag(chat_id)
+        # ✅ DB flag ON with user_id
+        await start_tag(chat_id, user_id)
 
         members = []  
         async for m in client.get_chat_members(chat_id):  
@@ -61,7 +61,7 @@ async def handle_buttons(client, cq):
             await stop_tag(chat_id)   # clean state
             return await cq.edit_message_text("⚠️ No valid members found!")  
 
-        chunk_size = 10   # ✅ ab 10 members ek sath mention honge  
+        chunk_size = 10  
         tag_info = TAG_TEXT.get(chat_id, {"text": "", "reply_id": None})  
         text = tag_info["text"]  
         reply_to_id = tag_info["reply_id"]  
