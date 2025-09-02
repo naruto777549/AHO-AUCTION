@@ -2,7 +2,7 @@ import asyncio
 import random
 from pyrogram import filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-from pyrogram.enums import ParseMode   # ✅ yeh import add kar
+from pyrogram.enums import ParseMode
 from Auction import app
 from Auction.utils import is_user_admin
 
@@ -56,27 +56,28 @@ async def handle_buttons(client, cq):
         if not members:  
             return await cq.edit_message_text("⚠️ No valid members found!")  
 
-        chunk_size = 5  
+        chunk_size = 10   # ✅ ab 10 members ek sath mention honge  
         tag_info = TAG_TEXT.get(chat_id, {"text": "", "reply_id": None})  
         text = tag_info["text"]  
         reply_to_id = tag_info["reply_id"]  
 
         for i in range(0, len(members), chunk_size):  
             chunk = members[i:i+chunk_size]  
-            msg = text + "\n\n"  
+            msg = text + "\n\n" if text else ""  
             for u in chunk:  
                 emoji = random.choice(EMOJIS)  
                 msg += f"[{emoji}](tg://user?id={u.id}) "  
+
             await client.send_message(  
                 chat_id,  
-                msg,  
-                parse_mode=ParseMode.MARKDOWN,   # ✅ fix applied
-                reply_to_message_id=reply_to_id  
+                msg.strip(),  
+                parse_mode=ParseMode.MARKDOWN,  
+                reply_to_message_id=reply_to_id if reply_to_id else None  # ✅ agar reply tha to wahi reply hoga  
             )  
             await asyncio.sleep(2)  
 
         await client.send_message(  
             chat_id,  
             f"✅ Tagging completed!\n👤 Users tagged: `{len(members)}`\n💬 Started by: [{cq.from_user.first_name}](tg://user?id={user_id})",  
-            parse_mode=ParseMode.MARKDOWN   # ✅ fix applied
+            parse_mode=ParseMode.MARKDOWN  
         )
