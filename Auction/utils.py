@@ -11,20 +11,19 @@ async def is_user_admin(bot: Client, chat_id: int, user_id: int) -> bool:
         status = member.status
         logger.info(f"Checking admin status for user {user_id} in chat {chat_id}: Status = {status}")
 
-        # ✅ Handle all possible admin/owner statuses
-        if status in [
-            ChatMemberStatus.ADMINISTRATOR,
-            ChatMemberStatus.OWNER,      # v2.x
-            ChatMemberStatus.CREATOR     # older versions
-        ]:
+        # ✅ Pyrogram v2.2.9 uses only ADMINISTRATOR and OWNER
+        if status in [ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.OWNER]:
             return True
 
-        # Extra fallback string check
+        # Extra fallback string check (safe for future/past versions)
         if str(status).lower() in ["administrator", "owner", "creator"]:
             return True
 
         return False
 
     except Exception as e:
-        logger.error(f"Error checking admin status for user {user_id} in chat {chat_id}: {type(e).__name__}: {e}")
+        logger.error(
+            f"Error checking admin status for user {user_id} in chat {chat_id}: "
+            f"{type(e).__name__}: {e}"
+        )
         return False
