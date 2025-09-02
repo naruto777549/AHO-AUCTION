@@ -48,5 +48,5 @@ async def start_group(client: Client, message):
     await save_group(chat_id)
 
     await message.reply_text(
-        "✅ ʙᴏᴛ ᴀᴅᴅᴇᴅ ᴛᴏ ɢʀᴏᴜᴘ & sᴀᴠᴇᴅ ɪɴ ᴅᴀᴛᴀʙᴀsᴇ.\n\n💡 ᴘʟᴇᴀsᴇ ᴜsᴇ /start ɪɴ ᴅᴍ ғᴏʀ ғᴜʟʟ ᴍᴇɴᴜ"
+        "Welcome to the User AHO | Tagger!"
     )
