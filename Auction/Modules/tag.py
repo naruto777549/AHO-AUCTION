@@ -34,13 +34,17 @@ async def tagall(client, message):
     ])  
 
     emojiline = " ".join(random.choices(EMOJIS, k=10))  
-    await message.reply_text(f"{tag_text}\n\nPreview: {emojiline}", reply_markup=markup)
+    await message.reply_text(
+        f"{tag_text}\n\nPreview:\n{emojiline}", 
+        reply_markup=markup,
+        reply_to_message_id=reply_to_id if reply_to_id else None
+    )
 
 
 @app.on_callback_query(filters.regex("^(send_tag|cancel_tag)$"))
 async def handle_buttons(client, cq):
     chat_id = cq.message.chat.id
-    user_id = cq.from_user.id   # ✅ yeh already hai
+    user_id = cq.from_user.id
     data = cq.data
 
     if data == "cancel_tag":  
@@ -48,17 +52,23 @@ async def handle_buttons(client, cq):
 
     if data == "send_tag":  
         await cq.edit_message_text("🚀 Tagging started...")  
+        await start_tag(chat_id, user_id)  # ✅ DB flag ON
 
-        # ✅ DB flag ON with user_id
-        await start_tag(chat_id, user_id)
+        # counters
+        success_count, bot_count, deleted_count, fail_count = 0, 0, 0, 0  
 
         members = []  
         async for m in client.get_chat_members(chat_id):  
-            if not m.user.is_bot and not m.user.is_deleted:  
-                members.append(m.user)  
+            if m.user.is_bot:
+                bot_count += 1
+                continue
+            if m.user.is_deleted:
+                deleted_count += 1
+                continue
+            members.append(m.user)  
 
         if not members:  
-            await stop_tag(chat_id)   # clean state
+            await stop_tag(chat_id)  
             return await cq.edit_message_text("⚠️ No valid members found!")  
 
         chunk_size = 10  
@@ -67,32 +77,38 @@ async def handle_buttons(client, cq):
         reply_to_id = tag_info["reply_id"]  
 
         for i in range(0, len(members), chunk_size):  
-            # ✅ check if stopped manually
-            if not await is_tagging_active(chat_id):
-                await client.send_message(chat_id, "🛑 Tagging stopped manually.")
-                return
+            if not await is_tagging_active(chat_id):  
+                await client.send_message(chat_id, "🛑 Tagging stopped manually.")  
+                return  
 
             chunk = members[i:i+chunk_size]  
-            msg = text + "\n\n" if text else ""  
-            for u in chunk:  
-                emoji = random.choice(EMOJIS)  
-                msg += f"[{emoji}](tg://user?id={u.id}) "  
+            emojiline = " ".join(random.choices(EMOJIS, k=10))  
 
-            await client.send_message(  
-                chat_id,  
-                msg.strip(),  
-                parse_mode=ParseMode.MARKDOWN,  
-                reply_to_message_id=reply_to_id if reply_to_id else None  
-            )  
+            msg = f"{text}\n\n{emojiline}" if text else emojiline  
+            try:
+                await client.send_message(
+                    chat_id,
+                    msg.strip(),
+                    parse_mode=ParseMode.MARKDOWN,
+                    reply_to_message_id=reply_to_id if reply_to_id else None
+                )
+                success_count += len(chunk)
+            except Exception:
+                fail_count += len(chunk)
+
             await asyncio.sleep(3)  
 
-        # ✅ DB flag OFF
-        await stop_tag(chat_id)
+        await stop_tag(chat_id)  # ✅ DB flag OFF
 
-        await client.send_message(  
-            chat_id,  
-            f"✅ Tagging completed!\n👤 Users tagged: `{len(members)}`\n💬 Started by: [{cq.from_user.first_name}](tg://user?id={user_id})",  
-            parse_mode=ParseMode.MARKDOWN  
+        await client.send_message(
+            chat_id,
+            (
+                f"✅ Tagging completed!\n\n"
+                f"👤 Successful: `{success_count}`\n"
+                f"🤖 Bots skipped: `{bot_count}`\n"
+                f"🗑 Deleted accounts skipped: `{deleted_count}`\n"
+                f"⚠️ Failed to tag: `{fail_count}`\n\n"
+                f"💬 Started by: [{cq.from_user.first_name}](tg://user?id={user_id})"
+            ),
+            parse_mode=ParseMode.MARKDOWN
         )
-
-
