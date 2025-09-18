@@ -26,7 +26,7 @@ async def tagall(client, message):
     # If replying to a message → use that text
     if message.reply_to_message:    
         tag_text = message.reply_to_message.text or ""    
-        reply_to_id = message.reply_to_message.id    
+        reply_to_id = message.reply_to_message.id   # ✅ Save the replied msg id    
     else:    
         tag_text = " ".join(message.command[1:]) or ""    
         reply_to_id = None    
@@ -42,7 +42,7 @@ async def tagall(client, message):
     await message.reply_text(  
         f"{tag_text}\n\nPreview:\n{preview}",   
         reply_markup=markup,  
-        reply_to_message_id=reply_to_id if reply_to_id else None  
+        reply_to_message_id=reply_to_id if reply_to_id else None  # ✅ Preview bhi reply hoga
     )
 
 
@@ -80,7 +80,7 @@ async def handle_buttons(client, cq):
         chunk_size = 10    
         tag_info = TAG_TEXT.get(chat_id, {"text": "", "reply_id": None})    
         text = tag_info["text"]    
-        reply_to_id = tag_info["reply_id"]    
+        reply_to_id = tag_info["reply_id"]   # ✅ This will be the reply target    
 
         for i in range(0, len(members), chunk_size):    
             if not await is_tagging_active(chat_id):    
@@ -101,7 +101,7 @@ async def handle_buttons(client, cq):
                     chat_id,  
                     msg.strip(),  
                     parse_mode=ParseMode.MARKDOWN,  
-                    reply_to_message_id=reply_to_id if reply_to_id else None  
+                    reply_to_message_id=reply_to_id if reply_to_id else None  # ✅ Har baar reply usi msg pe
                 )  
                 success_count += len(chunk)  
             except Exception:  
@@ -121,5 +121,6 @@ async def handle_buttons(client, cq):
                 f"⚠️ Failed to tag: `{fail_count}`\n\n"  
                 f"💬 Started by: [{cq.from_user.first_name}](tg://user?id={user_id})"  
             ),  
-            parse_mode=ParseMode.MARKDOWN  
+            parse_mode=ParseMode.MARKDOWN,  
+            reply_to_message_id=reply_to_id if reply_to_id else None  # ✅ Summary bhi reply me
         )
