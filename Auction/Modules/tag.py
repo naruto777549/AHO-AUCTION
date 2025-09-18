@@ -38,9 +38,9 @@ async def tagall(client, message):
          InlineKeyboardButton("❌ Cancel", callback_data="cancel_tag")]    
     ])    
 
-    emojiline = " ".join(random.choices(EMOJIS, k=10))    
+    preview = " ".join(random.choices(EMOJIS, k=10))    
     await message.reply_text(  
-        f"{tag_text}\n\nPreview:\n{emojiline}",   
+        f"{tag_text}\n\nPreview:\n{preview}",   
         reply_markup=markup,  
         reply_to_message_id=reply_to_id if reply_to_id else None  
     )
@@ -88,21 +88,20 @@ async def handle_buttons(client, cq):
                 return    
 
             chunk = members[i:i+chunk_size]    
-            emojiline = " ".join(random.choices(EMOJIS, k=10))    
 
-            # ✅ Mentions create karte hain
+            # ✅ Emoji clickable mention
             mentions = " ".join(
-                [f"[{m.first_name}](tg://user?id={m.id})" for m in chunk]
+                [f"[{random.choice(EMOJIS)}](tg://user?id={m.id})" for m in chunk]
             )
 
-            msg = f"{text}\n\n{mentions}\n\n{emojiline}" if text else f"{mentions}\n\n{emojiline}"  
+            msg = f"{text}\n\n{mentions}" if text else mentions  
 
             try:  
                 await client.send_message(  
                     chat_id,  
                     msg.strip(),  
                     parse_mode=ParseMode.MARKDOWN,  
-                    reply_to_message_id=reply_to_id if reply_to_id else None  # ✅ reply bhi work karega
+                    reply_to_message_id=reply_to_id if reply_to_id else None  
                 )  
                 success_count += len(chunk)  
             except Exception:  
